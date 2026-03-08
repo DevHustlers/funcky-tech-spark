@@ -98,7 +98,7 @@ const Navbar = () => {
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setOpen(false)} />
           <div className="absolute top-14 left-0 right-0 bottom-0 bg-background border-t border-border animate-fade-in overflow-y-auto">
-            <div className="max-w-5xl mx-auto px-6 py-8">
+            <div className="px-4 sm:px-6 py-8">
               <div className="space-y-1">
                 {links.map((link, i) => (
                   <Link
