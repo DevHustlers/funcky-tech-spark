@@ -132,8 +132,8 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Events
     "events.label": "Events",
-    "events.title.1": "Hackathons, meetups &",
-    "events.title.2": "more",
+    "events.title.1": "Where builders",
+    "events.title.2": "connect",
     "events.desc": "Join us online or in person. There's always something happening.",
     "events.upcoming": "Upcoming",
     "events.past": "Past events",
