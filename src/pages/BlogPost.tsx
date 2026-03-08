@@ -2,8 +2,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ArrowLeft, BookOpen, Clock, Tag } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
+import Prism from "prismjs";
+import "prismjs/components/prism-typescript";
+import "prismjs/components/prism-bash";
+import "prismjs/components/prism-javascript";
 
 // Rich content block types
 type ContentBlock =
@@ -34,7 +38,7 @@ const blogContent: Record<string, BlogPostData> = {
     readTime: "8 min read",
     author: { name: "Alex Rivera", role: "Founder & CEO" },
     content: [
-      { type: "p", text: "It started with a simple idea: what if there was a place where developers could genuinely collaborate without the noise of social media? That question led to the creation of DevHustle in early 2022." },
+      { type: "p", text: "It started with a simple idea: what if there was a place where developers could genuinely collaborate without the noise of social media? That question led to the creation of DevHustlers in early 2022." },
       { type: "h2", text: "The Early Days", id: "early-days" },
       { type: "p", text: "Our first home was a Discord server with 50 members — mostly friends and colleagues who shared a passion for building things. The energy was electric from day one. People were sharing projects, giving feedback, and forming teams for side projects." },
       { type: "quote", text: "The best communities aren't built — they're cultivated. You plant seeds, create the right conditions, and let people grow together.", author: "Alex Rivera" },
@@ -61,7 +65,7 @@ function calculateHealthScore(community) {
 }`, lang: "typescript" },
       { type: "h2", text: "Where We Are Today", id: "today" },
       { type: "p", text: "Today, with 50,000+ developers from 120 countries, the challenge is maintaining that intimate community feel while continuing to grow. We do this through smaller sub-communities organized by interest, timezone, and experience level." },
-      { type: "callout", text: "Sub-communities are the secret to scaling without losing intimacy. Each group has its own culture while sharing the broader DevHustle values.", variant: "info" },
+      { type: "callout", text: "Sub-communities are the secret to scaling without losing intimacy. Each group has its own culture while sharing the broader DevHustlers values.", variant: "info" },
       { type: "h2", text: "What's Next", id: "whats-next" },
       { type: "p", text: "The next chapter is even more exciting. We're building tools that make it easier to go from idea to shipped product within the community — project management, deployment pipelines, and integrated feedback loops." },
       { type: "list", items: [
@@ -79,7 +83,7 @@ function calculateHealthScore(community) {
     readTime: "6 min read",
     author: { name: "Priya Sharma", role: "Head of Community" },
     content: [
-      { type: "p", text: "One of the most rewarding aspects of DevHustle is watching ideas become real, impactful open source projects. Here are five standout projects that were born from our community hackathons and collaboration boards." },
+      { type: "p", text: "One of the most rewarding aspects of DevHustlers is watching ideas become real, impactful open source projects. Here are five standout projects that were born from our community hackathons and collaboration boards." },
       { type: "h2", text: "1. FastSchema", id: "fastschema" },
       { type: "p", text: "A lightweight database migration tool that now has over 8,000 GitHub stars. It started as a weekend hackathon project by three developers who were frustrated with existing migration tools." },
       { type: "code", code: `# FastSchema in action
@@ -90,7 +94,7 @@ npx fastschema migrate:run`, lang: "bash" },
       { type: "h2", text: "2. PixelForge", id: "pixelforge" },
       { type: "p", text: "An open source design-to-code tool that converts Figma designs into clean React components. Built by a team of four during our April 2025 hackathon, it's now used by several design agencies." },
       { type: "h2", text: "3. CloudPilot", id: "cloudpilot" },
-      { type: "p", text: "A multi-cloud management CLI that simplifies deployments across AWS, GCP, and Azure. The creator, a DevHustle mentor, built the first version in a week and open-sourced it to the community." },
+      { type: "p", text: "A multi-cloud management CLI that simplifies deployments across AWS, GCP, and Azure. The creator, a DevHustlers mentor, built the first version in a week and open-sourced it to the community." },
       { type: "h2", text: "4. TestBench", id: "testbench" },
       { type: "p", text: "An automated testing framework for API endpoints that generates tests from OpenAPI specs. It was born from a common frustration discussed in our #backend channel." },
       { type: "code", code: `// TestBench auto-generates tests from your OpenAPI spec
@@ -116,7 +120,7 @@ await tests.run();`, lang: "typescript" },
     readTime: "5 min read",
     author: { name: "James Wu", role: "CTO" },
     content: [
-      { type: "p", text: "Traditional mentorship assumes both parties are in the same timezone, or at least have overlapping schedules. For a global community like DevHustle, that assumption doesn't hold." },
+      { type: "p", text: "Traditional mentorship assumes both parties are in the same timezone, or at least have overlapping schedules. For a global community like DevHustlers, that assumption doesn't hold." },
       { type: "h2", text: "Why Async Works Better", id: "why-async" },
       { type: "p", text: "We've found that async mentorship — where mentors and mentees communicate primarily through written messages, code reviews, and recorded video — actually produces better outcomes than synchronous sessions in many cases." },
       { type: "quote", text: "Written communication forces both parties to think more carefully. Mentees formulate better questions. Mentors provide more thorough, considered responses." },
@@ -156,7 +160,7 @@ async function getData(url: string): Promise<Data> {
     author: { name: "Elena Petrova", role: "Head of Events" },
     content: [
       { type: "p", text: "Building in public means sharing your product development journey openly — the wins, the failures, the metrics, the decisions. It's become a powerful strategy for indie developers and startups alike." },
-      { type: "callout", text: "At DevHustle, we've seen hundreds of members successfully build in public. Here's what we've learned about what works and what doesn't.", variant: "info" },
+      { type: "callout", text: "At DevHustlers, we've seen hundreds of members successfully build in public. Here's what we've learned about what works and what doesn't.", variant: "info" },
       { type: "h2", text: "Start With the Problem", id: "start-with-problem" },
       { type: "p", text: "Before you write a line of code, share the problem you're trying to solve. Get feedback on whether it resonates. This saves you from building something nobody wants." },
       { type: "h2", text: "Share Progress Consistently", id: "share-progress" },
@@ -238,10 +242,10 @@ function detectFlow(activity: GitHubActivity[]): FlowState {
       { type: "p", text: "The accountability factor is equally important. When you share your goals with a community — whether it's shipping a side project, learning a new language, or contributing to open source — you're far more likely to follow through." },
       { type: "callout", text: "Members who publicly commit to goals in our #accountability channel are 3x more likely to complete them within the stated timeframe.", variant: "tip" },
       { type: "h2", text: "Real Opportunities", id: "opportunities" },
-      { type: "p", text: "Networking through communities leads to real opportunities. At DevHustle alone, we've seen members find jobs, co-founders, collaborators, and clients through organic community interactions. These connections are more genuine than typical LinkedIn networking." },
+      { type: "p", text: "Networking through communities leads to real opportunities. At DevHustlers alone, we've seen members find jobs, co-founders, collaborators, and clients through organic community interactions. These connections are more genuine than typical LinkedIn networking." },
       { type: "list", items: [
         "340+ members found jobs through community connections",
-        "28 startups co-founded by members who met on DevHustle",
+        "28 startups co-founded by members who met on DevHustlers",
         "1,200+ successful project collaborations",
         "500+ freelance contracts sourced through the community",
       ] },
@@ -251,13 +255,41 @@ function detectFlow(activity: GitHubActivity[]): FlowState {
   },
 };
 
-// Extract TOC headings from content
+// Extract TOC headings
 const getTocItems = (content: ContentBlock[]) => {
   return content
     .filter((b): b is { type: "h2"; text: string; id: string } | { type: "h3"; text: string; id: string } =>
       b.type === "h2" || b.type === "h3"
     )
     .map((b) => ({ text: b.text, id: b.id, level: b.type }));
+};
+
+// Code block with Prism highlighting
+const CodeBlock = ({ code, lang }: { code: string; lang?: string }) => {
+  const codeRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (codeRef.current) {
+      Prism.highlightElement(codeRef.current);
+    }
+  }, [code]);
+
+  const grammar = lang && Prism.languages[lang] ? lang : "javascript";
+
+  return (
+    <div className="my-6 border border-border overflow-hidden">
+      {lang && (
+        <div className="px-4 py-2 bg-code-bg border-b border-border flex items-center justify-between">
+          <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">{lang}</span>
+        </div>
+      )}
+      <pre className="p-4 overflow-x-auto bg-code-bg">
+        <code ref={codeRef} className={`language-${grammar} text-[13px] font-mono leading-relaxed`}>
+          {code}
+        </code>
+      </pre>
+    </div>
+  );
 };
 
 // Render a single content block
@@ -286,7 +318,7 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
           )}
         </blockquote>
       );
-    case "callout":
+    case "callout": {
       const variants = {
         info: "bg-accent/60 border-foreground/10",
         warning: "bg-destructive/5 border-destructive/20",
@@ -295,27 +327,17 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
       const icons = { info: "💡", warning: "⚠️", tip: "✨" };
       const v = block.variant || "info";
       return (
-        <div className={cn("rounded-xl border px-5 py-4 my-6", variants[v])}>
+        <div className={cn("border px-5 py-4 my-6", variants[v])}>
           <p className="text-[14px] text-foreground leading-relaxed">
             <span className="mr-2">{icons[v]}</span>
             {block.text}
           </p>
         </div>
       );
+    }
     case "code":
-      return (
-        <div className="my-6 rounded-xl border border-border overflow-hidden">
-          {block.lang && (
-            <div className="px-4 py-2 bg-accent/50 border-b border-border">
-              <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">{block.lang}</span>
-            </div>
-          )}
-          <pre className="p-4 overflow-x-auto bg-accent/30">
-            <code className="text-[13px] font-mono text-foreground/85 leading-relaxed whitespace-pre">{block.code}</code>
-          </pre>
-        </div>
-      );
-    case "list":
+      return <CodeBlock code={block.code} lang={block.lang} />;
+    case "list": {
       const ListTag = block.ordered ? "ol" : "ul";
       return (
         <ListTag className={cn("my-5 space-y-2 pl-5", block.ordered ? "list-decimal" : "list-disc")}>
@@ -326,6 +348,7 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
           ))}
         </ListTag>
       );
+    }
     case "divider":
       return <hr className="my-8 border-border" />;
     default:
@@ -338,7 +361,6 @@ const BlogPost = () => {
   const post = slug ? blogContent[slug] : null;
   const [activeId, setActiveId] = useState<string>("");
 
-  // Track active heading on scroll
   useEffect(() => {
     if (!post) return;
     const headings = post.content
@@ -396,10 +418,10 @@ const BlogPost = () => {
             </Link>
 
             <div className="flex flex-wrap items-center gap-3 mb-4 text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5 text-[12px]">
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-mono">
                 <Clock className="w-3 h-3" /> {post.date}
               </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded-full border border-border">
+              <span className="inline-flex items-center gap-1.5 text-[11px] px-2 py-0.5 border border-border">
                 <Tag className="w-3 h-3" /> {post.tag}
               </span>
               <span className="inline-flex items-center gap-1.5 text-[11px]">
@@ -413,7 +435,7 @@ const BlogPost = () => {
 
             {/* Author */}
             <div className="flex items-center gap-3 pb-8 border-b border-border">
-              <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center">
+              <div className="w-9 h-9 bg-accent flex items-center justify-center">
                 <span className="text-xs font-semibold text-muted-foreground">
                   {post.author.name.split(" ").map(n => n[0]).join("")}
                 </span>
@@ -443,14 +465,14 @@ const BlogPost = () => {
               </div>
             </div>
 
-            {/* TOC sidebar — desktop only */}
+            {/* TOC sidebar */}
             {tocItems.length > 0 && (
               <aside className="hidden lg:block w-56 shrink-0">
                 <div className="sticky top-24">
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-4 font-mono">
                     On this page
                   </p>
-                  <nav className="space-y-1">
+                  <nav className="space-y-0.5">
                     {tocItems.map((item) => (
                       <a
                         key={item.id}

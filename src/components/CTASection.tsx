@@ -4,7 +4,7 @@ const CTASection = () => {
   return (
     <section className="py-20 sm:py-24 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
-        <div className="rounded-2xl border border-border bg-accent/30 px-8 py-16 md:py-20 text-center">
+        <div className="border border-border bg-accent/30 px-6 sm:px-8 py-16 md:py-20 text-center">
           <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-4 leading-tight tracking-tight">
             Ready to build{" "}
             <span className="font-serif italic text-muted-foreground font-normal">something great</span>?
@@ -13,11 +13,11 @@ const CTASection = () => {
             Join a community of developers who care about craft, collaboration, and shipping real products.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors text-[15px]">
+            <button className="inline-flex items-center justify-center gap-2 px-7 py-3 bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors text-[15px]">
               Get Started Free
               <ArrowRight className="w-4 h-4" />
             </button>
-            <button className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full border border-border text-foreground font-medium hover:bg-accent transition-colors text-[15px]">
+            <button className="inline-flex items-center justify-center gap-2 px-7 py-3 border border-border text-foreground font-medium hover:bg-accent transition-colors text-[15px]">
               View Projects
             </button>
           </div>

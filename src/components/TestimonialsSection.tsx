@@ -2,7 +2,7 @@ const testimonials = [
   {
     name: "Sarah Chen",
     role: "Frontend Engineer at Vercel",
-    quote: "DevHustle completely changed how I approach side projects. The community feedback loop is incredible.",
+    quote: "DevHustlers completely changed how I approach side projects. The community feedback loop is incredible.",
   },
   {
     name: "Marcus Johnson",
@@ -17,7 +17,7 @@ const testimonials = [
   {
     name: "David Park",
     role: "Indie Developer",
-    quote: "Found my co-founder through DevHustle. We launched our startup six months later.",
+    quote: "Found my co-founder through DevHustlers. We launched our startup six months later.",
   },
 ];
 
@@ -35,17 +35,17 @@ const TestimonialsSection = () => {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border border border-border">
           {testimonials.map((t, i) => (
             <div
               key={i}
-              className="p-6 rounded-2xl border border-border bg-background hover:bg-accent/30 transition-colors duration-300"
+              className="p-6 bg-background hover:bg-accent/30 transition-colors duration-300"
             >
               <p className="text-foreground text-[15px] leading-relaxed mb-5">
                 "{t.quote}"
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                <div className="w-8 h-8 bg-accent flex items-center justify-center">
                   <span className="text-xs font-semibold text-muted-foreground">
                     {t.name.split(" ").map((n) => n[0]).join("")}
                   </span>

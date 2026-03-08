@@ -29,7 +29,7 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={() => setDark(!dark)}
-      className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+      className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
       aria-label="Toggle theme"
     >
       {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}

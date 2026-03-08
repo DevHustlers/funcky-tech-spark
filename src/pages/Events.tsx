@@ -11,7 +11,7 @@ const events = [
     status: "upcoming" as const,
   },
   {
-    title: "DevHustle Meetup — London",
+    title: "DevHustlers Meetup — London",
     date: "Mar 22, 2026",
     location: "London, UK",
     desc: "In-person networking and lightning talks at Shoreditch Works.",
@@ -25,7 +25,7 @@ const events = [
     status: "upcoming" as const,
   },
   {
-    title: "DevHustle Conference 2026",
+    title: "DevHustlers Conference 2026",
     date: "May 15–16, 2026",
     location: "San Francisco, CA",
     desc: "Our annual conference. Two days of talks, workshops, and community.",
@@ -39,7 +39,7 @@ const events = [
     status: "past" as const,
   },
   {
-    title: "DevHustle Meetup — Berlin",
+    title: "DevHustlers Meetup — Berlin",
     date: "Feb 20, 2026",
     location: "Berlin, DE",
     desc: "Community meetup with 60+ developers. Talks on Rust and WebAssembly.",
@@ -54,30 +54,30 @@ const Events = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <section className="pt-36 pb-16 px-6">
+      <section className="pt-28 sm:pt-36 pb-16 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-[13px] font-medium text-muted-foreground mb-3 uppercase tracking-widest">Events</p>
-          <h1 className="text-3xl md:text-5xl font-bold text-foreground leading-tight tracking-tight mb-4">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground leading-tight tracking-tight mb-4">
             Hackathons, meetups &{" "}
             <span className="font-serif italic text-muted-foreground font-normal">more</span>
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg">
+          <p className="text-muted-foreground text-[15px] sm:text-base md:text-lg">
             Join us online or in person. There's always something happening.
           </p>
         </div>
       </section>
 
-      <section className="px-6 pb-24">
+      <section className="px-4 sm:px-6 pb-24">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-[13px] font-medium text-muted-foreground mb-6 uppercase tracking-widest">
             Upcoming
           </h2>
           <div className="space-y-3 mb-16">
             {upcoming.map((event, i) => (
-              <div key={i} className="p-5 rounded-2xl border border-border hover:bg-accent/30 transition-colors duration-300">
+              <div key={i} className="p-5 border border-border hover:bg-accent/30 transition-colors duration-300">
                 <h3 className="font-semibold text-foreground text-[15px] mb-2">{event.title}</h3>
                 <p className="text-[13px] text-muted-foreground leading-relaxed mb-3">{event.desc}</p>
-                <div className="flex flex-wrap items-center gap-4 text-[12px] text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-4 text-[12px] text-muted-foreground font-mono">
                   <span className="inline-flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5" /> {event.date}
                   </span>
@@ -94,10 +94,10 @@ const Events = () => {
           </h2>
           <div className="space-y-3">
             {past.map((event, i) => (
-              <div key={i} className="p-5 rounded-2xl border border-border/60 opacity-60">
+              <div key={i} className="p-5 border border-border/60 opacity-60">
                 <h3 className="font-semibold text-foreground text-[15px] mb-2">{event.title}</h3>
                 <p className="text-[13px] text-muted-foreground leading-relaxed mb-3">{event.desc}</p>
-                <div className="flex flex-wrap items-center gap-4 text-[12px] text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-4 text-[12px] text-muted-foreground font-mono">
                   <span className="inline-flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5" /> {event.date}
                   </span>
