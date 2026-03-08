@@ -63,7 +63,7 @@ const Events = () => {
           <p className="text-[13px] font-medium text-muted-foreground mb-3 uppercase tracking-widest">{t("events.label")}</p>
           <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground leading-tight tracking-tight mb-4">
             {t("events.title.1")}{" "}
-            <span className="font-serif italic text-muted-foreground font-normal">{t("events.title.2")}</span>
+            <span className="font-serif text-muted-foreground font-normal">{t("events.title.2")}</span>
           </h1>
           <p className="text-muted-foreground text-[15px] sm:text-base md:text-lg">
             {t("events.desc")}

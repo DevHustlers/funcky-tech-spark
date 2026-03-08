@@ -16,7 +16,7 @@ const Logo = ({ size = "sm" }: LogoProps) => {
         <Zap className={`${iconSize} text-background fill-background`} strokeWidth={2.5} />
       </div>
       <span className={`font-bold text-foreground tracking-tight ${textSize}`}>
-        Dev<span className="font-serif italic font-normal text-muted-foreground">Hustlers</span>
+        Dev<span className="font-serif font-normal text-muted-foreground">Hustlers</span>
       </span>
     </Link>
   );

@@ -1,20 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Press+Start+2P&display=swap');
 
 @font-face {
-  font-family: 'Monaspace Radon';
+  font-family: 'Geist Pixel';
   font-style: normal;
   font-display: swap;
   font-weight: 400;
-  src: url('https://cdn.jsdelivr.net/fontsource/fonts/monaspace-radon@latest/latin-400-normal.woff2') format('woff2'),
-       url('https://cdn.jsdelivr.net/fontsource/fonts/monaspace-radon@latest/latin-400-normal.woff') format('woff');
-}
-@font-face {
-  font-family: 'Monaspace Radon';
-  font-style: italic;
-  font-display: swap;
-  font-weight: 400;
-  src: url('https://cdn.jsdelivr.net/fontsource/fonts/monaspace-radon@latest/latin-400-italic.woff2') format('woff2'),
-       url('https://cdn.jsdelivr.net/fontsource/fonts/monaspace-radon@latest/latin-400-italic.woff') format('woff');
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.7.0/dist/fonts/geist-pixel/GeistPixel-Square.woff2') format('woff2');
 }
 
 @tailwind base;
@@ -54,7 +45,8 @@
     --radius: 0px;
 
     --font-sans: 'DM Sans', system-ui, sans-serif;
-    --font-serif: 'Instrument Serif', Georgia, serif;
+    --font-pixel: 'Geist Pixel', 'Press Start 2P', monospace;
+    --font-pixel-alt: 'Press Start 2P', 'Geist Pixel', monospace;
     --font-mono: 'JetBrains Mono', monospace;
 
     --sidebar-background: 0 0% 98%;
@@ -152,7 +144,13 @@
 
 @layer utilities {
   .font-serif {
-    font-family: var(--font-serif);
+    font-family: var(--font-pixel);
+  }
+  .font-pixel {
+    font-family: var(--font-pixel);
+  }
+  .font-pixel-alt {
+    font-family: var(--font-pixel-alt);
   }
   .font-mono {
     font-family: var(--font-mono);
