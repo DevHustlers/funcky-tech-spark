@@ -19,7 +19,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-start justify-between gap-10">
           <div>
             <div className="mb-3"><Logo size="md" /></div>
-            <p className="text-[13px] text-muted-foreground max-w-xs leading-relaxed">{t("footer.desc")}</p>
+            <p className="text-[15px] text-muted-foreground max-w-xs leading-relaxed">{t("footer.desc")}</p>
           </div>
           <div className="flex flex-wrap gap-x-8 gap-y-2 text-[13px]">
             {links.map((link) => (
