@@ -4,6 +4,8 @@ import { ArrowLeft, BookOpen, Clock, Tag } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
+import PageLayout from "@/components/PageLayout";
+import SectionDivider from "@/components/SectionDivider";
 import Prism from "prismjs";
 import "prismjs/components/prism-typescript";
 import "prismjs/components/prism-bash";

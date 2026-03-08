@@ -5,6 +5,8 @@ import { ArrowRight, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import PageLayout from "@/components/PageLayout";
+import SectionDivider from "@/components/SectionDivider";
 
 const posts = [
   {
