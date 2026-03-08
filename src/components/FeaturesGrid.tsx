@@ -17,7 +17,7 @@ const FeaturesGrid = () => {
     <section id="features">
       <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
         <div className="px-3 sm:px-4 lg:px-6 pt-20 sm:pt-24 pb-14">
-          <p className="text-[13px] font-medium text-muted-foreground mb-3 uppercase tracking-widest">
+          <p className="text-[15px] font-medium text-muted-foreground mb-3 uppercase tracking-widest">
             {t("features.label")}
           </p>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">
@@ -33,8 +33,8 @@ const FeaturesGrid = () => {
               className="bg-background p-6 sm:p-7 hover:bg-accent/40 transition-colors duration-300"
             >
               <feature.icon className="w-5 h-5 text-foreground mb-4" strokeWidth={1.5} />
-              <h3 className="font-semibold text-foreground text-[15px] mb-1.5">{feature.title}</h3>
-              <p className="text-[13px] text-muted-foreground leading-relaxed">{feature.desc}</p>
+              <h3 className="font-semibold text-foreground text-[17px] mb-1.5">{feature.title}</h3>
+              <p className="text-[15px] text-muted-foreground leading-relaxed">{feature.desc}</p>
             </div>
           ))}
         </div>

@@ -19,17 +19,17 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-start justify-between gap-10">
           <div>
             <div className="mb-3"><Logo size="md" /></div>
-            <p className="text-[13px] text-muted-foreground max-w-xs leading-relaxed">{t("footer.desc")}</p>
+            <p className="text-[15px] text-muted-foreground max-w-xs leading-relaxed">{t("footer.desc")}</p>
           </div>
-          <div className="flex flex-wrap gap-x-8 gap-y-2 text-[13px]">
+          <div className="flex flex-wrap gap-x-8 gap-y-2 text-[15px]">
             {links.map((link) => (
               <Link key={link.href} to={link.href} className="text-muted-foreground hover:text-foreground transition-colors">{link.label}</Link>
             ))}
           </div>
         </div>
         <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[12px] text-muted-foreground">{t("footer.copyright")}</p>
-          <div className="flex gap-6 text-[12px] text-muted-foreground">
+          <p className="text-[13px] text-muted-foreground">{t("footer.copyright")}</p>
+          <div className="flex gap-6 text-[13px] text-muted-foreground">
             <a href="#" className="hover:text-foreground transition-colors">{t("footer.privacy")}</a>
             <a href="#" className="hover:text-foreground transition-colors">{t("footer.terms")}</a>
           </div>
