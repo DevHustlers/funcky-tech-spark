@@ -1,37 +1,29 @@
-import { Rocket } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const CTASection = () => {
   return (
-    <section className="relative py-32 px-4 text-center overflow-hidden">
-      <div className="absolute inset-0 gradient-cyber opacity-20" />
-      <div className="relative max-w-3xl mx-auto">
-        <div className="font-mono text-sm text-muted-foreground mb-6 tracking-widest">
-          {"// READY TO JOIN THE HIVEMIND?"}
-        </div>
-        <h2 className="font-display text-4xl md:text-7xl font-bold text-foreground text-glow mb-8 leading-tight">
-          STOP CODING
-          <br />
-          <span className="text-cyber-blue text-glow-blue">ALONE</span>
+    <section className="py-24 px-6">
+      <div className="max-w-3xl mx-auto text-center">
+        <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
+          Ready to build{" "}
+          <span className="font-serif italic text-muted-foreground">something great</span>
+          ?
         </h2>
-        <p className="text-muted-foreground text-lg md:text-xl mb-12 max-w-xl mx-auto leading-relaxed">
-          Join 50K+ developers who ship code, break things, and build the future together. No gatekeeping. No BS.
+        <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
+          Join a community of developers who care about craft, collaboration, and shipping real products.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button className="group relative px-10 py-4 font-mono text-sm font-bold tracking-wider overflow-hidden">
-            <div className="absolute inset-0 animate-border-dance" />
-            <div className="absolute inset-[2px] bg-background" />
-            <span className="relative flex items-center gap-3 text-foreground">
-              <Rocket className="w-5 h-5 group-hover:animate-pulse-neon" />
-              JACK_IN( )
-            </span>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <button className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity">
+            Get Started Free
+            <ArrowRight className="w-4 h-4" />
           </button>
-          <button className="px-10 py-4 font-mono text-sm font-bold tracking-wider border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 hover:box-glow transition-all duration-300">
-            VIEW_SOURCE( )
+          <button className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl border border-border text-foreground font-medium hover:bg-accent transition-colors">
+            View Projects
           </button>
         </div>
-        <div className="mt-12 font-mono text-xs text-muted-foreground/50">
-          {">"} no credit card · no meetings · just vibes and version control
-        </div>
+        <p className="mt-6 text-xs text-muted-foreground">
+          No credit card required · Free forever for individuals
+        </p>
       </div>
     </section>
   );

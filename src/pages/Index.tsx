@@ -1,64 +1,74 @@
-import GlitchText from "@/components/GlitchText";
-import MatrixRain from "@/components/MatrixRain";
+import Navbar from "@/components/Navbar";
 import FeaturesGrid from "@/components/FeaturesGrid";
 import StatsSection from "@/components/StatsSection";
-import TerminalWindow from "@/components/TerminalWindow";
 import CTASection from "@/components/CTASection";
-import Navbar from "@/components/Navbar";
 import heroBg from "@/assets/hero-bg.jpg";
-import { ChevronDown } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-hidden">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 pt-16">
-        {/* Background image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-30"
-          style={{ backgroundImage: `url(${heroBg})` }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
+      {/* Hero */}
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+        {/* Subtle gradient bg */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent pointer-events-none" />
 
-        <MatrixRain />
-
-        <div className="relative text-center max-w-5xl mx-auto">
-          <div className="font-mono text-sm text-muted-foreground mb-8 tracking-[0.3em]">
-            {">"} INITIALIZING DEVHIVE PROTOCOL...
+        <div className="max-w-4xl mx-auto text-center relative">
+          <div
+            className="animate-fade-up"
+            style={{ animationDelay: "0s" }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              Now 50,000+ developers strong
+            </div>
           </div>
 
-          <h1 className="font-display text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold leading-[0.9] mb-8">
-            <span className="text-foreground">WE</span>
-            <br />
-            <span className="text-glow">
-              <GlitchText text="CODE" />
-            </span>
-            <br />
-            <span className="text-cyber-blue text-glow-blue">CHAOS</span>
+          <h1
+            className="text-4xl sm:text-5xl md:text-7xl font-bold text-foreground leading-[1.1] mb-6 animate-fade-up"
+            style={{ animationDelay: "0.1s", opacity: 0 }}
+          >
+            Where developers{" "}
+            <span className="font-serif italic text-muted-foreground">come together</span>
+            {" "}to build
           </h1>
 
-          <p className="font-mono text-muted-foreground text-base md:text-lg max-w-xl mx-auto mb-12 leading-relaxed">
-            The underground tech collective for devs who ship fast, think different, and refuse to read the docs.
+          <p
+            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-up"
+            style={{ animationDelay: "0.2s", opacity: 0 }}
+          >
+            A modern community for programmers who want to collaborate, learn, and ship products that matter.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
-            <button className="group relative px-10 py-4 bg-primary text-primary-foreground font-mono text-sm font-bold tracking-wider hover:box-glow transition-all duration-300">
-              <span className="flex items-center gap-2">
-                {">"} JOIN_THE_HIVE( )
-              </span>
+          <div
+            className="flex flex-col sm:flex-row gap-3 justify-center mb-16 animate-fade-up"
+            style={{ animationDelay: "0.3s", opacity: 0 }}
+          >
+            <button className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity text-base">
+              Join the Community
+              <ArrowRight className="w-4 h-4" />
             </button>
-            <button className="px-10 py-4 border border-border text-muted-foreground font-mono text-sm tracking-wider hover:text-foreground hover:border-primary/30 transition-all duration-300">
-              EXPLORE_PROJECTS( )
+            <button className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl border border-border text-foreground font-medium hover:bg-accent transition-colors text-base">
+              Explore Projects
             </button>
           </div>
 
-          <ChevronDown className="w-6 h-6 text-muted-foreground mx-auto animate-float" />
+          {/* Hero image */}
+          <div
+            className="relative rounded-2xl overflow-hidden border border-border shadow-2xl shadow-primary/5 animate-fade-up"
+            style={{ animationDelay: "0.4s", opacity: 0 }}
+          >
+            <img
+              src={heroBg}
+              alt="Abstract modern design representing the DevHive community"
+              className="w-full h-auto"
+              loading="eager"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent" />
+          </div>
         </div>
-
-        {/* Scanline effect */}
-        <div className="absolute inset-0 pointer-events-none scanline-overlay" />
       </section>
 
       {/* Features */}
@@ -67,25 +77,25 @@ const Index = () => {
       {/* Stats */}
       <StatsSection />
 
-      {/* Terminal */}
-      <TerminalWindow />
-
       {/* CTA */}
       <CTASection />
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 px-4">
+      <footer className="border-t border-border py-12 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="font-mono text-xs text-muted-foreground">
-            © 2026 DEVHIVE // ALL RIGHTS HACKED
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-xs">D</span>
+            </div>
+            <span className="font-semibold text-foreground">DevHive</span>
           </div>
-          <div className="font-mono text-xs text-muted-foreground flex gap-6">
-            <a href="#" className="hover:text-foreground transition-colors">/privacy</a>
-            <a href="#" className="hover:text-foreground transition-colors">/terms</a>
-            <a href="#" className="hover:text-foreground transition-colors">/status</a>
+          <div className="flex gap-6 text-sm text-muted-foreground">
+            <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
+            <a href="#" className="hover:text-foreground transition-colors">Terms</a>
+            <a href="#" className="hover:text-foreground transition-colors">Contact</a>
           </div>
-          <div className="font-mono text-xs text-muted-foreground/40">
-            built with mass_hysteria && caffeine
+          <div className="text-sm text-muted-foreground">
+            © 2026 DevHive
           </div>
         </div>
       </footer>
