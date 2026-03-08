@@ -1,8 +1,9 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, ArrowRight } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import SectionDivider from "@/components/SectionDivider";
+import ScrollReveal from "@/components/ScrollReveal";
 import { useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
 
@@ -13,93 +14,131 @@ const Contact = () => {
   return (
     <PageLayout>
       <Navbar />
+
+      {/* Header */}
       <section className="pt-28 sm:pt-36 pb-16 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-[13px] font-medium text-muted-foreground mb-3 uppercase tracking-widest">{t("contact.label")}</p>
-          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground leading-tight tracking-tight mb-4">
-            {t("contact.title.1")}{" "}
-            <span className="font-serif text-muted-foreground font-normal">{t("contact.title.2")}</span>
-          </h1>
-          <p className="text-muted-foreground text-[15px] sm:text-base md:text-lg">
-            {t("contact.desc")}
-          </p>
+          <ScrollReveal>
+            <p className="text-[12px] font-medium text-muted-foreground mb-4 uppercase tracking-[0.2em] font-mono">
+              {t("contact.label")}
+            </p>
+            <h1 className="text-[clamp(1.75rem,5vw,3rem)] font-bold text-foreground leading-[1.1] tracking-tight mb-4">
+              {t("contact.title.1")}{" "}
+              <span className="font-serif text-muted-foreground font-normal">{t("contact.title.2")}</span>
+            </h1>
+            <p className="text-muted-foreground text-[14px] sm:text-[15px] leading-relaxed max-w-lg">
+              {t("contact.desc")}
+            </p>
+          </ScrollReveal>
         </div>
       </section>
 
-      <section className="px-4 sm:px-6 pb-24">
-        <div className="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-10">
-          <div className="md:col-span-3">
-            {submitted ? (
-              <div className="p-8 border border-border text-center">
-                <p className="text-foreground font-semibold mb-2">{t("contact.sent")}</p>
-                <p className="text-[14px] text-muted-foreground">{t("contact.sent.desc")}</p>
-              </div>
-            ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setSubmitted(true);
-                }}
-                className="space-y-4"
-              >
-                <div>
-                  <label className="block text-[13px] font-medium text-foreground mb-1.5">{t("contact.name")}</label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full px-4 py-2.5 border border-border bg-background text-foreground text-[14px] focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground/50"
-                    placeholder={t("contact.name.placeholder")}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[13px] font-medium text-foreground mb-1.5">{t("contact.email")}</label>
-                  <input
-                    type="email"
-                    required
-                    className="w-full px-4 py-2.5 border border-border bg-background text-foreground text-[14px] focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground/50"
-                    placeholder={t("contact.email.placeholder")}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[13px] font-medium text-foreground mb-1.5">{t("contact.message")}</label>
-                  <textarea
-                    required
-                    rows={5}
-                    className="w-full px-4 py-2.5 border border-border bg-background text-foreground text-[14px] focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground/50 resize-none"
-                    placeholder={t("contact.message.placeholder")}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center px-7 py-2.5 bg-foreground text-background font-medium text-[14px] hover:bg-foreground/90 transition-colors"
-                >
-                  {t("contact.send")}
-                </button>
-              </form>
-            )}
-          </div>
+      <SectionDivider />
 
-          <div className="md:col-span-2 space-y-6">
-            <div>
-              <div className="flex items-center gap-2 text-foreground font-medium text-[14px] mb-1">
-                <Mail className="w-4 h-4" /> {t("contact.email")}
+      {/* Content */}
+      <section className="px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border border-t border-border">
+            {/* Form */}
+            <ScrollReveal>
+              <div className="bg-background p-6 sm:p-10">
+                {submitted ? (
+                  <div className="py-12 text-center">
+                    <div className="w-12 h-12 bg-accent flex items-center justify-center mx-auto mb-4">
+                      <Mail className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <p className="text-foreground font-semibold mb-2">{t("contact.sent")}</p>
+                    <p className="text-[13px] text-muted-foreground max-w-xs mx-auto">{t("contact.sent.desc")}</p>
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      setSubmitted(true);
+                    }}
+                    className="space-y-5"
+                  >
+                    <div>
+                      <label className="block text-[12px] font-medium text-muted-foreground mb-2 uppercase tracking-wider">
+                        {t("contact.name")}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        className="w-full px-4 py-3 border border-border bg-background text-foreground text-[14px] focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/40 transition-colors"
+                        placeholder={t("contact.name.placeholder")}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[12px] font-medium text-muted-foreground mb-2 uppercase tracking-wider">
+                        {t("contact.email")}
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        className="w-full px-4 py-3 border border-border bg-background text-foreground text-[14px] focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/40 transition-colors"
+                        placeholder={t("contact.email.placeholder")}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[12px] font-medium text-muted-foreground mb-2 uppercase tracking-wider">
+                        {t("contact.message")}
+                      </label>
+                      <textarea
+                        required
+                        rows={5}
+                        className="w-full px-4 py-3 border border-border bg-background text-foreground text-[14px] focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/40 resize-none transition-colors"
+                        placeholder={t("contact.message.placeholder")}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="inline-flex items-center justify-center gap-2 px-7 py-3 bg-foreground text-background font-medium text-[14px] hover:bg-foreground/90 transition-colors"
+                    >
+                      {t("contact.send")}
+                      <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                    </button>
+                  </form>
+                )}
               </div>
-              <p className="text-[13px] text-muted-foreground">hello@devhustlers.community</p>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 text-foreground font-medium text-[14px] mb-1">
-                <MapPin className="w-4 h-4" /> {t("contact.location")}
+            </ScrollReveal>
+
+            {/* Info sidebar */}
+            <ScrollReveal delay={100}>
+              <div className="bg-background p-6 sm:p-10 flex flex-col justify-between h-full">
+                <div className="space-y-8">
+                  <div>
+                    <div className="flex items-center gap-2 text-foreground font-medium text-[13px] mb-2 uppercase tracking-wider">
+                      <Mail className="w-4 h-4" /> {t("contact.email")}
+                    </div>
+                    <p className="text-[14px] text-muted-foreground">hello@devhustlers.community</p>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 text-foreground font-medium text-[13px] mb-2 uppercase tracking-wider">
+                      <MapPin className="w-4 h-4" /> {t("contact.location")}
+                    </div>
+                    <p className="text-[14px] text-muted-foreground">{t("contact.location.value")}</p>
+                  </div>
+                </div>
+
+                <div className="mt-10 pt-8 border-t border-border">
+                  <p className="text-[13px] text-muted-foreground leading-relaxed">
+                    {t("contact.social")}{" "}
+                  </p>
+                  <div className="flex items-center gap-4 mt-3">
+                    {["Twitter", "GitHub", "Discord"].map((name) => (
+                      <a
+                        key={name}
+                        href="#"
+                        className="text-[13px] font-medium text-foreground hover:text-muted-foreground transition-colors underline underline-offset-4 decoration-border hover:decoration-foreground"
+                      >
+                        {name}
+                      </a>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <p className="text-[13px] text-muted-foreground">{t("contact.location.value")}</p>
-            </div>
-            <div className="pt-4">
-              <p className="text-[13px] text-muted-foreground leading-relaxed">
-                {t("contact.social")}{" "}
-                <a href="#" className="text-foreground underline underline-offset-2">Twitter</a>,{" "}
-                <a href="#" className="text-foreground underline underline-offset-2">GitHub</a>, {" "}
-                <a href="#" className="text-foreground underline underline-offset-2">Discord</a>.
-              </p>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>

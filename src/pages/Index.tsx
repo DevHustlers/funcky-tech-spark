@@ -100,7 +100,7 @@ const Index = () => {
         </div>
 
         {/* Mini feature row */}
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto -mx-4 sm:mx-auto">
           <div
             className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-border border-t border-border animate-fade-up"
             style={{ animationDelay: "0.4s", opacity: 0 }}
@@ -126,14 +126,14 @@ const Index = () => {
 
       {/* Social proof */}
       <ScrollReveal>
-        <section className="py-20 px-4 sm:px-6">
-          <div className="max-w-3xl mx-auto">
-            <p className="text-center text-[12px] sm:text-[13px] text-muted-foreground/60 uppercase tracking-widest mb-6 sm:mb-8 font-medium">
+        <section className="py-16 sm:py-20">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <p className="text-center text-[11px] sm:text-[12px] text-muted-foreground/50 uppercase tracking-[0.2em] mb-8 font-mono">
               {t("social.from")}
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-6 sm:gap-x-10 gap-y-3 text-muted-foreground/25">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-y-4">
               {["Google", "Meta", "Stripe", "Vercel", "GitHub", "Shopify"].map((name) => (
-                <span key={name} className="text-base sm:text-lg font-semibold tracking-tight select-none">
+                <span key={name} className="text-center text-[13px] sm:text-sm font-medium text-muted-foreground/20 tracking-tight select-none">
                   {name}
                 </span>
               ))}
