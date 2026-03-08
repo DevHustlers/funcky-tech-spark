@@ -27,7 +27,7 @@ const TeamSection = () => {
                   <p className="text-2xl font-bold text-foreground">{t("team.stat.1.value")}</p>
                   <p className="text-[11px] uppercase tracking-widest font-mono">{t("team.stat.1.label")}</p>
                 </div>
-                <div className="h-8 bg-border" style={{ width: 'var(--grid-line, 1.5px)' }} />
+                <div className="h-8 bg-border" style={{ width: 'var(--grid-line, 2px)' }} />
                 <div>
                   <p className="text-2xl font-bold text-foreground">{t("team.stat.2.value")}</p>
                   <p className="text-[11px] uppercase tracking-widest font-mono">{t("team.stat.2.label")}</p>
