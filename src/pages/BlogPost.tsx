@@ -390,7 +390,7 @@ const BlogPost = () => {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-background">
+      <PageLayout>
         <Navbar />
         <div className="pt-36 pb-24 px-6 text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Post not found</h1>
@@ -399,7 +399,7 @@ const BlogPost = () => {
           </Link>
         </div>
         <Footer />
-      </div>
+      </PageLayout>
     );
   }
 
