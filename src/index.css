@@ -177,7 +177,7 @@
 }
 
 /* 
- * 1.5px border overrides — outside @layer with !important
+ * 2px border overrides — outside @layer with !important
  * to guarantee override of Tailwind utility classes
  */
 *,
