@@ -55,8 +55,8 @@ const Navbar = () => {
             : "bg-background/60 backdrop-blur-xl"
         )}
       >
-        <div className="px-3 sm:px-6 lg:px-0 lg:max-w-5xl lg:mx-auto h-14 flex items-center justify-between">
-          <Logo />
+        <div className="px-3 sm:px-6 lg:px-0">
+          <div className="lg:max-w-5xl lg:mx-auto h-14 flex items-center justify-between">
 
           <div className="hidden md:flex items-center gap-0.5">
             {links.map((link) => (
