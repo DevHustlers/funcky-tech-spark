@@ -164,8 +164,9 @@ const Blog = () => {
         </div>
       </section>
 
+      <SectionDivider />
       <Footer />
-    </div>
+    </PageLayout>
   );
 };
 
