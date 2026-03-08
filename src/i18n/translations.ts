@@ -287,8 +287,8 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Events
     "events.label": "الفعاليات",
-    "events.title.1": "هاكاثونات ولقاءات و",
-    "events.title.2": "المزيد",
+    "events.title.1": "حيث يلتقي",
+    "events.title.2": "المطورون",
     "events.desc": "انضم إلينا عبر الإنترنت أو شخصياً. هناك دائماً شيء يحدث.",
     "events.upcoming": "القادمة",
     "events.past": "الفعاليات السابقة",
