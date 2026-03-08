@@ -45,7 +45,7 @@ const About = () => {
       <TeamSection />
       <SectionDivider />
       <Footer />
-    </div>
+    </PageLayout>
   );
 };
 
