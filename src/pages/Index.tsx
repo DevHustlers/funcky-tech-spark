@@ -111,8 +111,8 @@ const Index = () => {
               <div key={i} className="flex items-center gap-4 p-5 sm:p-6 bg-background">
                 <item.icon className="w-5 h-5 text-muted-foreground shrink-0" strokeWidth={1.5} />
                 <div>
-                  <p className="text-[14px] font-semibold text-foreground">{item.label}</p>
-                  <p className="text-[12px] text-muted-foreground">{item.sub}</p>
+                  <p className="text-[16px] font-semibold text-foreground">{item.label}</p>
+                  <p className="text-[14px] text-muted-foreground">{item.sub}</p>
                 </div>
               </div>
             ))}
