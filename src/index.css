@@ -1,6 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Press+Start+2P&display=swap');
 
 @font-face {
+  font-family: 'Monaspace Neon';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('https://cdn.jsdelivr.net/gh/githubnext/monaspace@v1.101/fonts/webfonts/MonaspaceNeon-Regular.woff') format('woff');
+}
+
+@font-face {
   font-family: 'Geist Sans';
   font-style: normal;
   font-display: swap;
