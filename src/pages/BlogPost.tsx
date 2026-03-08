@@ -406,7 +406,7 @@ const BlogPost = () => {
   const tocItems = getTocItems(post.content);
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageLayout>
       <Navbar />
       <article className="pt-28 sm:pt-36 pb-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
