@@ -125,12 +125,12 @@ const Index = () => {
       <ScrollReveal>
         <section className="py-16 sm:py-20">
           <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
-            <p className="text-center text-[11px] sm:text-[12px] text-muted-foreground/50 uppercase tracking-[0.2em] mb-8 font-mono">
+            <p className="text-center text-[11px] sm:text-[12px] text-muted-foreground uppercase tracking-[0.25em] mb-10 font-mono">
               {t("social.from")}
             </p>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-y-4">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-y-6 gap-x-4">
               {["React", "TypeScript", "Rust", "Go", "Python", "Node.js"].map((name) => (
-                <span key={name} className="text-center text-[13px] sm:text-sm font-medium text-muted-foreground/20 tracking-tight select-none">
+                <span key={name} className="text-center text-[13px] sm:text-sm font-medium text-muted-foreground/40 tracking-tight select-none hover:text-foreground/60 transition-colors duration-300">
                   {name}
                 </span>
               ))}
