@@ -24,7 +24,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close mobile nav on route change
   useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
@@ -38,25 +37,25 @@ const Navbar = () => {
     <>
       <nav
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-200",
           scrolled
-            ? "bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-[0_1px_3px_0_hsl(var(--foreground)/0.04)]"
+            ? "bg-background/90 backdrop-blur-xl border-b border-border"
             : "bg-background/60 backdrop-blur-xl border-b border-transparent"
         )}
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Logo />
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-0.5">
             {links.map((link) => (
               <Link
                 key={link.label}
                 to={link.href}
                 className={cn(
-                  "px-3 py-1.5 rounded-md text-[13px] transition-colors duration-200",
+                  "px-3 py-1.5 text-[13px] transition-colors duration-150",
                   isActive(link.href)
                     ? "text-foreground font-medium"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {link.label}
@@ -66,7 +65,7 @@ const Navbar = () => {
 
           <div className="flex items-center gap-1.5">
             <ThemeToggle />
-            <button className="hidden sm:inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-foreground text-background text-[13px] font-medium hover:bg-foreground/90 transition-colors ml-1">
+            <button className="hidden sm:inline-flex items-center gap-1.5 px-4 py-1.5 bg-foreground text-background text-[13px] font-medium hover:bg-foreground/90 transition-colors ml-1">
               Join Now
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -82,19 +81,18 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile menu overlay */}
       {open && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <div className="absolute top-14 left-0 right-0 bg-background border-b border-border shadow-lg animate-fade-in">
-            <div className="px-4 py-4 space-y-1">
+          <div className="absolute top-14 left-0 right-0 bg-background border-b border-border animate-fade-in">
+            <div className="px-4 py-3 space-y-0.5">
               {links.map((link) => (
                 <Link
                   key={link.label}
                   to={link.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "block px-3 py-2.5 rounded-lg text-[15px] transition-colors",
+                    "block px-3 py-2.5 text-[15px] transition-colors",
                     isActive(link.href)
                       ? "text-foreground font-medium bg-accent/50"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -104,7 +102,7 @@ const Navbar = () => {
                 </Link>
               ))}
               <div className="pt-3 px-3 sm:hidden">
-                <button className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full bg-foreground text-background text-sm font-medium">
+                <button className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 bg-foreground text-background text-sm font-medium">
                   Join Now
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>

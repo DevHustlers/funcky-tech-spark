@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -34,10 +34,11 @@
     --input: 240 6% 90%;
     --ring: 240 5% 12%;
 
-    --radius: 0.625rem;
+    --radius: 0px;
 
     --font-sans: 'DM Sans', system-ui, sans-serif;
     --font-serif: 'Instrument Serif', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5% 30%;
@@ -47,6 +48,17 @@
     --sidebar-accent-foreground: 240 10% 6%;
     --sidebar-border: 240 6% 90%;
     --sidebar-ring: 240 5% 12%;
+
+    /* Prism light theme tokens */
+    --code-bg: 240 5% 95%;
+    --code-fg: 240 10% 15%;
+    --code-comment: 240 5% 55%;
+    --code-keyword: 270 60% 45%;
+    --code-string: 150 60% 30%;
+    --code-function: 210 70% 40%;
+    --code-number: 20 80% 45%;
+    --code-operator: 240 10% 35%;
+    --code-punctuation: 240 5% 50%;
   }
 
   .dark {
@@ -86,6 +98,17 @@
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 240 5% 16%;
     --sidebar-ring: 0 0% 80%;
+
+    /* Prism dark theme tokens */
+    --code-bg: 240 8% 8%;
+    --code-fg: 0 0% 85%;
+    --code-comment: 240 5% 45%;
+    --code-keyword: 270 60% 70%;
+    --code-string: 150 50% 55%;
+    --code-function: 210 60% 65%;
+    --code-number: 20 70% 60%;
+    --code-operator: 0 0% 70%;
+    --code-punctuation: 240 5% 55%;
   }
 }
 
@@ -114,6 +137,64 @@
   .font-serif {
     font-family: var(--font-serif);
   }
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+/* Prism theme overrides using CSS variables */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: hsl(var(--code-comment));
+  font-style: italic;
+}
+
+.token.punctuation {
+  color: hsl(var(--code-punctuation));
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol {
+  color: hsl(var(--code-number));
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin {
+  color: hsl(var(--code-string));
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: hsl(var(--code-operator));
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: hsl(var(--code-keyword));
+}
+
+.token.function,
+.token.class-name {
+  color: hsl(var(--code-function));
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: hsl(var(--code-keyword));
 }
 
 @keyframes fade-up {
