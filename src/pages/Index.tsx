@@ -36,7 +36,7 @@ const Index = () => {
         <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
           <div className="max-w-3xl pb-20 sm:pb-32 px-1 sm:px-4 lg:px-6">
             <div className="animate-fade-up">
-              <div className="inline-flex items-center gap-2 px-3 py-1 border border-border text-[13px] text-muted-foreground mb-8 font-mono">
+              <div className="inline-flex items-center gap-2 px-3 py-1 border border-border text-[15px] text-muted-foreground mb-8 font-mono">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
