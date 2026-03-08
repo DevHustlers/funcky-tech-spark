@@ -183,34 +183,34 @@
 *,
 *::before,
 *::after {
-  --grid-line-width: 1.5px;
+  --grid-line-width: 2px;
 }
 
 .border {
-  border-width: 1.5px !important;
+  border-width: 2px !important;
 }
 .border-t {
-  border-top-width: 1.5px !important;
+  border-top-width: 2px !important;
 }
 .border-b {
-  border-bottom-width: 1.5px !important;
+  border-bottom-width: 2px !important;
 }
 .border-l {
-  border-left-width: 1.5px !important;
+  border-left-width: 2px !important;
 }
 .border-r {
-  border-right-width: 1.5px !important;
+  border-right-width: 2px !important;
 }
 .border-x {
-  border-left-width: 1.5px !important;
-  border-right-width: 1.5px !important;
+  border-left-width: 2px !important;
+  border-right-width: 2px !important;
 }
 .border-y {
-  border-top-width: 1.5px !important;
-  border-bottom-width: 1.5px !important;
+  border-top-width: 2px !important;
+  border-bottom-width: 2px !important;
 }
 .gap-px {
-  gap: 1.5px !important;
+  gap: 2px !important;
 }
 
 /* Elements that explicitly need 0 border */
