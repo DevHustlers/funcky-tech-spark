@@ -39,7 +39,7 @@ const events = [
     status: "past" as const,
   },
   {
-    title: "DevHive Meetup — Berlin",
+    title: "DevHustle Meetup — Berlin",
     date: "Feb 20, 2026",
     location: "Berlin, DE",
     desc: "Community meetup with 60+ developers. Talks on Rust and WebAssembly.",

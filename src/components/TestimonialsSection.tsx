@@ -17,7 +17,7 @@ const testimonials = [
   {
     name: "David Park",
     role: "Indie Developer",
-    quote: "Found my co-founder through DevHive. We launched our startup six months later.",
+    quote: "Found my co-founder through DevHustle. We launched our startup six months later.",
   },
 ];
 

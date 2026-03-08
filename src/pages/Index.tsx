@@ -18,7 +18,7 @@ const Index = () => {
       <section className="pt-32 pb-28 px-6 relative overflow-hidden">
         {/* Subtle grid background */}
         <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06]" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
           backgroundSize: '32px 32px',
         }} />
 
