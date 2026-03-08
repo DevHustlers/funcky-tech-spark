@@ -138,33 +138,34 @@
 }
 
 @layer base {
+  :root {
+    --grid-line: 1.5px;
+  }
+
   * {
     @apply border-border;
     border-width: 0;
   }
 
-  .border,
-  .border-t,
-  .border-b,
-  .border-l,
-  .border-r {
-    --tw-border-width: 1.5px;
-  }
-
   .border {
-    border-width: 1.5px;
+    border-width: var(--grid-line);
   }
   .border-t {
-    border-top-width: 1.5px;
+    border-top-width: var(--grid-line);
   }
   .border-b {
-    border-bottom-width: 1.5px;
+    border-bottom-width: var(--grid-line);
   }
   .border-l {
-    border-left-width: 1.5px;
+    border-left-width: var(--grid-line);
   }
   .border-r {
-    border-right-width: 1.5px;
+    border-right-width: var(--grid-line);
+  }
+
+  /* Override Tailwind's gap-px to use 1.5px */
+  .gap-px {
+    gap: var(--grid-line);
   }
 
   body {
