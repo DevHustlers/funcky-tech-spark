@@ -129,7 +129,7 @@ const Index = () => {
               {t("social.from")}
             </p>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-y-4">
-              {["Google", "Meta", "Stripe", "Vercel", "GitHub", "Shopify"].map((name) => (
+              {["React", "TypeScript", "Rust", "Go", "Python", "Node.js"].map((name) => (
                 <span key={name} className="text-center text-[13px] sm:text-sm font-medium text-muted-foreground/20 tracking-tight select-none">
                   {name}
                 </span>

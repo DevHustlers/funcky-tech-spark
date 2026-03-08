@@ -185,7 +185,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "hero.mini.3.sub": "إرشاد من خبراء",
 
     // Social proof
-    "social.from": "مطورون من",
+    "social.from": "بناة يعملون مع",
 
     // Features
     "features.label": "كل ما تحتاجه",
