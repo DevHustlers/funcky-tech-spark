@@ -35,7 +35,7 @@ const TestimonialsSection = () => {
           </p>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">
             {t("testimonials.title.1")}{" "}
-            <span className="font-serif italic text-muted-foreground font-normal">{t("testimonials.title.2")}</span>
+            <span className="font-serif text-muted-foreground font-normal">{t("testimonials.title.2")}</span>
           </h2>
         </div>
 

@@ -48,7 +48,7 @@ const Index = () => {
             style={{ animationDelay: "0.08s", opacity: 0 }}
           >
             {t("hero.title.1")}{" "}
-            <span className="font-serif italic text-muted-foreground font-normal">{t("hero.title.2")}</span>
+            <span className="font-serif text-muted-foreground font-normal">{t("hero.title.2")}</span>
             <br className="hidden sm:block" />
             {" "}{t("hero.title.3")}{" "}
             <span className="relative inline-block">

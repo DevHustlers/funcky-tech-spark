@@ -21,7 +21,7 @@ const TeamSection = () => {
             </p>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground leading-tight mb-5">
               {t("team.title.1")}{" "}
-              <span className="font-serif italic text-muted-foreground font-normal">{t("team.title.2")}</span>
+              <span className="font-serif text-muted-foreground font-normal">{t("team.title.2")}</span>
             </h2>
             <p className="text-[14px] sm:text-[15px] text-muted-foreground leading-relaxed mb-6">
               {t("team.desc")}

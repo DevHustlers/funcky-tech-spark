@@ -10,7 +10,7 @@ const CTASection = () => {
         <div className="border border-border bg-accent/30 px-6 sm:px-8 py-16 md:py-20 text-center">
           <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-4 leading-tight tracking-tight">
             {t("cta.title.1")}{" "}
-            <span className="font-serif italic text-muted-foreground font-normal">{t("cta.title.2")}</span>?
+            <span className="font-serif text-muted-foreground font-normal">{t("cta.title.2")}</span>?
           </h2>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto text-[15px]">
             {t("cta.desc")}

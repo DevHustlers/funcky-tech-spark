@@ -86,7 +86,7 @@ const Blog = () => {
           <p className="text-[12px] sm:text-[13px] font-medium text-muted-foreground mb-3 uppercase tracking-widest">{t("blog.label")}</p>
           <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground leading-tight tracking-tight mb-4">
             {t("blog.title.1")}{" "}
-            <span className="font-serif italic text-muted-foreground font-normal">{t("blog.title.2")}</span>
+            <span className="font-serif text-muted-foreground font-normal">{t("blog.title.2")}</span>
           </h1>
           <p className="text-muted-foreground text-[15px] sm:text-base md:text-lg mb-8">
             {t("blog.desc")}
