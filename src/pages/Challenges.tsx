@@ -65,8 +65,8 @@ const Challenges = () => {
     <PageLayout>
       <Navbar />
 
-      <section className="pt-28 sm:pt-40 pb-8 sm:pb-12">
-        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
+      <section className="pt-28 sm:pt-36 pb-8 sm:pb-12">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
           <p className="text-[11px] text-muted-foreground uppercase tracking-[0.3em] font-mono mb-4">
             {t("challenges.label")}
           </p>
@@ -83,7 +83,7 @@ const Challenges = () => {
       {/* Live Competition Banner */}
       <ScrollReveal>
         <section className="py-6">
-          <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
+          <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
             <Link to="/competition/comp-1" className="block group">
               <div className="border-2 border-emerald-500/30 bg-emerald-500/5 p-6 hover:border-emerald-500/50 transition-colors">
                 <div className="flex items-center justify-between">
