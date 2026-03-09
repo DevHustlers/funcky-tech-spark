@@ -183,8 +183,19 @@ const LiveSection = () => {
             </div>
             <div className="divide-y divide-border">
               {NEWS_FEED.map(item => (
-                <div key={item.id} className="group/feeditem px-6 sm:px-7 py-4 flex items-start gap-3 hover:bg-accent/40 transition-colors duration-300">
-                  <item.icon className={`w-4 h-4 mt-0.5 shrink-0 text-muted-foreground transition-colors duration-300 group-hover/feeditem:${item.color}`} strokeWidth={1.5} />
+                <div
+                  key={item.id}
+                  className="group/feeditem px-6 sm:px-7 py-4 flex items-start gap-3 hover:bg-accent/40 transition-colors duration-300"
+                  onMouseEnter={(e) => {
+                    const icon = e.currentTarget.querySelector('svg');
+                    if (icon) icon.style.color = item.hoverColor;
+                  }}
+                  onMouseLeave={(e) => {
+                    const icon = e.currentTarget.querySelector('svg');
+                    if (icon) icon.style.color = '';
+                  }}
+                >
+                  <item.icon className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground transition-colors duration-300" strokeWidth={1.5} />
                   <div className="min-w-0">
                     <p className="text-[15px] text-foreground leading-snug">{item.text}</p>
                     <p className="text-[13px] text-muted-foreground font-mono mt-0.5">{item.time}</p>
