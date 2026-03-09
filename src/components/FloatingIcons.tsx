@@ -1,17 +1,16 @@
 import { useMemo } from "react";
-import type { LucideIcon } from "lucide-react";
+import type { IconType } from "react-icons";
 import {
-  Code, Braces, FileCode, Terminal, Hash,
-  FileJson, FileType, Gem, Coffee, Flame,
-  Hexagon, Pentagon, Diamond, Box, Blocks,
-  Component, Puzzle, Layers, GitBranch, Binary,
-} from "lucide-react";
+  SiReact, SiRust, SiGo, SiRuby, SiCplusplus,
+  SiC, SiSharp, SiPython, SiTypescript, SiJavascript,
+  SiGnubash, SiZig,
+} from "react-icons/si";
+import { TbBrackets, TbCode } from "react-icons/tb";
 
-const ALL_ICONS: LucideIcon[] = [
-  Code, Braces, FileCode, Terminal, Hash,
-  FileJson, FileType, Gem, Coffee, Flame,
-  Hexagon, Pentagon, Diamond, Box, Blocks,
-  Component, Puzzle, Layers, GitBranch, Binary,
+const ALL_ICONS: IconType[] = [
+  SiReact, SiRust, SiGo, SiRuby, SiCplusplus,
+  SiC, SiSharp, SiPython, SiTypescript, SiJavascript,
+  SiGnubash, SiZig, TbBrackets, TbCode,
 ];
 
 const POSITIONS = [
@@ -32,9 +31,9 @@ const FloatingIcons = () => {
       Icon: ALL_ICONS[i % ALL_ICONS.length],
       top: pos.top + Math.random() * 3 - 1.5,
       left: pos.left + Math.random() * 3 - 1.5,
-      size: 30 + Math.random() * 18,
-      rotation: Math.random() * 30 - 15,
-      opacity: 0.08 + Math.random() * 0.06,
+      size: 40 + Math.random() * 24,
+      rotation: Math.random() * 24 - 12,
+      opacity: 0.09 + Math.random() * 0.07,
     }));
   }, []);
 
@@ -52,7 +51,6 @@ const FloatingIcons = () => {
             transform: `rotate(${rotation}deg)`,
             opacity,
           }}
-          strokeWidth={1.2}
         />
       ))}
     </div>
