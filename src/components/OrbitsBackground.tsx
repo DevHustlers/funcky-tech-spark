@@ -146,20 +146,13 @@ export function OrbitsBackground({
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Center glow
-      const centerGradient = ctx.createRadialGradient(cx(), cy(), 0, cx(), cy(), 40);
-      centerGradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`);
-      centerGradient.addColorStop(0.5, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.05)`);
+      // Subtle center glow only
+      const centerGradient = ctx.createRadialGradient(cx(), cy(), 0, cx(), cy(), 30);
+      centerGradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`);
       centerGradient.addColorStop(1, "transparent");
       ctx.fillStyle = centerGradient;
       ctx.beginPath();
-      ctx.arc(cx(), cy(), 40, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Center dot
-      ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`;
-      ctx.beginPath();
-      ctx.arc(cx(), cy(), 3, 0, Math.PI * 2);
+      ctx.arc(cx(), cy(), 30, 0, Math.PI * 2);
       ctx.fill();
 
       for (const orbit of orbits) {
