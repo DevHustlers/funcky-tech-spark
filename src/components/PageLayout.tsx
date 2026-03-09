@@ -1,10 +1,12 @@
 import { ReactNode } from "react";
 import PageTransition from "@/components/PageTransition";
+import FloatingIcons from "@/components/FloatingIcons";
 
 const PageLayout = ({ children }: { children: ReactNode }) => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background relative">
+        <FloatingIcons />
         {/* Vertical guide lines */}
         <div className="fixed inset-0 pointer-events-none z-[60]">
           <div className="max-w-5xl mx-auto h-full relative px-3 sm:px-6 lg:px-0">
