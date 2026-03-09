@@ -1252,6 +1252,11 @@ const Dashboard = () => {
   const [compFormMode, setCompFormMode] = useState<"none" | "create" | "edit">("none");
   const [editingComp, setEditingComp] = useState<CompetitionData | undefined>();
 
+  // Tracks state
+  const [tracks, setTracks] = useState<TrackData[]>(MOCK_TRACKS);
+  const [trackFormMode, setTrackFormMode] = useState<"none" | "create" | "edit">("none");
+  const [editingTrack, setEditingTrack] = useState<TrackData | undefined>();
+
   // Challenges state
   const [challenges, setChallenges] = useState<ChallengeData[]>(MOCK_CHALLENGES);
   const [chalFormMode, setChalFormMode] = useState<"none" | "create" | "edit">("none");
