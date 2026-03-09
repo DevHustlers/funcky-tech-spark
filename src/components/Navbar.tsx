@@ -67,10 +67,10 @@ const Navbar = () => {
           <div className="flex items-center gap-1">
             <LanguageSwitcher />
             <ThemeToggle />
-            <button className="hidden sm:inline-flex items-center gap-1.5 px-4 py-1.5 bg-foreground text-background text-[13px] font-medium hover:bg-foreground/90 transition-colors ms-1">
+            <Link to="/signup" className="hidden sm:inline-flex items-center gap-1.5 px-4 py-1.5 bg-foreground text-background text-[13px] font-medium hover:bg-foreground/90 transition-colors ms-1">
               {t("nav.join")}
               <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
-            </button>
+            </Link>
             <button
               onClick={() => setOpen(!open)}
               className="md:hidden p-2 -me-2 text-muted-foreground hover:text-foreground transition-colors"
