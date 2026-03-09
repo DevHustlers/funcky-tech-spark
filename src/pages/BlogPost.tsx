@@ -436,7 +436,7 @@ const BlogPost = () => {
       {/* Floating TOC for mobile/tablet */}
       <FloatingTOC items={tocItems} activeId={activeId} />
 
-      <article className="pt-28 sm:pt-36 pb-0">
+      <article className="pt-28 sm:pt-40 pb-0">
         <div className="max-w-5xl mx-auto">
           {/* Back to blog + metadata in one row between dividers */}
           <SectionDivider />
