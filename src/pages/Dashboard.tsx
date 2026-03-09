@@ -1331,6 +1331,18 @@ const Dashboard = () => {
     setCompetitions(prev => [dup, ...prev]);
   };
 
+  const saveTrack = (track: TrackData) => {
+    if (trackFormMode === "edit") {
+      setTracks(prev => prev.map(t => t.id === track.id ? track : t));
+    } else {
+      setTracks(prev => [track, ...prev]);
+    }
+    setTrackFormMode("none");
+    setEditingTrack(undefined);
+  };
+
+  const deleteTrack = (id: string) => setTracks(prev => prev.filter(t => t.id !== id));
+
   const saveChallenge = (chal: ChallengeData) => {
     if (chalFormMode === "edit") {
       setChallenges(prev => prev.map(c => c.id === chal.id ? chal : c));
