@@ -9,8 +9,8 @@ import { TbBrackets, TbCode } from "react-icons/tb";
 
 const ALL_ICONS: IconType[] = [
   SiReact, SiRust, SiGo, SiRuby, SiCplusplus,
-  SiC, SiCsharp, SiPython, SiTypescript, SiJavascript,
-  SiGnubash, SiJava, SiZig, TbBrackets, TbCode,
+  SiC, SiSharp, SiPython, SiTypescript, SiJavascript,
+  SiGnubash, SiZig, TbBrackets, TbCode,
 ];
 
 const POSITIONS = [
