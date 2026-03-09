@@ -29,7 +29,7 @@ const About = () => {
 
       {/* Hero */}
       <section className="pt-28 sm:pt-40 pb-16 sm:pb-20">
-        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
           <div className="max-w-3xl">
             <ScrollReveal>
               <p className="text-[13px] font-mono text-muted-foreground mb-4 uppercase tracking-widest">{t("about.label")}</p>
@@ -49,7 +49,7 @@ const About = () => {
 
       {/* Stats */}
       <section>
-        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-border border border-border">
             {[
               { value: t("about.stat.1.value"), label: t("about.stat.1.label") },
@@ -72,7 +72,7 @@ const About = () => {
       {/* Communities */}
       <ScrollReveal>
         <section className="py-16 sm:py-24">
-          <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
+          <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
             <div className="max-w-2xl mb-10">
               <p className="text-[13px] font-mono text-muted-foreground mb-4 uppercase tracking-widest">Our Communities</p>
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight tracking-tight mb-3">
