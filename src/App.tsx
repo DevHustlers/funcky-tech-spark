@@ -16,6 +16,7 @@ import Signup from "./pages/Signup";
 import Challenges from "./pages/Challenges";
 import Leaderboard from "./pages/Leaderboard";
 import Planets from "./pages/Planets";
+import TrackDetail from "./pages/TrackDetail";
 import Dashboard from "./pages/Dashboard";
 import Competition from "./pages/Competition";
 import NotFound from "./pages/NotFound";
