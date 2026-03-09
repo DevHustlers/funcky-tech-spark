@@ -6,7 +6,8 @@ import {
   Shield, Globe, Pencil, Trash2, CheckCircle2, Award,
   Flame, Rocket, Gem, Crown, Sparkles, Heart, Target,
   Swords, CircleDot, Diamond, Hexagon, Pentagon, Compass,
-  Anchor, Lightbulb, Bolt, Medal, BadgeCheck, X, Check
+  Anchor, Lightbulb, Bolt, Medal, BadgeCheck, X, Check,
+  Play, StopCircle, Timer, CirclePlus, GripVertical
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
