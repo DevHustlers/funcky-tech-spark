@@ -9,15 +9,15 @@ import OrbitsBackground from "@/components/OrbitsBackground";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 const PLANETS = [
-  { name: "Frontend", icon: Code, members: 342, challenges: 28, color: "text-blue-500", borderColor: "border-blue-500/20", description: "Master the art of building beautiful, responsive user interfaces with modern frameworks and tools." },
-  { name: "Backend", icon: Server, members: 278, challenges: 24, color: "text-green-500", borderColor: "border-green-500/20", description: "Build robust server-side systems, APIs, and microservices that power modern applications." },
-  { name: "Data Science", icon: BarChart3, members: 195, challenges: 18, color: "text-purple-500", borderColor: "border-purple-500/20", description: "Extract insights from data through statistical analysis, visualization, and predictive modeling." },
-  { name: "AI / ML", icon: Brain, members: 231, challenges: 22, color: "text-pink-500", borderColor: "border-pink-500/20", description: "Explore machine learning, deep learning, and artificial intelligence applications." },
-  { name: "Cybersecurity", icon: Shield, members: 167, challenges: 20, color: "text-red-500", borderColor: "border-red-500/20", description: "Defend systems, discover vulnerabilities, and master the art of ethical hacking." },
-  { name: "Mobile Dev", icon: Smartphone, members: 204, challenges: 16, color: "text-cyan-500", borderColor: "border-cyan-500/20", description: "Create native and cross-platform mobile applications for iOS and Android." },
-  { name: "Operating Systems", icon: Cpu, members: 89, challenges: 12, color: "text-orange-500", borderColor: "border-orange-500/20", description: "Dive deep into system programming, kernel development, and OS architecture." },
-  { name: "UI/UX", icon: Palette, members: 256, challenges: 14, color: "text-violet-500", borderColor: "border-violet-500/20", description: "Design intuitive interfaces and user experiences that delight and engage." },
-  { name: "Network", icon: Wifi, members: 112, challenges: 15, color: "text-teal-500", borderColor: "border-teal-500/20", description: "Master networking protocols, infrastructure, and distributed systems." },
+  { slug: "frontend", name: "Frontend", icon: Code, members: 342, challenges: 28, color: "text-blue-500", borderColor: "border-blue-500/20", description: "Master the art of building beautiful, responsive user interfaces with modern frameworks and tools." },
+  { slug: "backend", name: "Backend", icon: Server, members: 278, challenges: 24, color: "text-green-500", borderColor: "border-green-500/20", description: "Build robust server-side systems, APIs, and microservices that power modern applications." },
+  { slug: "data-science", name: "Data Science", icon: BarChart3, members: 195, challenges: 18, color: "text-purple-500", borderColor: "border-purple-500/20", description: "Extract insights from data through statistical analysis, visualization, and predictive modeling." },
+  { slug: "ai-ml", name: "AI / ML", icon: Brain, members: 231, challenges: 22, color: "text-pink-500", borderColor: "border-pink-500/20", description: "Explore machine learning, deep learning, and artificial intelligence applications." },
+  { slug: "cybersecurity", name: "Cybersecurity", icon: Shield, members: 167, challenges: 20, color: "text-red-500", borderColor: "border-red-500/20", description: "Defend systems, discover vulnerabilities, and master the art of ethical hacking." },
+  { slug: "mobile-dev", name: "Mobile Dev", icon: Smartphone, members: 204, challenges: 16, color: "text-cyan-500", borderColor: "border-cyan-500/20", description: "Create native and cross-platform mobile applications for iOS and Android." },
+  { slug: "operating-systems", name: "Operating Systems", icon: Cpu, members: 89, challenges: 12, color: "text-orange-500", borderColor: "border-orange-500/20", description: "Dive deep into system programming, kernel development, and OS architecture." },
+  { slug: "ui-ux", name: "UI/UX", icon: Palette, members: 256, challenges: 14, color: "text-violet-500", borderColor: "border-violet-500/20", description: "Design intuitive interfaces and user experiences that delight and engage." },
+  { slug: "network", name: "Network", icon: Wifi, members: 112, challenges: 15, color: "text-teal-500", borderColor: "border-teal-500/20", description: "Master networking protocols, infrastructure, and distributed systems." },
 ];
 
 const Planets = () => {
