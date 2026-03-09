@@ -1,69 +1,89 @@
 import { useEffect, useState } from "react";
-import {
-  Globe, Rocket, Terminal, Code, Database, Cpu,
-  Monitor, Smartphone, Cloud, Wifi, Lock, Zap,
-  Star, Moon, Sun, Atom, Binary, Braces,
-  FileCode, GitBranch, Hash, Layers, Server, Settings,
-} from "lucide-react";
+import { Globe, Moon, Sun, Atom, Orbit } from "lucide-react";
+import { IconReact, IconTypeScript, IconGo, IconPython, IconNode, IconRust } from "./PixelIcons";
 
-const ALL_ICONS = [
-  Globe, Rocket, Terminal, Code, Database, Cpu,
-  Monitor, Smartphone, Cloud, Wifi, Lock, Zap,
-  Star, Moon, Sun, Atom, Binary, Braces,
-  FileCode, GitBranch, Hash, Layers, Server, Settings,
-];
+const LUCIDE_ICONS = [Globe, Moon, Sun, Atom, Orbit];
 
-interface FloatingIcon {
+const LANG_ICONS = [IconReact, IconTypeScript, IconGo, IconPython, IconNode, IconRust];
+
+interface FloatingItem {
   id: number;
-  Icon: typeof Globe;
+  type: "lucide" | "lang";
+  index: number;
   top: number;
   left: number;
   size: number;
   rotation: number;
   opacity: number;
-  side: "left" | "right";
 }
 
 const FloatingIcons = () => {
-  const [icons, setIcons] = useState<FloatingIcon[]>([]);
+  const [items, setItems] = useState<FloatingItem[]>([]);
 
   useEffect(() => {
-    const shuffled = [...ALL_ICONS].sort(() => Math.random() - 0.5);
-    const items: FloatingIcon[] = shuffled.slice(0, 14).map((Icon, i) => {
-      const side = i < 7 ? "left" : "right";
-      return {
+    const all: FloatingItem[] = [];
+    // 4 per side = 8 total
+    const positions = [
+      // left side
+      { top: 10, left: 3 }, { top: 35, left: 5 }, { top: 58, left: 2 }, { top: 82, left: 6 },
+      // right side
+      { top: 12, left: 92 }, { top: 38, left: 94 }, { top: 60, left: 91 }, { top: 85, left: 93 },
+    ];
+
+    const shuffledLucide = [...LUCIDE_ICONS].sort(() => Math.random() - 0.5);
+    const shuffledLang = [...LANG_ICONS].sort(() => Math.random() - 0.5);
+
+    positions.forEach((pos, i) => {
+      const isLang = i % 2 === 0;
+      all.push({
         id: i,
-        Icon,
-        top: 8 + (i % 7) * 13 + Math.random() * 5,
-        left: side === "left"
-          ? 2 + Math.random() * 8
-          : 90 + Math.random() * 8,
-        size: 16 + Math.random() * 10,
-        rotation: Math.random() * 40 - 20,
-        opacity: 0.06 + Math.random() * 0.07,
-        side,
-      };
+        type: isLang ? "lang" : "lucide",
+        index: isLang ? i % shuffledLang.length : i % shuffledLucide.length,
+        top: pos.top + Math.random() * 6 - 3,
+        left: pos.left + Math.random() * 4 - 2,
+        size: 28 + Math.random() * 16,
+        rotation: Math.random() * 30 - 15,
+        opacity: 0.07 + Math.random() * 0.06,
+      });
     });
-    setIcons(items);
+
+    // Assign actual shuffled indices
+    let lucideIdx = 0, langIdx = 0;
+    all.forEach(item => {
+      if (item.type === "lang") { item.index = langIdx++ % shuffledLang.length; }
+      else { item.index = lucideIdx++ % shuffledLucide.length; }
+    });
+
+    setItems(all);
   }, []);
+
+  const shuffledLucide = LUCIDE_ICONS;
+  const shuffledLang = LANG_ICONS;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden">
-      {icons.map((item) => (
-        <item.Icon
-          key={item.id}
-          className="absolute text-muted-foreground"
-          style={{
-            top: `${item.top}%`,
-            left: `${item.left}%`,
-            width: item.size,
-            height: item.size,
-            transform: `rotate(${item.rotation}deg)`,
-            opacity: item.opacity,
-          }}
-          strokeWidth={1.5}
-        />
-      ))}
+      {items.map((item) => {
+        const style = {
+          top: `${item.top}%`,
+          left: `${item.left}%`,
+          width: item.size,
+          height: item.size,
+          transform: `rotate(${item.rotation}deg)`,
+          opacity: item.opacity,
+        };
+
+        if (item.type === "lucide") {
+          const LucideIcon = shuffledLucide[item.index % shuffledLucide.length];
+          return <LucideIcon key={item.id} className="absolute text-muted-foreground" style={style} strokeWidth={1.2} />;
+        }
+
+        const LangIcon = shuffledLang[item.index % shuffledLang.length];
+        return (
+          <div key={item.id} className="absolute text-muted-foreground" style={style}>
+            <LangIcon className="w-full h-full" />
+          </div>
+        );
+      })}
     </div>
   );
 };
