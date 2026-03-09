@@ -91,7 +91,7 @@ const About = () => {
                     href={community.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group flex flex-col items-center gap-4 p-8 bg-background text-center hover:bg-accent/30 transition-colors"
+                    className={`group flex flex-col items-center gap-4 p-8 bg-background text-center border border-transparent transition-all duration-300 ${community.bg}`}
                   >
                     <community.icon
                       size={36}
