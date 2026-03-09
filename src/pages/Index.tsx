@@ -37,13 +37,13 @@ const Index = () => {
         <LightRays
           raysOrigin="top-center"
           raysSpeed={0.8}
-          lightSpread={0.5}
-          rayLength={3}
-          fadeDistance={1}
-          saturation={1}
+          lightSpread={0.6}
+          rayLength={4}
+          fadeDistance={1.2}
+          saturation={1.2}
           followMouse
           mouseInfluence={0.1}
-          className="pointer-events-none opacity-40 dark:opacity-25"
+          className="pointer-events-none opacity-35 dark:opacity-50"
         />
         <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0 relative z-10">
           <div className="max-w-3xl pb-20 sm:pb-32 px-1 sm:px-4 lg:px-6">
