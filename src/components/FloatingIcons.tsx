@@ -1,22 +1,28 @@
 import { useMemo } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
-  Globe, Moon, Sun, Atom, Orbit,
-  Code, Terminal, Database, Cpu, Binary,
-  Braces, FileCode, Server, Webhook, CircuitBoard,
+  Code, Braces, FileCode, Terminal, Hash,
+  FileJson, FileType, Gem, Coffee, Flame,
+  Hexagon, Pentagon, Diamond, Box, Blocks,
+  Component, Puzzle, Layers, GitBranch, Binary,
 } from "lucide-react";
 
 const ALL_ICONS: LucideIcon[] = [
-  Globe, Moon, Sun, Atom, Orbit,
-  Code, Terminal, Database, Cpu, Binary,
-  Braces, FileCode, Server, Webhook, CircuitBoard,
+  Code, Braces, FileCode, Terminal, Hash,
+  FileJson, FileType, Gem, Coffee, Flame,
+  Hexagon, Pentagon, Diamond, Box, Blocks,
+  Component, Puzzle, Layers, GitBranch, Binary,
 ];
 
 const POSITIONS = [
-  { top: 5, left: 2 }, { top: 18, left: 5 }, { top: 32, left: 3 },
-  { top: 48, left: 6 }, { top: 62, left: 2 }, { top: 78, left: 5 }, { top: 90, left: 3 },
-  { top: 8, left: 91 }, { top: 22, left: 94 }, { top: 36, left: 92 },
-  { top: 50, left: 93 }, { top: 65, left: 91 }, { top: 80, left: 94 }, { top: 92, left: 92 },
+  // left side (10)
+  { top: 3, left: 2 }, { top: 12, left: 5 }, { top: 22, left: 3 },
+  { top: 33, left: 6 }, { top: 43, left: 2 }, { top: 53, left: 5 },
+  { top: 63, left: 3 }, { top: 73, left: 6 }, { top: 83, left: 2 }, { top: 93, left: 5 },
+  // right side (10)
+  { top: 5, left: 91 }, { top: 15, left: 94 }, { top: 25, left: 92 },
+  { top: 35, left: 93 }, { top: 45, left: 91 }, { top: 55, left: 94 },
+  { top: 65, left: 92 }, { top: 75, left: 93 }, { top: 85, left: 91 }, { top: 95, left: 94 },
 ];
 
 const FloatingIcons = () => {
@@ -24,11 +30,11 @@ const FloatingIcons = () => {
     return POSITIONS.map((pos, i) => ({
       id: i,
       Icon: ALL_ICONS[i % ALL_ICONS.length],
-      top: pos.top + Math.random() * 4 - 2,
+      top: pos.top + Math.random() * 3 - 1.5,
       left: pos.left + Math.random() * 3 - 1.5,
-      size: 32 + Math.random() * 20,
+      size: 30 + Math.random() * 18,
       rotation: Math.random() * 30 - 15,
-      opacity: 0.08 + Math.random() * 0.07,
+      opacity: 0.08 + Math.random() * 0.06,
     }));
   }, []);
 
