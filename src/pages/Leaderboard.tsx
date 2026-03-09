@@ -24,9 +24,9 @@ const MOCK_USERS = [
 ];
 
 const RankBadge = ({ rank }: { rank: number }) => {
-  if (rank === 1) return <div className="w-10 h-10 flex items-center justify-center bg-amber-500/10 border border-amber-500/30"><Trophy className="w-5 h-5 text-amber-500" /></div>;
-  if (rank === 2) return <div className="w-10 h-10 flex items-center justify-center bg-zinc-400/10 border border-zinc-400/30"><Medal className="w-5 h-5 text-zinc-400" /></div>;
-  if (rank === 3) return <div className="w-10 h-10 flex items-center justify-center bg-amber-700/10 border border-amber-700/30"><Medal className="w-5 h-5 text-amber-700" /></div>;
+  if (rank === 1) return <div className="w-10 h-10 flex items-center justify-center border border-amber-500/30 bg-amber-500/10"><Trophy className="w-5 h-5 text-amber-500" /></div>;
+  if (rank === 2) return <div className="w-10 h-10 flex items-center justify-center border border-zinc-400/30 bg-zinc-400/10"><Medal className="w-5 h-5 text-zinc-400" /></div>;
+  if (rank === 3) return <div className="w-10 h-10 flex items-center justify-center border border-amber-700/30 bg-amber-700/10"><Medal className="w-5 h-5 text-amber-700" /></div>;
   return <div className="w-10 h-10 flex items-center justify-center border border-border font-mono text-[14px] font-bold text-muted-foreground">{rank}</div>;
 };
 
@@ -50,8 +50,9 @@ const Leaderboard = () => {
     <PageLayout>
       <Navbar />
 
+      {/* Header */}
       <section className="pt-28 sm:pt-36 pb-8 sm:pb-12">
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
           <p className="text-[11px] text-muted-foreground uppercase tracking-[0.3em] font-mono mb-4">
             {t("leaderboard.label")}
           </p>
@@ -68,9 +69,9 @@ const Leaderboard = () => {
 
       {/* Badge Tiers Legend */}
       <ScrollReveal>
-        <section className="py-8">
+        <section className="py-12 sm:py-16">
           <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
-            <p className="text-[11px] text-muted-foreground uppercase tracking-[0.3em] font-mono mb-4">
+            <p className="text-[13px] font-mono text-muted-foreground mb-4 uppercase tracking-widest">
               {t("badge.title")}
             </p>
             <div className="grid grid-cols-5 gap-px bg-border border border-border">
@@ -88,11 +89,13 @@ const Leaderboard = () => {
         </section>
       </ScrollReveal>
 
+      <SectionDivider />
+
       {/* Top 3 podium */}
       <ScrollReveal>
-        <section className="py-16">
+        <section className="py-12 sm:py-16">
           <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
-            <div className="grid grid-cols-3 gap-px bg-border mb-12">
+            <div className="grid grid-cols-3 gap-px bg-border border border-border">
               {[1, 0, 2].map((order, i) => {
                 const u = MOCK_USERS[order];
                 const heights = ["h-32", "h-40", "h-24"];
@@ -119,15 +122,17 @@ const Leaderboard = () => {
         </section>
       </ScrollReveal>
 
+      <SectionDivider />
+
       {/* Filters */}
-      <div className="border-t border-b border-border">
-        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-1">
+      <div className="border-b border-border">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0 flex items-center justify-between">
+          <div className="flex items-center">
             {FILTERS.map(f => (
               <button
                 key={f.key}
                 onClick={() => setTimeFilter(f.key)}
-                className={`px-4 py-2 text-[13px] font-medium transition-colors ${
+                className={`px-4 py-3 text-[13px] font-medium transition-colors ${
                   timeFilter === f.key
                     ? "bg-foreground text-background"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -144,13 +149,15 @@ const Leaderboard = () => {
         </div>
       </div>
 
+      <SectionDivider />
+
       {/* Full Rankings */}
       <ScrollReveal>
-        <section className="py-2">
+        <section className="py-0">
           <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
-            <div className="divide-y divide-border border-b border-border">
-              {MOCK_USERS.map((user) => (
-                <div key={user.rank} className="flex items-center gap-4 sm:gap-6 py-4 sm:py-5 px-2 hover:bg-accent/30 transition-colors cursor-pointer group">
+            {MOCK_USERS.map((user) => (
+              <div key={user.rank}>
+                <div className="flex items-center gap-4 sm:gap-6 py-5 px-2 hover:bg-accent/30 transition-colors cursor-pointer group bg-background">
                   <RankBadge rank={user.rank} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
@@ -163,9 +170,9 @@ const Leaderboard = () => {
                     </div>
                   </div>
                   <div className="hidden sm:flex items-center gap-1 flex-wrap justify-end max-w-[200px]">
-                    {user.tracks.map(t => (
-                      <span key={t} className="text-[10px] font-mono px-2 py-0.5 border border-border text-muted-foreground">
-                        {t}
+                    {user.tracks.map(track => (
+                      <span key={track} className="text-[10px] font-mono px-2 py-0.5 border border-border text-muted-foreground">
+                        {track}
                       </span>
                     ))}
                   </div>
@@ -174,13 +181,13 @@ const Leaderboard = () => {
                     <p className="text-[11px] text-muted-foreground font-mono">{user.challenges} {t("leaderboard.challenges")}</p>
                   </div>
                 </div>
-              ))}
-            </div>
+                <SectionDivider />
+              </div>
+            ))}
           </div>
         </section>
       </ScrollReveal>
 
-      <SectionDivider />
       <Footer />
     </PageLayout>
   );

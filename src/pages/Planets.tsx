@@ -28,7 +28,7 @@ const Planets = () => {
       <Navbar />
 
       <section className="pt-28 sm:pt-36 pb-8 sm:pb-12">
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
           <div className="flex items-center gap-6">
             <div className="flex-1">
               <p className="text-[11px] text-muted-foreground uppercase tracking-[0.3em] font-mono mb-4">
@@ -42,7 +42,7 @@ const Planets = () => {
               </p>
             </div>
             <OrbitsBackground
-              className="w-40 h-40 sm:w-52 sm:h-52 shrink-0 hidden sm:block"
+              className="w-56 h-56 sm:w-72 sm:h-72 shrink-0 hidden sm:block"
               count={5}
               color="#6b7280"
               speed={0.5}
@@ -67,7 +67,7 @@ const Planets = () => {
                     <planet.icon className={`w-7 h-7 ${planet.color}`} strokeWidth={1.5} />
                   </div>
 
-                  <h3 className="text-xl font-bold text-foreground mb-2">
+                  <h3 className={`text-xl font-bold mb-2 ${planet.color}`}>
                     {planet.name}
                   </h3>
 
@@ -87,7 +87,7 @@ const Planets = () => {
                     </div>
                   </div>
 
-                  <span className="inline-flex items-center gap-2 text-[13px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  <span className={`inline-flex items-center gap-2 text-[13px] font-medium ${planet.color} transition-colors`}>
                     {t("planets.explore")} <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
                   </span>
                 </Link>

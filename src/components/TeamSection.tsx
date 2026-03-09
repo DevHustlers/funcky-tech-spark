@@ -16,7 +16,7 @@ const TeamSection = () => {
   return (
     <section>
       <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-border border-t border-border">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-border">
           <div className="bg-background p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
             <ScrollReveal>
               <p className="text-[13px] font-medium text-muted-foreground mb-3 uppercase tracking-widest">{t("team.label")}</p>
@@ -42,9 +42,10 @@ const TeamSection = () => {
           <div className="grid grid-rows-[1fr_1fr] gap-px bg-border">
             <ScrollReveal delay={100}>
               <div className="group p-6 sm:p-8 bg-background hover:bg-accent/30 transition-colors duration-300 h-full flex flex-col justify-center">
-                <div className="w-11 h-11 rounded-full overflow-hidden mb-4">
+                <div className="w-16 h-16 rounded-full overflow-hidden">
                   <img src={team[0].image} alt={team[0].name} className="w-full h-full object-cover" />
                 </div>
+                <div className="w-1/2 h-px bg-border my-4" />
                 <h3 className="font-semibold text-foreground text-[15px]">{team[0].name}</h3>
                 <p className="text-[12px] text-muted-foreground mb-2 font-medium">{team[0].role}</p>
                 <p className="text-[13px] text-muted-foreground leading-relaxed">{team[0].bio}</p>
@@ -54,9 +55,10 @@ const TeamSection = () => {
               {team.slice(1).map((member, i) => (
                 <ScrollReveal key={i} delay={200 + i * 100}>
                   <div className="group p-5 sm:p-6 bg-background hover:bg-accent/30 transition-colors duration-300 h-full flex flex-col justify-center">
-                    <div className="w-11 h-11 rounded-full overflow-hidden mb-4">
+                    <div className="w-16 h-16 rounded-full overflow-hidden">
                       <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
                     </div>
+                    <div className="w-1/2 h-px bg-border my-4" />
                     <h3 className="font-semibold text-foreground text-[15px]">{member.name}</h3>
                     <p className="text-[12px] text-muted-foreground mb-2 font-medium">{member.role}</p>
                     <p className="text-[13px] text-muted-foreground leading-relaxed hidden sm:block">{member.bio}</p>
