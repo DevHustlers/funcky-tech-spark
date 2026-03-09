@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import type { IconType } from "react-icons";
 import {
   SiReact, SiRust, SiGo, SiRuby, SiCplusplus,
-  SiC, SiCsharp, SiPython, SiTypescript, SiJavascript,
-  SiGnubash, SiJava, SiZig,
+  SiC, SiSharp, SiPython, SiTypescript, SiJavascript,
+  SiGnubash, SiZig,
 } from "react-icons/si";
 import { TbBrackets, TbCode } from "react-icons/tb";
 
