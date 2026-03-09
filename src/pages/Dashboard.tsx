@@ -100,6 +100,18 @@ const statusBadge = (status: string) => {
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  
+  // Badges management state
+  const [badges, setBadges] = useState(() =>
+    BADGE_TIERS.map(b => ({
+      ...b,
+      iconName: b.id === "spark" ? "Sparkles" : b.id === "igniter" ? "Flame" : b.id === "voyager" ? "Rocket" : b.id === "titan" ? "Gem" : "Crown",
+    }))
+  );
+  const [editingBadgeId, setEditingBadgeId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editMinPoints, setEditMinPoints] = useState(0);
+  const [showIconPicker, setShowIconPicker] = useState<string | null>(null);
 
   return (
     <PageLayout>
