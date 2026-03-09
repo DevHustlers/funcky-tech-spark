@@ -35,12 +35,12 @@ const UPCOMING_EVENTS = [
 ];
 
 const NEWS_FEED = [
-  { id: 1, text: "Frontend Mastery Showdown is LIVE now!", time: "Just now", icon: Play, color: "text-live" },
-  { id: 2, text: "Sarah Chen earned the Titan badge 🏆", time: "5m ago", icon: Trophy, color: "text-upcoming" },
-  { id: 3, text: "New challenge: Build a Real-Time Chat UI", time: "1h ago", icon: Flame, color: "text-destructive" },
-  { id: 4, text: "Ahmed Hassan reached 11,000 points", time: "2h ago", icon: Zap, color: "text-feed" },
-  { id: 5, text: "Frontend Hackathon registrations open", time: "3h ago", icon: Calendar, color: "text-upcoming" },
-  { id: 6, text: "Leaderboard updated — new #1 this week", time: "4h ago", icon: Star, color: "text-feed" },
+  { id: 1, text: "Frontend Mastery Showdown is LIVE now!", time: "Just now", icon: Play, hoverColor: "hsl(var(--live))" },
+  { id: 2, text: "Sarah Chen earned the Titan badge 🏆", time: "5m ago", icon: Trophy, hoverColor: "hsl(var(--upcoming))" },
+  { id: 3, text: "New challenge: Build a Real-Time Chat UI", time: "1h ago", icon: Flame, hoverColor: "hsl(var(--destructive))" },
+  { id: 4, text: "Ahmed Hassan reached 11,000 points", time: "2h ago", icon: Zap, hoverColor: "hsl(var(--feed))" },
+  { id: 5, text: "Frontend Hackathon registrations open", time: "3h ago", icon: Calendar, hoverColor: "hsl(var(--upcoming))" },
+  { id: 6, text: "Leaderboard updated — new #1 this week", time: "4h ago", icon: Star, hoverColor: "hsl(var(--feed))" },
 ];
 
 const useCountdown = (targetDate: Date) => {
