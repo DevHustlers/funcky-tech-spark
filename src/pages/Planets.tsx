@@ -1,0 +1,92 @@
+import { ArrowRight, Code, Server, BarChart3, Brain, Shield, Smartphone, Cpu, Palette, Wifi } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import PageLayout from "@/components/PageLayout";
+import SectionDivider from "@/components/SectionDivider";
+import ScrollReveal from "@/components/ScrollReveal";
+
+const PLANETS = [
+  { name: "Frontend", icon: Code, members: 342, challenges: 28, color: "text-blue-500", borderColor: "border-blue-500/20", description: "Master the art of building beautiful, responsive user interfaces with modern frameworks and tools." },
+  { name: "Backend", icon: Server, members: 278, challenges: 24, color: "text-green-500", borderColor: "border-green-500/20", description: "Build robust server-side systems, APIs, and microservices that power modern applications." },
+  { name: "Data Science", icon: BarChart3, members: 195, challenges: 18, color: "text-purple-500", borderColor: "border-purple-500/20", description: "Extract insights from data through statistical analysis, visualization, and predictive modeling." },
+  { name: "AI / ML", icon: Brain, members: 231, challenges: 22, color: "text-pink-500", borderColor: "border-pink-500/20", description: "Explore machine learning, deep learning, and artificial intelligence applications." },
+  { name: "Cybersecurity", icon: Shield, members: 167, challenges: 20, color: "text-red-500", borderColor: "border-red-500/20", description: "Defend systems, discover vulnerabilities, and master the art of ethical hacking." },
+  { name: "Mobile Dev", icon: Smartphone, members: 204, challenges: 16, color: "text-cyan-500", borderColor: "border-cyan-500/20", description: "Create native and cross-platform mobile applications for iOS and Android." },
+  { name: "Operating Systems", icon: Cpu, members: 89, challenges: 12, color: "text-orange-500", borderColor: "border-orange-500/20", description: "Dive deep into system programming, kernel development, and OS architecture." },
+  { name: "UI/UX", icon: Palette, members: 256, challenges: 14, color: "text-violet-500", borderColor: "border-violet-500/20", description: "Design intuitive interfaces and user experiences that delight and engage." },
+  { name: "Network", icon: Wifi, members: 112, challenges: 15, color: "text-teal-500", borderColor: "border-teal-500/20", description: "Master networking protocols, infrastructure, and distributed systems." },
+];
+
+const Planets = () => {
+  return (
+    <PageLayout>
+      <Navbar />
+
+      <section className="pt-28 sm:pt-36 pb-16">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
+          <p className="text-[11px] text-muted-foreground uppercase tracking-[0.3em] font-mono mb-4">
+            explore
+          </p>
+          <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight mb-4">
+            Planets
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-lg">
+            Each track is a planet in the DevHustlers universe. Choose your orbit and start your journey.
+          </p>
+        </div>
+      </section>
+
+      <SectionDivider />
+
+      <ScrollReveal>
+        <section className="py-12">
+          <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border border border-border">
+              {PLANETS.map((planet) => (
+                <div
+                  key={planet.name}
+                  className="bg-background p-8 hover:bg-accent/30 transition-all cursor-pointer group relative"
+                >
+                  {/* Planet icon */}
+                  <div className={`w-14 h-14 flex items-center justify-center border ${planet.borderColor} mb-6`}>
+                    <planet.icon className={`w-7 h-7 ${planet.color}`} strokeWidth={1.5} />
+                  </div>
+
+                  <h3 className="text-xl font-bold text-foreground mb-2">
+                    {planet.name}
+                  </h3>
+
+                  <p className="text-muted-foreground text-[14px] leading-relaxed mb-6">
+                    {planet.description}
+                  </p>
+
+                  {/* Stats */}
+                  <div className="flex items-center gap-6 mb-6">
+                    <div>
+                      <p className="font-mono font-bold text-foreground text-[18px]">{planet.members}</p>
+                      <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-wider">members</p>
+                    </div>
+                    <div className="w-px h-8 bg-border" />
+                    <div>
+                      <p className="font-mono font-bold text-foreground text-[18px]">{planet.challenges}</p>
+                      <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-wider">challenges</p>
+                    </div>
+                  </div>
+
+                  <button className="inline-flex items-center gap-2 text-[13px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                    Explore Planet <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </ScrollReveal>
+
+      <SectionDivider />
+      <Footer />
+    </PageLayout>
+  );
+};
+
+export default Planets;
