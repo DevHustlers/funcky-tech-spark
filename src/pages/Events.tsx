@@ -65,8 +65,8 @@ const Events = () => {
       <SectionDivider />
 
       <section>
-        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
-          <h2 className="text-[13px] font-medium text-muted-foreground mb-0 uppercase tracking-widest py-4 px-1 sm:px-2 lg:px-6">{t("events.past")}</h2>
+          <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
+          <h2 className="text-[13px] font-medium text-muted-foreground mb-0 uppercase tracking-widest py-4">{t("events.past")}</h2>
           <div className="border border-border bg-border">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-px opacity-60">
               {past.map((event, i) => (

@@ -144,7 +144,7 @@ const CompetitionCard = ({ comp }: { comp: typeof LIVE_COMPETITIONS[0] }) => {
 const LiveSection = () => {
   return (
     <section className="py-16 sm:py-24">
-      <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
+      <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
         {/* Section header */}
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 border border-emerald-500/30 bg-emerald-500/10 text-[12px] font-mono text-emerald-500 uppercase tracking-widest mb-4">
