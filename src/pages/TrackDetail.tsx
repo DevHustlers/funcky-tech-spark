@@ -1,5 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { ArrowLeft, Users, Target, Trophy, BookOpen, Code, Server, BarChart3, Brain, Shield, Smartphone, Cpu, Palette, Wifi } from "lucide-react";
+import { ArrowLeft, ArrowRight, Users, Target, Trophy, BookOpen, Code, Server, BarChart3, Brain, Shield, Smartphone, Cpu, Palette, Wifi } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageLayout from "@/components/PageLayout";
