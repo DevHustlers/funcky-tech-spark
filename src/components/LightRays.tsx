@@ -176,7 +176,7 @@ const LightRays = ({
       const val = getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim();
       if (val) return hslVarToHex(val);
     } catch { /* fallback */ }
-    return resolvedTheme === 'dark' ? '#f0f3f5' : '#6b7d94';
+    return resolvedTheme === 'dark' ? '#ffffff' : '#8899aa';
   }, [resolvedTheme]);
 
   useEffect(() => {
