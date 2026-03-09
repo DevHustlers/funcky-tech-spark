@@ -42,6 +42,7 @@ const AVAILABLE_ICONS = [
 const SIDEBAR_ITEMS = [
   { label: "Overview", icon: BarChart3, id: "overview" },
   { label: "Users", icon: Users, id: "users" },
+  { label: "Tracks", icon: Globe, id: "tracks" },
   { label: "Challenges", icon: Trophy, id: "challenges" },
   { label: "Competitions", icon: Play, id: "competitions" },
   { label: "Events", icon: Calendar, id: "events" },
