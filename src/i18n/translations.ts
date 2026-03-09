@@ -285,7 +285,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.contact": "تواصل معنا",
     "nav.join": "انضم الآن",
     "nav.challenges": "التحديات",
-    "nav.planets": "الكواكب",
+    "nav.planets": "المسارات",
     "nav.leaderboard": "المتصدرين",
 
     // Hero
