@@ -7,14 +7,15 @@ import {
 } from "react-icons/si";
 import { TbBrackets, TbCode } from "react-icons/tb";
 import {
-  GiPlanetCore, GiPlanetConquest, GiSaturn, GiMoonOrbit,
-  GiEarthAfricaEurope, GiEarthAmerica, GiJupiter, GiRingedPlanet,
+  GiPlanetCore, GiPlanetConquest, GiMoonOrbit,
+  GiEarthAfricaEurope, GiEarthAmerica, GiRingedPlanet,
 } from "react-icons/gi";
+import { FaGlobeAmericas, FaGlobeEurope } from "react-icons/fa";
 
 const ALL_ICONS: IconType[] = [
-  SiReact, GiPlanetCore, SiRust, GiSaturn, SiGo, GiMoonOrbit,
+  SiReact, GiPlanetCore, SiRust, GiRingedPlanet, SiGo, GiMoonOrbit,
   SiRuby, GiEarthAfricaEurope, SiCplusplus, GiPlanetConquest,
-  SiC, GiEarthAmerica, SiSharp, GiJupiter, SiPython, GiRingedPlanet,
+  SiC, GiEarthAmerica, SiSharp, FaGlobeAmericas, SiPython, FaGlobeEurope,
   SiTypescript, SiJavascript, SiGnubash, SiZig, TbBrackets, TbCode,
 ];
 
