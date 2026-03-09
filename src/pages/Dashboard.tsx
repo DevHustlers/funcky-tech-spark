@@ -1831,7 +1831,7 @@ const Dashboard = () => {
                               <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {event.registered}/{event.capacity}</span>
                             )}
                             {event.link && (
-                              <span className="flex items-center gap-1"><Link className="w-3 h-3" /> Link</span>
+                              <span className="flex items-center gap-1"><LinkIcon className="w-3 h-3" /> Link</span>
                             )}
                           </div>
                         </div>
