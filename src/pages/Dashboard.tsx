@@ -96,6 +96,14 @@ interface UserData {
   bio: string;
 }
 
+interface TrackData {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  iconName: string;
+}
+
 interface EventData {
   id: string;
   title: string;
