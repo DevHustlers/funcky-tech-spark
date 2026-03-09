@@ -1356,10 +1356,10 @@ const Dashboard = () => {
   };
 
   return (
-    <PageLayout>
-      <div className="min-h-screen flex">
+    <PageTransition>
+      <div className="min-h-screen bg-background flex">
         {/* Sidebar */}
-        <aside className="w-56 shrink-0 border-r border-border bg-background fixed top-0 left-0 bottom-0 z-40 flex flex-col">
+        <aside className="w-56 shrink-0 border-r border-sidebar-border bg-sidebar fixed top-0 left-0 bottom-0 z-40 flex flex-col">
           <div className="h-14 border-b border-border flex items-center px-5">
             <Logo />
           </div>
