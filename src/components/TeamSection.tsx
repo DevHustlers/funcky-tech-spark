@@ -1,10 +1,13 @@
 import ScrollReveal from "@/components/ScrollReveal";
 import { useLanguage } from "@/i18n/LanguageContext";
+import hamsaImg from "@/assets/team-hamsa.png";
+import alaaImg from "@/assets/team-alaa.png";
+import omarImg from "@/assets/team-omar.webp";
 
 const team = [
-  { name: "Hamsa", role: "Founder & CEO", bio: "Software Engineer. Visionary builder leading DevHustlers from idea to impact." },
-  { name: "Alaa Elsamouly", role: "Co-Founder", bio: "Software Engineer. Architecting the platform and driving technical excellence." },
-  { name: "Omar", role: "CTO", bio: "Engineering leader. Shaping the infrastructure and scaling the community's backbone." },
+  { name: "Hamsa Mansour", role: "Founder & CEO", bio: "Software Engineer. Visionary builder leading DevHustlers from idea to impact.", image: hamsaImg },
+  { name: "Alaa El-Samouly", role: "Co-Founder", bio: "Software Engineer. Architecting the platform and driving technical excellence.", image: alaaImg },
+  { name: "Omar", role: "CTO", bio: "Engineering leader. Shaping the infrastructure and scaling the community's backbone.", image: omarImg },
 ];
 
 const TeamSection = () => {
@@ -39,8 +42,8 @@ const TeamSection = () => {
           <div className="grid grid-rows-[1fr_1fr] gap-px bg-border">
             <ScrollReveal delay={100}>
               <div className="group p-6 sm:p-8 bg-background hover:bg-accent/30 transition-colors duration-300 h-full flex flex-col justify-center">
-                <div className="w-11 h-11 bg-accent flex items-center justify-center mb-4 group-hover:bg-foreground transition-colors duration-300">
-                  <span className="text-sm font-bold text-muted-foreground group-hover:text-background transition-colors">H</span>
+                <div className="w-11 h-11 rounded-full overflow-hidden mb-4">
+                  <img src={team[0].image} alt={team[0].name} className="w-full h-full object-cover" />
                 </div>
                 <h3 className="font-semibold text-foreground text-[15px]">{team[0].name}</h3>
                 <p className="text-[12px] text-muted-foreground mb-2 font-medium">{team[0].role}</p>
@@ -51,8 +54,8 @@ const TeamSection = () => {
               {team.slice(1).map((member, i) => (
                 <ScrollReveal key={i} delay={200 + i * 100}>
                   <div className="group p-5 sm:p-6 bg-background hover:bg-accent/30 transition-colors duration-300 h-full flex flex-col justify-center">
-                    <div className="w-11 h-11 bg-accent flex items-center justify-center mb-4 group-hover:bg-foreground transition-colors duration-300">
-                      <span className="text-sm font-bold text-muted-foreground group-hover:text-background transition-colors">{member.name.split(" ").map((n) => n[0]).join("")}</span>
+                    <div className="w-11 h-11 rounded-full overflow-hidden mb-4">
+                      <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
                     </div>
                     <h3 className="font-semibold text-foreground text-[15px]">{member.name}</h3>
                     <p className="text-[12px] text-muted-foreground mb-2 font-medium">{member.role}</p>
