@@ -14,10 +14,10 @@ import {
 } from "@icons-pack/react-simple-icons";
 
 const COMMUNITIES = [
-  { name: "WhatsApp", icon: SiWhatsapp, href: "#", members: "1.2K", color: "hover:text-[#25D366]", bg: "hover:bg-[#25D366]/10 hover:border-[#25D366]/30" },
-  { name: "Discord", icon: SiDiscord, href: "#", members: "2.4K", color: "hover:text-[#5865F2]", bg: "hover:bg-[#5865F2]/10 hover:border-[#5865F2]/30" },
-  { name: "X (Twitter)", icon: SiX, href: "#", members: "3.1K", color: "hover:text-foreground", bg: "hover:bg-foreground/5 hover:border-foreground/20" },
-  { name: "Facebook", icon: SiFacebook, href: "#", members: "1.8K", color: "hover:text-[#1877F2]", bg: "hover:bg-[#1877F2]/10 hover:border-[#1877F2]/30" },
+  { name: "WhatsApp", icon: SiWhatsapp, href: "#", members: "1.2K", color: "#25D366" },
+  { name: "Discord", icon: SiDiscord, href: "#", members: "2.4K", color: "#5865F2" },
+  { name: "X (Twitter)", icon: SiX, href: "#", members: "3.1K", color: "hsl(var(--foreground))" },
+  { name: "Facebook", icon: SiFacebook, href: "#", members: "1.8K", color: "#1877F2" },
 ];
 
 const About = () => {
@@ -49,7 +49,7 @@ const About = () => {
 
       {/* Stats */}
       <section>
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-border border border-border">
             {[
               { value: t("about.stat.1.value"), label: t("about.stat.1.label") },
@@ -69,10 +69,19 @@ const About = () => {
 
       <SectionDivider />
 
+      {/* Team */}
+      <ScrollReveal>
+        <section className="py-16 sm:py-24">
+          <TeamSection />
+        </section>
+      </ScrollReveal>
+
+      <SectionDivider />
+
       {/* Communities */}
       <ScrollReveal>
         <section className="py-16 sm:py-24">
-          <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
+          <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
             <div className="max-w-2xl mb-10">
               <p className="text-[13px] font-mono text-muted-foreground mb-4 uppercase tracking-widest">Our Communities</p>
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight tracking-tight mb-3">
@@ -91,15 +100,18 @@ const About = () => {
                     href={community.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`group flex flex-col items-center gap-4 p-8 bg-background text-center border border-transparent transition-all duration-300 ${community.bg}`}
+                    className="group flex flex-col items-center gap-4 p-8 bg-background text-center transition-all duration-300 hover:bg-accent/30"
                   >
                     <community.icon
                       size={36}
-                      className={`text-muted-foreground/50 transition-colors duration-300 ${community.color}`}
+                      className="text-muted-foreground/50 transition-colors duration-300"
+                      style={{ color: community.color }}
                     />
                     <div>
                       <p className="text-[15px] font-bold text-foreground mb-0.5">{community.name}</p>
-                      <p className="text-[12px] font-mono text-muted-foreground">{community.members} members</p>
+                      <p className="text-[12px] font-mono transition-colors duration-300" style={{ color: community.color }}>
+                        {community.members} members
+                      </p>
                     </div>
                     <span className="inline-flex items-center gap-1.5 text-[12px] font-mono text-muted-foreground group-hover:text-foreground transition-colors">
                       Join <ArrowRight className="w-3 h-3 rtl:rotate-180" />
@@ -112,8 +124,6 @@ const About = () => {
         </section>
       </ScrollReveal>
 
-      <SectionDivider />
-      <TeamSection />
       <SectionDivider />
       <Footer />
     </PageLayout>
