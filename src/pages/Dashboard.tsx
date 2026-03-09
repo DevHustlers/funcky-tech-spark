@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Users, Trophy, Zap, Calendar, Settings, BarChart3,
   Plus, Search, MoreHorizontal, ArrowRight, Clock,
@@ -9,11 +10,12 @@ import {
   Anchor, Lightbulb, Bolt, Medal, BadgeCheck, X, Check,
   Play, StopCircle, Timer, CirclePlus, GripVertical,
   Circle, ArrowLeft, Copy, ChevronDown, ChevronUp, Mail,
-  MapPin, Link, UserPlus, UserMinus
+  MapPin, Link as LinkIcon, UserPlus, UserMinus
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
-import PageLayout from "@/components/PageLayout";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import PageTransition from "@/components/PageTransition";
 import { BADGE_TIERS, type BadgeTier } from "@/components/HonorBadge";
 
 const AVAILABLE_ICONS = [
@@ -1354,11 +1356,11 @@ const Dashboard = () => {
   };
 
   return (
-    <PageLayout>
-      <div className="min-h-screen flex">
+    <PageTransition>
+      <div className="min-h-screen bg-background flex">
         {/* Sidebar */}
-        <aside className="w-56 shrink-0 border-r border-border bg-background fixed top-0 left-0 bottom-0 z-40 flex flex-col">
-          <div className="h-14 border-b border-border flex items-center px-5">
+        <aside className="w-56 shrink-0 border-r border-sidebar-border bg-sidebar fixed top-0 left-0 bottom-0 z-40 flex flex-col">
+          <div className="h-14 border-b border-sidebar-border flex items-center px-5">
             <Logo />
           </div>
           <nav className="flex-1 py-4 px-3 space-y-0.5">
@@ -1368,8 +1370,8 @@ const Dashboard = () => {
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium transition-colors ${
                   activeTab === item.id
-                    ? "bg-accent text-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/50"
                 }`}
               >
                 <item.icon className="w-4 h-4" />
@@ -1377,14 +1379,22 @@ const Dashboard = () => {
               </button>
             ))}
           </nav>
-          <div className="p-4 border-t border-border">
+          <div className="border-t border-sidebar-border">
+            <Link
+              to="/"
+              className="flex items-center gap-2 px-5 py-3 text-[12px] font-mono text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors uppercase tracking-widest"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to site
+            </Link>
+          </div>
+          <div className="p-4 border-t border-sidebar-border">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-accent border border-border flex items-center justify-center text-[11px] font-bold font-mono text-foreground">
+              <div className="w-8 h-8 bg-sidebar-accent border border-sidebar-border flex items-center justify-center text-[11px] font-bold font-mono text-sidebar-accent-foreground">
                 AD
               </div>
               <div>
-                <p className="text-[13px] font-medium text-foreground">Admin</p>
-                <p className="text-[11px] text-muted-foreground font-mono">admin@dvh.dev</p>
+                <p className="text-[13px] font-medium text-sidebar-accent-foreground">Admin</p>
+                <p className="text-[11px] text-sidebar-foreground font-mono">admin@dvh.dev</p>
               </div>
             </div>
           </div>
@@ -1403,9 +1413,10 @@ const Dashboard = () => {
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   placeholder="Search..."
-                  className="h-9 pl-9 pr-4 w-56 bg-accent/50 border border-border text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="h-9 pl-9 pr-4 w-56 bg-accent/50 border border-border text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring font-mono"
                 />
               </div>
+              <LanguageSwitcher />
               <ThemeToggle />
             </div>
           </div>
@@ -1829,7 +1840,7 @@ const Dashboard = () => {
                               <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {event.registered}/{event.capacity}</span>
                             )}
                             {event.link && (
-                              <span className="flex items-center gap-1"><Link className="w-3 h-3" /> Link</span>
+                              <span className="flex items-center gap-1"><LinkIcon className="w-3 h-3" /> Link</span>
                             )}
                           </div>
                         </div>
@@ -2140,7 +2151,7 @@ const Dashboard = () => {
           </div>
         </main>
       </div>
-    </PageLayout>
+    </PageTransition>
   );
 };
 
