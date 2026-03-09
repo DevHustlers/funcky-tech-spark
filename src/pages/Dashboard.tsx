@@ -8,7 +8,8 @@ import {
   Swords, CircleDot, Diamond, Hexagon, Pentagon, Compass,
   Anchor, Lightbulb, Bolt, Medal, BadgeCheck, X, Check,
   Play, StopCircle, Timer, CirclePlus, GripVertical,
-  Circle, ArrowLeft, Copy, ChevronDown, ChevronUp
+  Circle, ArrowLeft, Copy, ChevronDown, ChevronUp, Mail,
+  MapPin, Link, UserPlus, UserMinus
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -83,6 +84,46 @@ interface ChallengeData {
   requirements: string;
 }
 
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  joined: string;
+  points: number;
+  status: "active" | "inactive" | "banned";
+  role: "member" | "moderator" | "admin";
+  bio: string;
+}
+
+interface EventData {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  type: "hackathon" | "workshop" | "competition" | "meetup" | "webinar" | "system";
+  status: "draft" | "upcoming" | "live" | "ended" | "scheduled";
+  capacity: number;
+  registered: number;
+  link: string;
+}
+
+interface PointRule {
+  id: string;
+  action: string;
+  points: number;
+  active: boolean;
+}
+
+interface PointAward {
+  id: string;
+  user: string;
+  action: string;
+  points: string;
+  time: string;
+}
+
 // ─── Mock Data ───
 const MOCK_COMPETITIONS: CompetitionData[] = [
   {
@@ -133,8 +174,48 @@ const MOCK_CHALLENGES: ChallengeData[] = [
   { id: "ch-5", title: "Predictive Analytics Dashboard", description: "Build a dashboard with interactive charts and predictive models.", track: "Data Science", difficulty: "Medium", status: "upcoming", participants: 0, points: 600, duration: "7 days", requirements: "Use at least 2 chart types. Include a simple prediction model." },
 ];
 
+const MOCK_USERS: UserData[] = [
+  { id: "u-1", name: "Sarah Chen", email: "sarah@example.com", joined: "2h ago", points: 12450, status: "active", role: "admin", bio: "Full-stack developer passionate about React and TypeScript." },
+  { id: "u-2", name: "Ahmed Hassan", email: "ahmed@example.com", joined: "5h ago", points: 11200, status: "active", role: "moderator", bio: "Backend engineer specializing in Node.js and Python." },
+  { id: "u-3", name: "Maria Rodriguez", email: "maria@example.com", joined: "1d ago", points: 10800, status: "active", role: "member", bio: "UI/UX designer turned frontend developer." },
+  { id: "u-4", name: "James Park", email: "james@example.com", joined: "2d ago", points: 9650, status: "inactive", role: "member", bio: "Data scientist exploring ML and AI." },
+  { id: "u-5", name: "Fatima Al-Sayed", email: "fatima@example.com", joined: "3d ago", points: 8900, status: "active", role: "member", bio: "Cybersecurity enthusiast and CTF player." },
+];
+
+const MOCK_EVENTS: EventData[] = [
+  { id: "ev-1", title: "Frontend Hackathon", description: "Build innovative frontend projects in 48 hours.", date: "Mar 15, 2026", time: "10:00 AM", location: "Online — Discord", type: "hackathon", status: "upcoming", capacity: 200, registered: 142, link: "https://discord.gg/hackathon" },
+  { id: "ev-2", title: "AI Workshop", description: "Hands-on workshop on building AI-powered applications.", date: "Mar 22, 2026", time: "2:00 PM", location: "Online — Zoom", type: "workshop", status: "upcoming", capacity: 100, registered: 67, link: "" },
+  { id: "ev-3", title: "Monthly Challenge Reset", description: "New challenges released for the month.", date: "Apr 1, 2026", time: "12:00 AM", location: "Platform", type: "system", status: "scheduled", capacity: 0, registered: 0, link: "" },
+  { id: "ev-4", title: "Cybersecurity CTF", description: "Capture the flag competition for all skill levels.", date: "Apr 10, 2026", time: "6:00 PM", location: "Online — Platform", type: "competition", status: "draft", capacity: 150, registered: 0, link: "" },
+  { id: "ev-5", title: "Community Meetup", description: "Monthly community gathering to share projects and network.", date: "Apr 15, 2026", time: "7:00 PM", location: "Online — Google Meet", type: "meetup", status: "draft", capacity: 50, registered: 0, link: "" },
+];
+
+const MOCK_POINT_RULES: PointRule[] = [
+  { id: "pr-1", action: "Complete a challenge", points: 500, active: true },
+  { id: "pr-2", action: "Daily login", points: 10, active: true },
+  { id: "pr-3", action: "Login streak (7d)", points: 50, active: true },
+  { id: "pr-4", action: "Follow Discord", points: 50, active: true },
+  { id: "pr-5", action: "Follow Twitter/X", points: 50, active: true },
+  { id: "pr-6", action: "Follow LinkedIn", points: 30, active: false },
+  { id: "pr-7", action: "Follow GitHub", points: 40, active: true },
+  { id: "pr-8", action: "Follow Telegram", points: 30, active: true },
+  { id: "pr-9", action: "Follow WhatsApp", points: 20, active: false },
+  { id: "pr-10", action: "Refer a friend", points: 200, active: true },
+];
+
+const MOCK_POINT_LOG: PointAward[] = [
+  { id: "pl-1", user: "Sarah Chen", action: "Completed challenge", points: "+500", time: "10m ago" },
+  { id: "pl-2", user: "Ahmed Hassan", action: "Followed Discord", points: "+50", time: "25m ago" },
+  { id: "pl-3", user: "Maria Rodriguez", action: "Daily login streak (12d)", points: "+120", time: "1h ago" },
+  { id: "pl-4", user: "James Park", action: "Referral bonus", points: "+200", time: "2h ago" },
+  { id: "pl-5", user: "Fatima Al-Sayed", action: "Manual award (Admin)", points: "+300", time: "3h ago" },
+];
+
 const TRACK_OPTIONS = ["Frontend", "Backend", "AI / ML", "Cybersecurity", "Data Science", "DevOps", "Mobile", "Full Stack"];
 const DIFFICULTY_OPTIONS: ChallengeData["difficulty"][] = ["Easy", "Medium", "Hard", "Expert"];
+const EVENT_TYPE_OPTIONS: EventData["type"][] = ["hackathon", "workshop", "competition", "meetup", "webinar", "system"];
+const USER_STATUS_OPTIONS: UserData["status"][] = ["active", "inactive", "banned"];
+const USER_ROLE_OPTIONS: UserData["role"][] = ["member", "moderator", "admin"];
 
 const MOCK_STATS = [
   { label: "Total Users", value: "2,847", change: "+12%", icon: Users },
@@ -143,34 +224,11 @@ const MOCK_STATS = [
   { label: "Upcoming Events", value: "6", change: "+2", icon: Calendar },
 ];
 
-const MOCK_RECENT_USERS = [
-  { name: "Sarah Chen", email: "sarah@example.com", joined: "2h ago", points: 12450, status: "active" },
-  { name: "Ahmed Hassan", email: "ahmed@example.com", joined: "5h ago", points: 11200, status: "active" },
-  { name: "Maria Rodriguez", email: "maria@example.com", joined: "1d ago", points: 10800, status: "active" },
-  { name: "James Park", email: "james@example.com", joined: "2d ago", points: 9650, status: "inactive" },
-  { name: "Fatima Al-Sayed", email: "fatima@example.com", joined: "3d ago", points: 8900, status: "active" },
-];
-
-const MOCK_EVENTS_TIMELINE = [
-  { title: "Frontend Hackathon", date: "Mar 15, 2026", status: "upcoming", type: "hackathon" },
-  { title: "AI Workshop", date: "Mar 22, 2026", status: "upcoming", type: "workshop" },
-  { title: "Monthly Challenge Reset", date: "Apr 1, 2026", status: "scheduled", type: "system" },
-  { title: "Cybersecurity CTF", date: "Apr 10, 2026", status: "draft", type: "competition" },
-  { title: "Community Meetup", date: "Apr 15, 2026", status: "draft", type: "meetup" },
-];
-
-const MOCK_POINT_LOG = [
-  { user: "Sarah Chen", action: "Completed challenge", points: "+500", time: "10m ago" },
-  { user: "Ahmed Hassan", action: "Followed Discord", points: "+50", time: "25m ago" },
-  { user: "Maria Rodriguez", action: "Daily login streak (12d)", points: "+120", time: "1h ago" },
-  { user: "James Park", action: "Referral bonus", points: "+200", time: "2h ago" },
-  { user: "Fatima Al-Sayed", action: "Manual award (Admin)", points: "+300", time: "3h ago" },
-];
-
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
     active: "text-emerald-500 border-emerald-500/30",
     inactive: "text-muted-foreground border-border",
+    banned: "text-red-500 border-red-500/30",
     live: "text-emerald-500 border-emerald-500/30",
     upcoming: "text-amber-500 border-amber-500/30",
     ended: "text-muted-foreground border-border",
@@ -188,6 +246,15 @@ const difficultyBadge = (d: string) => {
     Expert: "text-red-500 border-red-500/30",
   };
   return map[d] || "text-muted-foreground border-border";
+};
+
+const roleBadge = (r: string) => {
+  const map: Record<string, string> = {
+    admin: "text-red-500 border-red-500/30",
+    moderator: "text-blue-500 border-blue-500/30",
+    member: "text-muted-foreground border-border",
+  };
+  return map[r] || "text-muted-foreground border-border";
 };
 
 // ─── Reusable input field ───
@@ -225,6 +292,408 @@ const PrimaryBtn = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButto
 const SecondaryBtn = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button {...props} className="inline-flex items-center gap-2 px-4 py-2 border border-border text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">{children}</button>
 );
+
+const DangerBtn = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+  <button {...props} className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-500 text-[13px] font-medium hover:bg-red-500/20 transition-colors">{children}</button>
+);
+
+// ─── User Form ───
+const UserForm = ({
+  initial,
+  onSave,
+  onCancel,
+  isEdit = false,
+}: {
+  initial?: UserData;
+  onSave: (data: UserData) => void;
+  onCancel: () => void;
+  isEdit?: boolean;
+}) => {
+  const [name, setName] = useState(initial?.name || "");
+  const [email, setEmail] = useState(initial?.email || "");
+  const [points, setPoints] = useState(initial?.points || 0);
+  const [status, setStatus] = useState<UserData["status"]>(initial?.status || "active");
+  const [role, setRole] = useState<UserData["role"]>(initial?.role || "member");
+  const [bio, setBio] = useState(initial?.bio || "");
+
+  const handleSave = () => {
+    if (!name.trim() || !email.trim()) return;
+    onSave({
+      id: initial?.id || `u-${Date.now()}`,
+      name: name.trim(),
+      email: email.trim(),
+      joined: initial?.joined || "Just now",
+      points,
+      status,
+      role,
+      bio,
+    });
+  };
+
+  return (
+    <div className="border-2 border-foreground">
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <h3 className="text-[14px] font-bold text-foreground">{isEdit ? "Edit User" : "Add User"}</h3>
+        <button onClick={onCancel} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+      </div>
+      <div className="p-5 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <FieldLabel>Full Name</FieldLabel>
+            <FieldInput value={name} onChange={e => setName(e.target.value)} placeholder="e.g. John Doe" />
+          </div>
+          <div>
+            <FieldLabel>Email</FieldLabel>
+            <FieldInput type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="e.g. john@example.com" />
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <FieldLabel>Role</FieldLabel>
+            <FieldSelect value={role} onChange={e => setRole(e.target.value as UserData["role"])}>
+              {USER_ROLE_OPTIONS.map(r => <option key={r} value={r} className="capitalize">{r}</option>)}
+            </FieldSelect>
+          </div>
+          <div>
+            <FieldLabel>Status</FieldLabel>
+            <FieldSelect value={status} onChange={e => setStatus(e.target.value as UserData["status"])}>
+              {USER_STATUS_OPTIONS.map(s => <option key={s} value={s} className="capitalize">{s}</option>)}
+            </FieldSelect>
+          </div>
+          <div>
+            <FieldLabel>Points</FieldLabel>
+            <FieldInput type="number" value={points} onChange={e => setPoints(Number(e.target.value))} min={0} />
+          </div>
+        </div>
+        <div>
+          <FieldLabel>Bio</FieldLabel>
+          <FieldTextarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Short user bio..." />
+        </div>
+        <div className="flex items-center gap-2 pt-2">
+          <PrimaryBtn onClick={handleSave} disabled={!name.trim() || !email.trim()}>
+            <Check className="w-3.5 h-3.5" /> {isEdit ? "Save Changes" : "Add User"}
+          </PrimaryBtn>
+          <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Event Form ───
+const EventForm = ({
+  initial,
+  onSave,
+  onCancel,
+  isEdit = false,
+}: {
+  initial?: EventData;
+  onSave: (data: EventData) => void;
+  onCancel: () => void;
+  isEdit?: boolean;
+}) => {
+  const [title, setTitle] = useState(initial?.title || "");
+  const [description, setDescription] = useState(initial?.description || "");
+  const [date, setDate] = useState(initial?.date || "");
+  const [time, setTime] = useState(initial?.time || "");
+  const [location, setLocation] = useState(initial?.location || "");
+  const [type, setType] = useState<EventData["type"]>(initial?.type || "workshop");
+  const [status, setStatus] = useState<EventData["status"]>(initial?.status || "draft");
+  const [capacity, setCapacity] = useState(initial?.capacity || 100);
+  const [link, setLink] = useState(initial?.link || "");
+
+  const handleSave = () => {
+    if (!title.trim()) return;
+    onSave({
+      id: initial?.id || `ev-${Date.now()}`,
+      title: title.trim(),
+      description,
+      date: date || "TBD",
+      time: time || "TBD",
+      location: location || "Online",
+      type,
+      status,
+      capacity,
+      registered: initial?.registered || 0,
+      link,
+    });
+  };
+
+  return (
+    <div className="border-2 border-foreground">
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <h3 className="text-[14px] font-bold text-foreground">{isEdit ? "Edit Event" : "Create Event"}</h3>
+        <button onClick={onCancel} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+      </div>
+      <div className="p-5 space-y-4">
+        <div>
+          <FieldLabel>Title</FieldLabel>
+          <FieldInput value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Frontend Hackathon" />
+        </div>
+        <div>
+          <FieldLabel>Description</FieldLabel>
+          <FieldTextarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Event description..." />
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <FieldLabel>Date</FieldLabel>
+            <FieldInput value={date} onChange={e => setDate(e.target.value)} placeholder="e.g. Mar 15, 2026" />
+          </div>
+          <div>
+            <FieldLabel>Time</FieldLabel>
+            <FieldInput value={time} onChange={e => setTime(e.target.value)} placeholder="e.g. 10:00 AM" />
+          </div>
+          <div>
+            <FieldLabel>Location</FieldLabel>
+            <FieldInput value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Online — Discord" />
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <FieldLabel>Type</FieldLabel>
+            <FieldSelect value={type} onChange={e => setType(e.target.value as EventData["type"])}>
+              {EVENT_TYPE_OPTIONS.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
+            </FieldSelect>
+          </div>
+          <div>
+            <FieldLabel>Status</FieldLabel>
+            <FieldSelect value={status} onChange={e => setStatus(e.target.value as EventData["status"])}>
+              <option value="draft">Draft</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="live">Live</option>
+              <option value="ended">Ended</option>
+            </FieldSelect>
+          </div>
+          <div>
+            <FieldLabel>Capacity</FieldLabel>
+            <FieldInput type="number" value={capacity} onChange={e => setCapacity(Number(e.target.value))} min={0} />
+          </div>
+        </div>
+        <div>
+          <FieldLabel>Event Link (optional)</FieldLabel>
+          <FieldInput value={link} onChange={e => setLink(e.target.value)} placeholder="https://..." />
+        </div>
+        <div className="flex items-center gap-2 pt-2">
+          <PrimaryBtn onClick={handleSave} disabled={!title.trim()}>
+            <Check className="w-3.5 h-3.5" /> {isEdit ? "Save Changes" : "Create Event"}
+          </PrimaryBtn>
+          <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Point Rule Form ───
+const PointRuleForm = ({
+  initial,
+  onSave,
+  onCancel,
+  isEdit = false,
+}: {
+  initial?: PointRule;
+  onSave: (data: PointRule) => void;
+  onCancel: () => void;
+  isEdit?: boolean;
+}) => {
+  const [action, setAction] = useState(initial?.action || "");
+  const [points, setPoints] = useState(initial?.points || 100);
+  const [active, setActive] = useState(initial?.active ?? true);
+
+  return (
+    <div className="border-2 border-foreground">
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <h3 className="text-[14px] font-bold text-foreground">{isEdit ? "Edit Rule" : "Add Rule"}</h3>
+        <button onClick={onCancel} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+      </div>
+      <div className="p-5 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <FieldLabel>Action</FieldLabel>
+            <FieldInput value={action} onChange={e => setAction(e.target.value)} placeholder="e.g. Complete a quiz" />
+          </div>
+          <div>
+            <FieldLabel>Points</FieldLabel>
+            <FieldInput type="number" value={points} onChange={e => setPoints(Number(e.target.value))} min={0} />
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setActive(!active)}
+            className={`w-10 h-5 rounded-full relative transition-colors ${active ? "bg-emerald-500" : "bg-muted-foreground/30"}`}
+          >
+            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${active ? "left-5" : "left-0.5"}`} />
+          </button>
+          <span className="text-[13px] text-foreground">{active ? "Active" : "Inactive"}</span>
+        </div>
+        <div className="flex items-center gap-2 pt-2">
+          <PrimaryBtn onClick={() => { if (action.trim()) onSave({ id: initial?.id || `pr-${Date.now()}`, action: action.trim(), points, active }); }} disabled={!action.trim()}>
+            <Check className="w-3.5 h-3.5" /> {isEdit ? "Save" : "Add Rule"}
+          </PrimaryBtn>
+          <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Award Points Form ───
+const AwardPointsForm = ({
+  users,
+  onAward,
+  onCancel,
+}: {
+  users: UserData[];
+  onAward: (userId: string, userName: string, points: number, reason: string) => void;
+  onCancel: () => void;
+}) => {
+  const [selectedUser, setSelectedUser] = useState(users[0]?.id || "");
+  const [points, setPoints] = useState(100);
+  const [reason, setReason] = useState("");
+
+  return (
+    <div className="border-2 border-foreground">
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <h3 className="text-[14px] font-bold text-foreground">Award Points</h3>
+        <button onClick={onCancel} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+      </div>
+      <div className="p-5 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <FieldLabel>User</FieldLabel>
+            <FieldSelect value={selectedUser} onChange={e => setSelectedUser(e.target.value)}>
+              {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+            </FieldSelect>
+          </div>
+          <div>
+            <FieldLabel>Points</FieldLabel>
+            <FieldInput type="number" value={points} onChange={e => setPoints(Number(e.target.value))} />
+          </div>
+        </div>
+        <div>
+          <FieldLabel>Reason</FieldLabel>
+          <FieldInput value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Manual award for outstanding contribution" />
+        </div>
+        <div className="flex items-center gap-2 pt-2">
+          <PrimaryBtn onClick={() => {
+            const user = users.find(u => u.id === selectedUser);
+            if (user && reason.trim()) onAward(user.id, user.name, points, reason.trim());
+          }} disabled={!reason.trim() || !points}>
+            <Zap className="w-3.5 h-3.5" /> Award Points
+          </PrimaryBtn>
+          <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Badge Form ───
+const BadgeForm = ({
+  onSave,
+  onCancel,
+}: {
+  onSave: (badge: { id: string; nameKey: string; minPoints: number; icon: React.ElementType; iconName: string; colorClass: string; borderClass: string; bgClass: string }) => void;
+  onCancel: () => void;
+}) => {
+  const [name, setName] = useState("");
+  const [minPoints, setMinPoints] = useState(0);
+  const [selectedIcon, setSelectedIcon] = useState(AVAILABLE_ICONS[0]);
+  const COLOR_PRESETS = [
+    { label: "Zinc", colorClass: "text-zinc-400", borderClass: "border-zinc-400/30", bgClass: "bg-zinc-400/10" },
+    { label: "Emerald", colorClass: "text-emerald-500", borderClass: "border-emerald-500/30", bgClass: "bg-emerald-500/10" },
+    { label: "Blue", colorClass: "text-blue-500", borderClass: "border-blue-500/30", bgClass: "bg-blue-500/10" },
+    { label: "Purple", colorClass: "text-purple-500", borderClass: "border-purple-500/30", bgClass: "bg-purple-500/10" },
+    { label: "Amber", colorClass: "text-amber-500", borderClass: "border-amber-500/30", bgClass: "bg-amber-500/10" },
+    { label: "Red", colorClass: "text-red-500", borderClass: "border-red-500/30", bgClass: "bg-red-500/10" },
+    { label: "Pink", colorClass: "text-pink-500", borderClass: "border-pink-500/30", bgClass: "bg-pink-500/10" },
+    { label: "Cyan", colorClass: "text-cyan-500", borderClass: "border-cyan-500/30", bgClass: "bg-cyan-500/10" },
+  ];
+  const [selectedColor, setSelectedColor] = useState(COLOR_PRESETS[0]);
+
+  return (
+    <div className="border-2 border-foreground">
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <h3 className="text-[14px] font-bold text-foreground">Create Badge</h3>
+        <button onClick={onCancel} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+      </div>
+      <div className="p-5 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <FieldLabel>Badge Name</FieldLabel>
+            <FieldInput value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Champion" />
+          </div>
+          <div>
+            <FieldLabel>Min Points</FieldLabel>
+            <FieldInput type="number" value={minPoints} onChange={e => setMinPoints(Number(e.target.value))} min={0} />
+          </div>
+        </div>
+        <div>
+          <FieldLabel>Color</FieldLabel>
+          <div className="flex items-center gap-2 flex-wrap">
+            {COLOR_PRESETS.map(c => (
+              <button
+                key={c.label}
+                onClick={() => setSelectedColor(c)}
+                className={`px-3 py-1.5 border text-[12px] font-mono transition-colors ${
+                  selectedColor.label === c.label ? `${c.borderClass} ${c.bgClass} ${c.colorClass}` : "border-border text-muted-foreground hover:border-foreground/40"
+                }`}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <FieldLabel>Icon</FieldLabel>
+          <div className="grid grid-cols-10 gap-1">
+            {AVAILABLE_ICONS.map(iconOption => {
+              const OptionIcon = iconOption.icon;
+              const isSelected = selectedIcon.name === iconOption.name;
+              return (
+                <button
+                  key={iconOption.name}
+                  onClick={() => setSelectedIcon(iconOption)}
+                  className={`w-9 h-9 flex items-center justify-center border transition-colors ${
+                    isSelected ? "border-foreground bg-accent text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+                  }`}
+                >
+                  <OptionIcon className="w-4 h-4" />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        {/* Preview */}
+        <div className="flex items-center gap-3 p-3 border border-border bg-accent/20">
+          <div className={`w-10 h-10 flex items-center justify-center border ${selectedColor.borderClass} ${selectedColor.bgClass}`}>
+            <selectedIcon.icon className={`w-5 h-5 ${selectedColor.colorClass}`} />
+          </div>
+          <div>
+            <p className={`text-[12px] font-mono font-medium ${selectedColor.colorClass} uppercase tracking-wider`}>{name || "Badge Name"}</p>
+            <p className="text-[10px] text-muted-foreground font-mono">{minPoints.toLocaleString()}+ pts</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 pt-2">
+          <PrimaryBtn onClick={() => {
+            if (name.trim()) onSave({
+              id: `badge-${Date.now()}`,
+              nameKey: name.trim(),
+              minPoints,
+              icon: selectedIcon.icon,
+              iconName: selectedIcon.name,
+              ...selectedColor,
+            });
+          }} disabled={!name.trim()}>
+            <Check className="w-3.5 h-3.5" /> Create Badge
+          </PrimaryBtn>
+          <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ─── Question Form Component ───
 const QuestionForm = ({
@@ -457,7 +926,6 @@ const CompetitionForm = ({
         </button>
       </div>
       <div className="p-5 space-y-4">
-        {/* Info fields */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <FieldLabel>Title</FieldLabel>
@@ -492,7 +960,6 @@ const CompetitionForm = ({
           </div>
         </div>
 
-        {/* Questions */}
         <div className="border border-border">
           <div className="px-4 py-3 border-b border-border flex items-center justify-between">
             <h4 className="text-[13px] font-bold text-foreground">
@@ -640,6 +1107,24 @@ const ChallengeForm = ({
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
 
+  // Users state
+  const [users, setUsers] = useState<UserData[]>(MOCK_USERS);
+  const [userFormMode, setUserFormMode] = useState<"none" | "create" | "edit">("none");
+  const [editingUser, setEditingUser] = useState<UserData | undefined>();
+  const [viewingUser, setViewingUser] = useState<UserData | null>(null);
+
+  // Events state
+  const [events, setEvents] = useState<EventData[]>(MOCK_EVENTS);
+  const [eventFormMode, setEventFormMode] = useState<"none" | "create" | "edit">("none");
+  const [editingEvent, setEditingEvent] = useState<EventData | undefined>();
+
+  // Points state
+  const [pointRules, setPointRules] = useState<PointRule[]>(MOCK_POINT_RULES);
+  const [pointLog, setPointLog] = useState<PointAward[]>(MOCK_POINT_LOG);
+  const [ruleFormMode, setRuleFormMode] = useState<"none" | "create" | "edit">("none");
+  const [editingRule, setEditingRule] = useState<PointRule | undefined>();
+  const [showAwardForm, setShowAwardForm] = useState(false);
+
   // Badges state
   const [badges, setBadges] = useState(() =>
     BADGE_TIERS.map(b => ({
@@ -651,6 +1136,7 @@ const Dashboard = () => {
   const [editName, setEditName] = useState("");
   const [editMinPoints, setEditMinPoints] = useState(0);
   const [showIconPicker, setShowIconPicker] = useState<string | null>(null);
+  const [showBadgeForm, setShowBadgeForm] = useState(false);
 
   // Competitions state
   const [competitions, setCompetitions] = useState<CompetitionData[]>(MOCK_COMPETITIONS);
@@ -662,7 +1148,50 @@ const Dashboard = () => {
   const [chalFormMode, setChalFormMode] = useState<"none" | "create" | "edit">("none");
   const [editingChal, setEditingChal] = useState<ChallengeData | undefined>();
 
-  // Competition handlers
+  // ─── Handlers ───
+  const saveUser = (user: UserData) => {
+    if (userFormMode === "edit") {
+      setUsers(prev => prev.map(u => u.id === user.id ? user : u));
+    } else {
+      setUsers(prev => [user, ...prev]);
+    }
+    setUserFormMode("none");
+    setEditingUser(undefined);
+  };
+
+  const deleteUser = (id: string) => setUsers(prev => prev.filter(u => u.id !== id));
+
+  const saveEvent = (event: EventData) => {
+    if (eventFormMode === "edit") {
+      setEvents(prev => prev.map(e => e.id === event.id ? event : e));
+    } else {
+      setEvents(prev => [event, ...prev]);
+    }
+    setEventFormMode("none");
+    setEditingEvent(undefined);
+  };
+
+  const deleteEvent = (id: string) => setEvents(prev => prev.filter(e => e.id !== id));
+
+  const savePointRule = (rule: PointRule) => {
+    if (ruleFormMode === "edit") {
+      setPointRules(prev => prev.map(r => r.id === rule.id ? rule : r));
+    } else {
+      setPointRules(prev => [...prev, rule]);
+    }
+    setRuleFormMode("none");
+    setEditingRule(undefined);
+  };
+
+  const deletePointRule = (id: string) => setPointRules(prev => prev.filter(r => r.id !== id));
+  const togglePointRule = (id: string) => setPointRules(prev => prev.map(r => r.id === id ? { ...r, active: !r.active } : r));
+
+  const awardPoints = (userId: string, userName: string, points: number, reason: string) => {
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, points: u.points + points } : u));
+    setPointLog(prev => [{ id: `pl-${Date.now()}`, user: userName, action: reason, points: `+${points}`, time: "Just now" }, ...prev]);
+    setShowAwardForm(false);
+  };
+
   const saveCompetition = (comp: CompetitionData) => {
     if (compFormMode === "edit") {
       setCompetitions(prev => prev.map(c => c.id === comp.id ? comp : c));
@@ -688,7 +1217,6 @@ const Dashboard = () => {
     setCompetitions(prev => [dup, ...prev]);
   };
 
-  // Challenge handlers
   const saveChallenge = (chal: ChallengeData) => {
     if (chalFormMode === "edit") {
       setChallenges(prev => prev.map(c => c.id === chal.id ? chal : c));
@@ -780,8 +1308,8 @@ const Dashboard = () => {
                       <Activity className="w-4 h-4 text-muted-foreground" />
                     </div>
                     <div className="divide-y divide-border">
-                      {MOCK_POINT_LOG.map((log, i) => (
-                        <div key={i} className="px-5 py-3 flex items-center justify-between">
+                      {pointLog.slice(0, 5).map((log) => (
+                        <div key={log.id} className="px-5 py-3 flex items-center justify-between">
                           <div>
                             <p className="text-[13px] font-medium text-foreground">{log.user}</p>
                             <p className="text-[11px] text-muted-foreground">{log.action}</p>
@@ -801,8 +1329,8 @@ const Dashboard = () => {
                       <Calendar className="w-4 h-4 text-muted-foreground" />
                     </div>
                     <div className="divide-y divide-border">
-                      {MOCK_EVENTS_TIMELINE.map((event, i) => (
-                        <div key={i} className="px-5 py-3 flex items-center justify-between">
+                      {events.slice(0, 5).map((event) => (
+                        <div key={event.id} className="px-5 py-3 flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="w-1.5 h-1.5 rounded-full bg-foreground shrink-0" />
                             <div>
@@ -825,27 +1353,88 @@ const Dashboard = () => {
             {activeTab === "users" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <p className="text-[13px] text-muted-foreground">Showing <span className="text-foreground font-medium">2,847</span> users</p>
-                  <PrimaryBtn><Plus className="w-3.5 h-3.5" /> Add User</PrimaryBtn>
+                  <p className="text-[13px] text-muted-foreground">Managing <span className="text-foreground font-medium">{users.length}</span> users</p>
+                  <PrimaryBtn onClick={() => { setUserFormMode("create"); setEditingUser(undefined); setViewingUser(null); }}>
+                    <Plus className="w-3.5 h-3.5" /> Add User
+                  </PrimaryBtn>
                 </div>
 
-                <div className="border border-border">
-                  <div className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-5 py-3 border-b border-border text-[11px] font-mono text-muted-foreground uppercase tracking-widest">
-                    <span>User</span><span>Email</span><span>Points</span><span>Status</span><span>Actions</span>
+                {userFormMode !== "none" && (
+                  <UserForm
+                    initial={editingUser}
+                    isEdit={userFormMode === "edit"}
+                    onSave={saveUser}
+                    onCancel={() => { setUserFormMode("none"); setEditingUser(undefined); }}
+                  />
+                )}
+
+                {/* User detail view */}
+                {viewingUser && (
+                  <div className="border-2 border-foreground">
+                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                      <h3 className="text-[14px] font-bold text-foreground">User Details</h3>
+                      <button onClick={() => setViewingUser(null)} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+                    </div>
+                    <div className="p-5">
+                      <div className="flex items-start gap-5">
+                        <div className="w-16 h-16 bg-accent border border-border flex items-center justify-center text-[20px] font-bold font-mono text-foreground shrink-0">
+                          {viewingUser.name.split(" ").map(n => n[0]).join("")}
+                        </div>
+                        <div className="flex-1 space-y-3">
+                          <div>
+                            <h4 className="text-[18px] font-bold text-foreground">{viewingUser.name}</h4>
+                            <p className="text-[13px] text-muted-foreground flex items-center gap-2">
+                              <Mail className="w-3.5 h-3.5" /> {viewingUser.email}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className={`text-[10px] font-mono px-2 py-0.5 border uppercase tracking-wider ${statusBadge(viewingUser.status)}`}>{viewingUser.status}</span>
+                            <span className={`text-[10px] font-mono px-2 py-0.5 border uppercase tracking-wider ${roleBadge(viewingUser.role)}`}>{viewingUser.role}</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-4 pt-2">
+                            <div className="border border-border p-3">
+                              <p className="text-[11px] text-muted-foreground font-mono uppercase">Points</p>
+                              <p className="text-[20px] font-bold font-mono text-foreground">{viewingUser.points.toLocaleString()}</p>
+                            </div>
+                            <div className="border border-border p-3">
+                              <p className="text-[11px] text-muted-foreground font-mono uppercase">Joined</p>
+                              <p className="text-[14px] font-medium text-foreground">{viewingUser.joined}</p>
+                            </div>
+                            <div className="border border-border p-3">
+                              <p className="text-[11px] text-muted-foreground font-mono uppercase">Role</p>
+                              <p className="text-[14px] font-medium text-foreground capitalize">{viewingUser.role}</p>
+                            </div>
+                          </div>
+                          {viewingUser.bio && (
+                            <div className="pt-2">
+                              <p className="text-[11px] text-muted-foreground font-mono uppercase mb-1">Bio</p>
+                              <p className="text-[13px] text-foreground">{viewingUser.bio}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  {MOCK_RECENT_USERS.map((user, i) => (
-                    <div key={i} className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-5 py-4 border-b border-border last:border-b-0 items-center hover:bg-accent/30 transition-colors">
+                )}
+
+                <div className="border border-border">
+                  <div className="grid grid-cols-[1fr_1fr_auto_auto_auto_auto] gap-4 px-5 py-3 border-b border-border text-[11px] font-mono text-muted-foreground uppercase tracking-widest">
+                    <span>User</span><span>Email</span><span>Points</span><span>Role</span><span>Status</span><span>Actions</span>
+                  </div>
+                  {users.map((user) => (
+                    <div key={user.id} className="grid grid-cols-[1fr_1fr_auto_auto_auto_auto] gap-4 px-5 py-4 border-b border-border last:border-b-0 items-center hover:bg-accent/30 transition-colors">
                       <div>
                         <p className="text-[14px] font-medium text-foreground">{user.name}</p>
                         <p className="text-[11px] text-muted-foreground font-mono">Joined {user.joined}</p>
                       </div>
                       <p className="text-[13px] text-muted-foreground">{user.email}</p>
                       <p className="font-mono font-bold text-foreground text-[14px] w-20 text-right">{user.points.toLocaleString()}</p>
+                      <span className={`text-[10px] font-mono px-2 py-0.5 border uppercase tracking-wider w-24 text-center ${roleBadge(user.role)}`}>{user.role}</span>
                       <span className={`text-[10px] font-mono px-2 py-0.5 border uppercase tracking-wider w-20 text-center ${statusBadge(user.status)}`}>{user.status}</span>
-                      <div className="flex items-center gap-1 w-20 justify-end">
-                        <button className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"><Eye className="w-3.5 h-3.5" /></button>
-                        <button className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
-                        <button className="p-1.5 text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                      <div className="flex items-center gap-1 w-24 justify-end">
+                        <button onClick={() => { setViewingUser(user); setUserFormMode("none"); }} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"><Eye className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => { setUserFormMode("edit"); setEditingUser(user); setViewingUser(null); }} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => deleteUser(user.id)} className="p-1.5 text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
                     </div>
                   ))}
@@ -931,7 +1520,6 @@ const Dashboard = () => {
                   />
                 )}
 
-                {/* Competition list */}
                 <div className="border border-border divide-y divide-border">
                   {competitions.map((comp) => (
                     <div key={comp.id} className="p-5 hover:bg-accent/30 transition-colors">
@@ -999,20 +1587,34 @@ const Dashboard = () => {
             {activeTab === "events" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <p className="text-[13px] text-muted-foreground"><span className="text-foreground font-medium">6</span> events planned</p>
-                  <PrimaryBtn><Plus className="w-3.5 h-3.5" /> New Event</PrimaryBtn>
+                  <p className="text-[13px] text-muted-foreground">Managing <span className="text-foreground font-medium">{events.length}</span> events</p>
+                  <PrimaryBtn onClick={() => { setEventFormMode("create"); setEditingEvent(undefined); }}>
+                    <Plus className="w-3.5 h-3.5" /> New Event
+                  </PrimaryBtn>
                 </div>
+
+                {eventFormMode !== "none" && (
+                  <EventForm
+                    initial={editingEvent}
+                    isEdit={eventFormMode === "edit"}
+                    onSave={saveEvent}
+                    onCancel={() => { setEventFormMode("none"); setEditingEvent(undefined); }}
+                  />
+                )}
+
                 <div className="border border-border">
                   <div className="px-5 py-4 border-b border-border">
                     <h3 className="text-[14px] font-bold text-foreground">Event Timeline</h3>
                   </div>
                   <div className="relative">
                     <div className="absolute left-8 top-0 bottom-0 w-px bg-border" />
-                    {MOCK_EVENTS_TIMELINE.map((event, i) => (
-                      <div key={i} className="flex items-start gap-6 px-5 py-5 hover:bg-accent/30 transition-colors relative">
+                    {events.map((event) => (
+                      <div key={event.id} className="flex items-start gap-6 px-5 py-5 hover:bg-accent/30 transition-colors relative">
                         <div className="w-6 h-6 border border-border bg-background flex items-center justify-center z-10 shrink-0 mt-0.5">
                           {event.status === "upcoming" ? (
                             <Clock className="w-3 h-3 text-amber-500" />
+                          ) : event.status === "live" ? (
+                            <Play className="w-3 h-3 text-emerald-500" />
                           ) : event.status === "scheduled" ? (
                             <CheckCircle2 className="w-3 h-3 text-blue-500" />
                           ) : (
@@ -1025,15 +1627,26 @@ const Dashboard = () => {
                             <span className={`text-[10px] font-mono px-2 py-0.5 border uppercase tracking-wider ${statusBadge(event.status)}`}>
                               {event.status}
                             </span>
+                            <span className="text-[10px] font-mono px-2 py-0.5 border border-border text-muted-foreground uppercase tracking-wider">
+                              {event.type}
+                            </span>
                           </div>
-                          <div className="flex items-center gap-4 text-[12px] text-muted-foreground font-mono">
-                            <span>{event.date}</span>
-                            <span>{event.type}</span>
+                          <p className="text-[12px] text-muted-foreground mb-1">{event.description}</p>
+                          <div className="flex items-center gap-4 text-[12px] text-muted-foreground font-mono flex-wrap">
+                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {event.date}</span>
+                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {event.time}</span>
+                            <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {event.location}</span>
+                            {event.capacity > 0 && (
+                              <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {event.registered}/{event.capacity}</span>
+                            )}
+                            {event.link && (
+                              <span className="flex items-center gap-1"><Link className="w-3 h-3" /> Link</span>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-1">
-                          <button className="p-2 text-muted-foreground hover:text-foreground transition-colors"><Pencil className="w-4 h-4" /></button>
-                          <button className="p-2 text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={() => { setEventFormMode("edit"); setEditingEvent(event); }} className="p-2 text-muted-foreground hover:text-foreground transition-colors"><Pencil className="w-4 h-4" /></button>
+                          <button onClick={() => deleteEvent(event.id)} className="p-2 text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </div>
                     ))}
@@ -1047,43 +1660,69 @@ const Dashboard = () => {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <p className="text-[13px] text-muted-foreground">Point system management</p>
-                  <PrimaryBtn><Plus className="w-3.5 h-3.5" /> Award Points</PrimaryBtn>
+                  <div className="flex items-center gap-2">
+                    <SecondaryBtn onClick={() => { setRuleFormMode("create"); setEditingRule(undefined); }}>
+                      <Plus className="w-3.5 h-3.5" /> Add Rule
+                    </SecondaryBtn>
+                    <PrimaryBtn onClick={() => setShowAwardForm(true)}>
+                      <Zap className="w-3.5 h-3.5" /> Award Points
+                    </PrimaryBtn>
+                  </div>
                 </div>
+
+                {showAwardForm && (
+                  <AwardPointsForm
+                    users={users}
+                    onAward={awardPoints}
+                    onCancel={() => setShowAwardForm(false)}
+                  />
+                )}
+
+                {ruleFormMode !== "none" && (
+                  <PointRuleForm
+                    initial={editingRule}
+                    isEdit={ruleFormMode === "edit"}
+                    onSave={savePointRule}
+                    onCancel={() => { setRuleFormMode("none"); setEditingRule(undefined); }}
+                  />
+                )}
+
                 <div className="grid grid-cols-2 gap-6">
                   <div className="border border-border">
-                    <div className="px-5 py-4 border-b border-border">
+                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                       <h3 className="text-[14px] font-bold text-foreground">Auto Point Rules</h3>
+                      <span className="text-[11px] font-mono text-muted-foreground">{pointRules.length} rules</span>
                     </div>
                     <div className="divide-y divide-border">
-                      {[
-                        { action: "Complete a challenge", points: "+500", active: true },
-                        { action: "Daily login", points: "+10", active: true },
-                        { action: "Login streak (7d)", points: "+50", active: true },
-                        { action: "Follow Discord", points: "+50", active: true },
-                        { action: "Follow Twitter/X", points: "+50", active: true },
-                        { action: "Follow LinkedIn", points: "+30", active: false },
-                        { action: "Follow GitHub", points: "+40", active: true },
-                        { action: "Follow Telegram", points: "+30", active: true },
-                        { action: "Follow WhatsApp", points: "+20", active: false },
-                        { action: "Refer a friend", points: "+200", active: true },
-                      ].map((rule, i) => (
-                        <div key={i} className="px-5 py-3 flex items-center justify-between">
+                      {pointRules.map((rule) => (
+                        <div key={rule.id} className="px-5 py-3 flex items-center justify-between group">
                           <div className="flex items-center gap-3">
-                            <div className={`w-2 h-2 rounded-full ${rule.active ? "bg-emerald-500" : "bg-muted-foreground/30"}`} />
-                            <span className="text-[13px] text-foreground">{rule.action}</span>
+                            <button
+                              onClick={() => togglePointRule(rule.id)}
+                              className={`w-2 h-2 rounded-full transition-colors cursor-pointer ${rule.active ? "bg-emerald-500" : "bg-muted-foreground/30"}`}
+                              title={rule.active ? "Active — click to disable" : "Inactive — click to enable"}
+                            />
+                            <span className={`text-[13px] ${rule.active ? "text-foreground" : "text-muted-foreground line-through"}`}>{rule.action}</span>
                           </div>
-                          <span className="text-[13px] font-mono font-bold text-emerald-500">{rule.points}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[13px] font-mono font-bold text-emerald-500">+{rule.points}</span>
+                            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => { setRuleFormMode("edit"); setEditingRule(rule); }} className="p-1 text-muted-foreground hover:text-foreground transition-colors"><Pencil className="w-3 h-3" /></button>
+                              <button onClick={() => deletePointRule(rule.id)} className="p-1 text-muted-foreground hover:text-red-500 transition-colors"><Trash2 className="w-3 h-3" /></button>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
                   <div className="border border-border">
-                    <div className="px-5 py-4 border-b border-border">
+                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                       <h3 className="text-[14px] font-bold text-foreground">Recent Awards</h3>
+                      <span className="text-[11px] font-mono text-muted-foreground">{pointLog.length} entries</span>
                     </div>
                     <div className="divide-y divide-border">
-                      {MOCK_POINT_LOG.map((log, i) => (
-                        <div key={i} className="px-5 py-3 flex items-center justify-between">
+                      {pointLog.map((log) => (
+                        <div key={log.id} className="px-5 py-3 flex items-center justify-between">
                           <div>
                             <p className="text-[13px] font-medium text-foreground">{log.user}</p>
                             <p className="text-[11px] text-muted-foreground">{log.action}</p>
@@ -1128,7 +1767,20 @@ const Dashboard = () => {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <p className="text-[13px] text-muted-foreground">Manage <span className="text-foreground font-medium">{badges.length}</span> badge tiers</p>
+                  <PrimaryBtn onClick={() => setShowBadgeForm(true)}>
+                    <Plus className="w-3.5 h-3.5" /> New Badge
+                  </PrimaryBtn>
                 </div>
+
+                {showBadgeForm && (
+                  <BadgeForm
+                    onSave={(badge) => {
+                      setBadges(prev => [...prev, badge]);
+                      setShowBadgeForm(false);
+                    }}
+                    onCancel={() => setShowBadgeForm(false)}
+                  />
+                )}
 
                 <div className="border border-border divide-y divide-border">
                   {badges.map((badge) => {
@@ -1223,17 +1875,25 @@ const Dashboard = () => {
                                 </div>
                               </div>
                             </div>
-                            <button
-                              onClick={() => {
-                                setEditingBadgeId(badge.id);
-                                setEditName(badge.nameKey);
-                                setEditMinPoints(badge.minPoints);
-                                setShowIconPicker(null);
-                              }}
-                              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => {
+                                  setEditingBadgeId(badge.id);
+                                  setEditName(badge.nameKey);
+                                  setEditMinPoints(badge.minPoints);
+                                  setShowIconPicker(null);
+                                }}
+                                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setBadges(prev => prev.filter(b => b.id !== badge.id))}
+                                className="p-2 text-muted-foreground hover:text-red-500 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>
