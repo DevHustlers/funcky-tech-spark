@@ -20,6 +20,8 @@ import TrackDetail from "./pages/TrackDetail";
 import Dashboard from "./pages/Dashboard";
 import Competition from "./pages/Competition";
 import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,8 @@ const AnimatedRoutes = () => {
         <Route path="/planets" element={<Planets />} />
         <Route path="/planets/:slug" element={<TrackDetail />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>
