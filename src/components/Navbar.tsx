@@ -117,7 +117,7 @@ const Navbar = () => {
                       <span>Profile</span>
                     </Link>
                   </DropdownMenuItem>
-                  {(user.email === "o.ahmed3688@gmail.com" || user.user_metadata?.role === "admin") && (
+                  {(user.user_metadata?.role === "admin") && (
                     <DropdownMenuItem asChild className="cursor-pointer rounded-none focus:bg-accent text-[13px] font-medium transition-colors">
                       <Link to="/dashboard" className="w-full flex items-center text-emerald-600 dark:text-emerald-500">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -188,7 +188,7 @@ const Navbar = () => {
                     <Link to="/profile" onClick={() => setOpen(false)} className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-border text-foreground text-[15px] font-medium hover:bg-accent transition-colors">
                       <UserIcon className="w-4 h-4" /> Profile
                     </Link>
-                    {(user.email === "o.ahmed3688@gmail.com" || user.user_metadata?.role === "admin") && (
+                    {(user.user_metadata?.role === "admin") && (
                       <Link to="/dashboard" onClick={() => setOpen(false)} className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-emerald-500/30 text-emerald-600 dark:text-emerald-500 bg-emerald-500/5 text-[15px] font-medium hover:bg-emerald-500/10 transition-colors">
                         <LayoutDashboard className="w-4 h-4" /> Dashboard
                       </Link>

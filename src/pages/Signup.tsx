@@ -63,7 +63,13 @@ const Signup = () => {
         setError('Signup failed unexpectedly');
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during signup');
+      if (err.message?.toLowerCase().includes('rate limit')) {
+        setError('Email rate limit exceeded. Please wait or use a different email address. (Admins: Disable "Confirm Email" in Supabase Auth settings to bypass this during testing).');
+      } else if (err.message?.toLowerCase().includes('api key') || err.message?.toLowerCase().includes('apikey')) {
+        setError('No API key found in request. Please check your Supabase configuration and .env variables.');
+      } else {
+        setError(err.message || 'An error occurred during signup');
+      }
     } finally {
       setLoading(false);
     }

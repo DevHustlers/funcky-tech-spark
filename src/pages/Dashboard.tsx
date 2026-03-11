@@ -1230,11 +1230,9 @@ const Dashboard = () => {
         return;
       }
       
-      const email = user.email;
       const role = user.user_metadata?.role;
       
-      if (email === "o.ahmed3688@gmail.com" || role === "admin") {
-        // If it's this specific user, we still grant access. You can also run the provided SQL script to make them admin in the DB.
+      if (role === "admin") {
         setIsAdmin(true);
         setLoading(false);
       } else {
@@ -1246,7 +1244,7 @@ const Dashboard = () => {
       const user = session?.user;
       if (!user) {
         navigate("/login");
-      } else if (user.email !== "o.ahmed3688@gmail.com" && user.user_metadata?.role !== "admin") {
+      } else if (user.user_metadata?.role !== "admin") {
         navigate("/");
       }
     });
