@@ -17,7 +17,7 @@ import Challenges from "./pages/Challenges";
 import Leaderboard from "./pages/Leaderboard";
 import Planets from "./pages/Planets";
 import TrackDetail from "./pages/TrackDetail";
-import Dashboard from "./pages/Dashboard";
+import DashboardLayout from "./pages/dashboard";
 import Competition from "./pages/Competition";
 import NotFound from "./pages/NotFound";
 
@@ -42,7 +42,7 @@ const AnimatedRoutes = () => {
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/planets" element={<Planets />} />
         <Route path="/planets/:slug" element={<TrackDetail />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/*" element={<DashboardLayout />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>

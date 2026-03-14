@@ -21,7 +21,12 @@ const Index = () => {
   const [wordIndex, setWordIndex] = useState(0);
   const { t } = useLanguage();
 
-  const rotatingWords = [t("hero.word.1"), t("hero.word.2"), t("hero.word.3"), t("hero.word.4")];
+  const rotatingWords = [
+    t("hero.word.1"),
+    t("hero.word.2"),
+    t("hero.word.3"),
+    t("hero.word.4"),
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -38,7 +43,13 @@ const Index = () => {
       <section className="pt-28 sm:pt-40 relative overflow-hidden">
         {/* Light mode: Particles */}
         <div className="absolute inset-0 pointer-events-none dark:hidden opacity-60">
-          <Particles quantity={500} size={0.8} color="#374151" staticity={40} ease={60} />
+          <Particles
+            quantity={500}
+            size={0.8}
+            color="#374151"
+            staticity={40}
+            ease={60}
+          />
         </div>
         {/* Dark mode: LightRays */}
         <div className="absolute inset-0 pointer-events-none hidden dark:block">
@@ -71,9 +82,10 @@ const Index = () => {
               style={{ animationDelay: "0.08s", opacity: 0 }}
             >
               {t("hero.title.1")}{" "}
-              <span className="font-serif text-muted-foreground font-normal">{t("hero.title.2")}</span>
-              <br className="hidden sm:block" />
-              {" "}{t("hero.title.3")}{" "}
+              <span className="font-serif text-muted-foreground font-normal">
+                {t("hero.title.2")}
+              </span>
+              <br className="hidden sm:block" /> {t("hero.title.3")}{" "}
               <span className="relative inline-block align-baseline">
                 <svg
                   className="absolute -bottom-1 left-0 w-full z-30 pointer-events-none"
@@ -90,7 +102,10 @@ const Index = () => {
                   />
                 </svg>
                 <span className="inline-flex h-[1em] items-end overflow-hidden align-baseline leading-[1]">
-                  <span key={wordIndex} className="inline-block animate-slide-up">
+                  <span
+                    key={wordIndex}
+                    className="inline-block animate-slide-up"
+                  >
                     {rotatingWords[wordIndex]}
                   </span>
                 </span>
@@ -124,15 +139,37 @@ const Index = () => {
             style={{ animationDelay: "0.4s", opacity: 0 }}
           >
             {[
-              { icon: Terminal, label: t("hero.mini.1.label"), sub: t("hero.mini.1.sub") },
-              { icon: GitBranch, label: t("hero.mini.2.label"), sub: t("hero.mini.2.sub") },
-              { icon: Sparkles, label: t("hero.mini.3.label"), sub: t("hero.mini.3.sub") },
+              {
+                icon: Terminal,
+                label: t("hero.mini.1.label"),
+                sub: t("hero.mini.1.sub"),
+              },
+              {
+                icon: GitBranch,
+                label: t("hero.mini.2.label"),
+                sub: t("hero.mini.2.sub"),
+              },
+              {
+                icon: Sparkles,
+                label: t("hero.mini.3.label"),
+                sub: t("hero.mini.3.sub"),
+              },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-4 p-5 sm:p-6 bg-background">
-                <item.icon className="w-5 h-5 text-muted-foreground shrink-0" strokeWidth={1.5} />
+              <div
+                key={i}
+                className="flex items-center gap-4 p-5 sm:p-6 bg-background"
+              >
+                <item.icon
+                  className="w-5 h-5 text-muted-foreground shrink-0"
+                  strokeWidth={1.5}
+                />
                 <div>
-                  <p className="text-[16px] font-semibold text-foreground">{item.label}</p>
-                  <p className="text-[14px] text-muted-foreground">{item.sub}</p>
+                  <p className="text-[16px] font-semibold text-foreground">
+                    {item.label}
+                  </p>
+                  <p className="text-[14px] text-muted-foreground">
+                    {item.sub}
+                  </p>
                 </div>
               </div>
             ))}
@@ -155,15 +192,20 @@ const Index = () => {
                   key={name}
                   className="flex flex-col items-center gap-2.5 cursor-default transition-colors duration-300"
                   onMouseEnter={(e) => {
-                    e.currentTarget.querySelector('svg')!.style.color = hoverColor;
-                    e.currentTarget.querySelector('span')!.style.color = hoverColor;
+                    e.currentTarget.querySelector("svg")!.style.color =
+                      hoverColor;
+                    e.currentTarget.querySelector("span")!.style.color =
+                      hoverColor;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.querySelector('svg')!.style.color = '';
-                    e.currentTarget.querySelector('span')!.style.color = '';
+                    e.currentTarget.querySelector("svg")!.style.color = "";
+                    e.currentTarget.querySelector("span")!.style.color = "";
                   }}
                 >
-                  <Icon size={48} className="text-muted-foreground/40 transition-colors duration-300" />
+                  <Icon
+                    size={48}
+                    className="text-muted-foreground/40 transition-colors duration-300"
+                  />
                   <span className="text-[15px] sm:text-[17px] font-bold text-muted-foreground/40 tracking-tight select-none transition-colors duration-300">
                     {name}
                   </span>
@@ -175,19 +217,33 @@ const Index = () => {
       </ScrollReveal>
 
       <SectionDivider />
-      <ScrollReveal><LiveSection /></ScrollReveal>
+      <ScrollReveal>
+        <LiveSection />
+      </ScrollReveal>
       <SectionDivider />
-      <ScrollReveal><FeaturesGrid /></ScrollReveal>
+      <ScrollReveal>
+        <FeaturesGrid />
+      </ScrollReveal>
       <SectionDivider />
-      <ScrollReveal><StatsSection /></ScrollReveal>
+      <ScrollReveal>
+        <StatsSection />
+      </ScrollReveal>
       <SectionDivider />
-      <ScrollReveal><TestimonialsSection /></ScrollReveal>
+      <ScrollReveal>
+        <TestimonialsSection />
+      </ScrollReveal>
       <SectionDivider />
-      <ScrollReveal><TeamSection /></ScrollReveal>
+      <ScrollReveal>
+        <TeamSection />
+      </ScrollReveal>
       <SectionDivider />
-      <ScrollReveal><FAQSection /></ScrollReveal>
+      <ScrollReveal>
+        <FAQSection />
+      </ScrollReveal>
       <SectionDivider />
-      <ScrollReveal><CTASection /></ScrollReveal>
+      <ScrollReveal>
+        <CTASection />
+      </ScrollReveal>
       <SectionDivider />
       <Footer />
     </PageLayout>
