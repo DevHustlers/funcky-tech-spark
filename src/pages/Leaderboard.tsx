@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Trophy, Medal, Star, TrendingUp, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import {
+  Trophy,
+  Medal,
+  Star,
+  TrendingUp,
+  ArrowUp,
+  ArrowDown,
+  Minus,
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageLayout from "@/components/PageLayout";
@@ -9,31 +17,215 @@ import HonorBadge, { BADGE_TIERS } from "@/components/HonorBadge";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 const MOCK_USERS = [
-  { rank: 1, name: "Sarah Chen", username: "@sarachen", points: 12450, change: 2, challenges: 34, streak: 15, tracks: ["Frontend", "UI/UX"] },
-  { rank: 2, name: "Ahmed Hassan", username: "@ahmedh", points: 11200, change: -1, challenges: 29, streak: 12, tracks: ["Backend", "Network"] },
-  { rank: 3, name: "Maria Rodriguez", username: "@mariar", points: 10800, change: 1, challenges: 31, streak: 8, tracks: ["AI / ML", "Data Science"] },
-  { rank: 4, name: "James Park", username: "@jamesp", points: 9650, change: 0, challenges: 27, streak: 20, tracks: ["Cybersecurity"] },
-  { rank: 5, name: "Fatima Al-Sayed", username: "@fatimas", points: 8900, change: 3, challenges: 25, streak: 6, tracks: ["Mobile Dev", "Frontend"] },
-  { rank: 6, name: "Liam O'Brien", username: "@liamob", points: 8200, change: -2, challenges: 22, streak: 9, tracks: ["Backend", "OS"] },
-  { rank: 7, name: "Yuki Tanaka", username: "@yukit", points: 7800, change: 1, challenges: 20, streak: 11, tracks: ["Data Science", "AI / ML"] },
-  { rank: 8, name: "Noah Williams", username: "@noahw", points: 7350, change: 0, challenges: 19, streak: 5, tracks: ["Frontend"] },
-  { rank: 9, name: "Priya Patel", username: "@priyap", points: 6900, change: -1, challenges: 18, streak: 7, tracks: ["UI/UX", "Mobile Dev"] },
-  { rank: 10, name: "Alex Kim", username: "@alexk", points: 6500, change: 4, challenges: 16, streak: 3, tracks: ["Network", "Cybersecurity"] },
-  { rank: 11, name: "Emma Brown", username: "@emmab", points: 6100, change: 0, challenges: 15, streak: 14, tracks: ["Backend"] },
-  { rank: 12, name: "Omar Farooq", username: "@omarf", points: 5800, change: -3, challenges: 14, streak: 2, tracks: ["OS", "Network"] },
+  {
+    rank: 1,
+    name: "Sarah Chen",
+    username: "@sarachen",
+    points: 12450,
+    change: 2,
+    challenges: 34,
+    streak: 15,
+    tracks: ["Frontend", "UI/UX"],
+  },
+  {
+    rank: 2,
+    name: "Ahmed Hassan",
+    username: "@ahmedh",
+    points: 11200,
+    change: -1,
+    challenges: 29,
+    streak: 12,
+    tracks: ["Backend", "Network"],
+  },
+  {
+    rank: 3,
+    name: "Maria Rodriguez",
+    username: "@mariar",
+    points: 10800,
+    change: 1,
+    challenges: 31,
+    streak: 8,
+    tracks: ["AI / ML", "Data Science"],
+  },
+  {
+    rank: 4,
+    name: "James Park",
+    username: "@jamesp",
+    points: 9650,
+    change: 0,
+    challenges: 27,
+    streak: 20,
+    tracks: ["Cybersecurity"],
+  },
+  {
+    rank: 5,
+    name: "Fatima Al-Sayed",
+    username: "@fatimas",
+    points: 8900,
+    change: 3,
+    challenges: 25,
+    streak: 6,
+    tracks: ["Mobile Dev", "Frontend"],
+  },
+  {
+    rank: 6,
+    name: "Liam O'Brien",
+    username: "@liamob",
+    points: 8200,
+    change: -2,
+    challenges: 22,
+    streak: 9,
+    tracks: ["Backend", "OS"],
+  },
+  {
+    rank: 7,
+    name: "Yuki Tanaka",
+    username: "@yukit",
+    points: 7800,
+    change: 1,
+    challenges: 20,
+    streak: 11,
+    tracks: ["Data Science", "AI / ML"],
+  },
+  {
+    rank: 8,
+    name: "Noah Williams",
+    username: "@noahw",
+    points: 7350,
+    change: 0,
+    challenges: 19,
+    streak: 5,
+    tracks: ["Frontend"],
+  },
+  {
+    rank: 9,
+    name: "Priya Patel",
+    username: "@priyap",
+    points: 6900,
+    change: -1,
+    challenges: 18,
+    streak: 7,
+    tracks: ["UI/UX", "Mobile Dev"],
+  },
+  {
+    rank: 10,
+    name: "Alex Kim",
+    username: "@alexk",
+    points: 6500,
+    change: 4,
+    challenges: 16,
+    streak: 3,
+    tracks: ["Network", "Cybersecurity"],
+  },
+  {
+    rank: 11,
+    name: "Emma Brown",
+    username: "@emmab",
+    points: 6100,
+    change: 0,
+    challenges: 15,
+    streak: 14,
+    tracks: ["Backend"],
+  },
+  {
+    rank: 12,
+    name: "Omar Farooq",
+    username: "@omarf",
+    points: 5800,
+    change: -3,
+    challenges: 14,
+    streak: 2,
+    tracks: ["OS", "Network"],
+  },
 ];
 
 const RankBadge = ({ rank }: { rank: number }) => {
-  if (rank === 1) return <div className="w-10 h-10 flex items-center justify-center border border-amber-500/30 bg-amber-500/10"><Trophy className="w-5 h-5 text-amber-500" /></div>;
-  if (rank === 2) return <div className="w-10 h-10 flex items-center justify-center border border-zinc-400/30 bg-zinc-400/10"><Medal className="w-5 h-5 text-zinc-400" /></div>;
-  if (rank === 3) return <div className="w-10 h-10 flex items-center justify-center border border-amber-700/30 bg-amber-700/10"><Medal className="w-5 h-5 text-amber-700" /></div>;
-  return <div className="w-10 h-10 flex items-center justify-center border border-border font-mono text-[14px] font-bold text-muted-foreground">{rank}</div>;
+  if (rank === 1)
+    return (
+      <div className="w-10 h-10 flex items-center justify-center border border-amber-500/30 bg-amber-500/10">
+        <Trophy className="w-5 h-5 text-amber-500" />
+      </div>
+    );
+  if (rank === 2)
+    return (
+      <div className="w-10 h-10 flex items-center justify-center border border-zinc-400/30 bg-zinc-400/10">
+        <Medal className="w-5 h-5 text-zinc-400" />
+      </div>
+    );
+  if (rank === 3)
+    return (
+      <div className="w-10 h-10 flex items-center justify-center border border-amber-700/30 bg-amber-700/10">
+        <Medal className="w-5 h-5 text-amber-700" />
+      </div>
+    );
+  return (
+    <div className="w-10 h-10 flex items-center justify-center border border-border font-mono text-[14px] font-bold text-muted-foreground">
+      {rank}
+    </div>
+  );
 };
 
 const ChangeIndicator = ({ change }: { change: number }) => {
-  if (change > 0) return <span className="inline-flex items-center gap-0.5 text-[11px] text-emerald-500 font-mono"><ArrowUp className="w-3 h-3" />{change}</span>;
-  if (change < 0) return <span className="inline-flex items-center gap-0.5 text-[11px] text-red-500 font-mono"><ArrowDown className="w-3 h-3" />{Math.abs(change)}</span>;
-  return <span className="inline-flex items-center text-[11px] text-muted-foreground/50 font-mono"><Minus className="w-3 h-3" /></span>;
+  if (change > 0)
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[11px] text-emerald-500 font-mono">
+        <ArrowUp className="w-3 h-3" />
+        {change}
+      </span>
+    );
+  if (change < 0)
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[11px] text-red-500 font-mono">
+        <ArrowDown className="w-3 h-3" />
+        {Math.abs(change)}
+      </span>
+    );
+  return (
+    <span className="inline-flex items-center text-[11px] text-muted-foreground/50 font-mono">
+      <Minus className="w-3 h-3" />
+    </span>
+  );
+};
+
+const UserRow = ({ user }: { user: (typeof MOCK_USERS)[0] }) => {
+  const { t } = useLanguage();
+  return (
+    <div className="flex items-center gap-4 sm:gap-6">
+      <RankBadge rank={user.rank} />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-3 mb-0.5">
+          <p className="font-semibold text-foreground text-[14px] sm:text-[15px] truncate">
+            {user.name}
+          </p>
+          <ChangeIndicator change={user.change} />
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="text-[11px] sm:text-[12px] text-muted-foreground font-mono">
+            {user.username}
+          </p>
+          <HonorBadge points={user.points} size="sm" showLabel={true} />
+        </div>
+      </div>
+      <div className="hidden sm:flex items-center gap-1 flex-wrap justify-end max-w-[200px]">
+        {user.tracks.map((track) => (
+          <span
+            key={track}
+            className="text-[10px] font-mono px-2 py-0.5 border border-border text-muted-foreground"
+          >
+            {track}
+          </span>
+        ))}
+      </div>
+      <div className="text-right shrink-0">
+        <p className="font-mono font-bold text-foreground text-[15px] sm:text-[16px]">
+          {user.points.toLocaleString()}
+        </p>
+        <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono">
+          {user.challenges} {t("leaderboard.challenges")}
+        </p>
+      </div>
+    </div>
+  );
 };
 
 const Leaderboard = () => {
@@ -52,36 +244,174 @@ const Leaderboard = () => {
 
       {/* Header */}
       <section className="pt-28 sm:pt-36 pb-8 sm:pb-12">
-        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
-          <p className="text-[11px] text-muted-foreground uppercase tracking-[0.3em] font-mono mb-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
+          <p className="text-[12px] sm:text-[13px] font-medium text-muted-foreground mb-3 uppercase tracking-widest">
             {t("leaderboard.label")}
           </p>
-          <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight mb-4">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground leading-tight tracking-tight mb-4">
             {t("leaderboard.title")}
           </h1>
-          <p className="text-muted-foreground text-lg max-w-lg">
+          <p className="text-muted-foreground text-[15px] sm:text-base md:text-lg max-w-lg">
             {t("leaderboard.desc")}
           </p>
+
+          {/* Filters */}
+          <div className="flex flex-wrap gap-2 mt-8">
+            {FILTERS.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setTimeFilter(f.key)}
+                className={`px-3 py-1 text-[12px] font-medium border transition-colors ${
+                  timeFilter === f.key
+                    ? "bg-foreground text-background border-foreground"
+                    : "bg-background text-muted-foreground border-border hover:text-foreground"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+            <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-mono ms-auto">
+              <TrendingUp className="w-3.5 h-3.5" />
+              {t("leaderboard.updated")}
+            </div>
+          </div>
         </div>
       </section>
 
       <SectionDivider />
 
-      {/* Badge Tiers Legend */}
+      {/* Top 3 Podium */}
       <ScrollReveal>
-        <section className="py-12 sm:py-16">
-          <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
-            <p className="text-[13px] font-mono text-muted-foreground mb-4 uppercase tracking-widest">
+        <section className="py-10 sm:py-14">
+          <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
+            <p className="text-[12px] sm:text-[13px] font-mono text-muted-foreground mb-6 uppercase tracking-widest">
+              {t("leaderboard.top_players") || "Top Players"}
+            </p>
+            <div className="grid grid-cols-3 gap-px bg-border border border-border">
+              {/* 2nd Place */}
+              <div className="bg-background flex flex-col items-center justify-end py-6 sm:py-10 px-3 order-1">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center border border-zinc-400/30 bg-zinc-400/10 mb-3">
+                  <Medal className="w-6 h-6 sm:w-7 sm:h-7 text-zinc-400" />
+                </div>
+                <span className="font-mono text-[20px] sm:text-[24px] font-bold text-zinc-400 mb-1">
+                  2
+                </span>
+                <p className="font-semibold text-foreground text-[13px] sm:text-[15px] text-center truncate max-w-full">
+                  {MOCK_USERS[1].name}
+                </p>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono mt-0.5">
+                  {MOCK_USERS[1].username}
+                </p>
+                <p className="font-mono font-bold text-foreground text-[14px] sm:text-[16px] mt-2">
+                  {MOCK_USERS[1].points.toLocaleString()}
+                </p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground font-mono">
+                  {MOCK_USERS[1].challenges} {t("leaderboard.challenges")}
+                </p>
+                <div className="mt-3">
+                  <HonorBadge
+                    points={MOCK_USERS[1].points}
+                    size="sm"
+                    showLabel={true}
+                  />
+                </div>
+              </div>
+
+              {/* 1st Place */}
+              <div className="bg-background flex flex-col items-center justify-end py-8 sm:py-12 px-3 order-2 relative">
+                <div className="absolute top-3 sm:top-4 left-1/2 -translate-x-1/2">
+                  <Star className="w-4 h-4 text-amber-500/40" />
+                </div>
+                <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center border border-amber-500/30 bg-amber-500/10 mb-3">
+                  <Trophy className="w-7 h-7 sm:w-8 sm:h-8 text-amber-500" />
+                </div>
+                <span className="font-mono text-[24px] sm:text-[28px] font-bold text-amber-500 mb-1">
+                  1
+                </span>
+                <p className="font-semibold text-foreground text-[14px] sm:text-[16px] text-center truncate max-w-full">
+                  {MOCK_USERS[0].name}
+                </p>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono mt-0.5">
+                  {MOCK_USERS[0].username}
+                </p>
+                <p className="font-mono font-bold text-foreground text-[16px] sm:text-[18px] mt-2">
+                  {MOCK_USERS[0].points.toLocaleString()}
+                </p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground font-mono">
+                  {MOCK_USERS[0].challenges} {t("leaderboard.challenges")}
+                </p>
+                <div className="mt-3">
+                  <HonorBadge
+                    points={MOCK_USERS[0].points}
+                    size="sm"
+                    showLabel={true}
+                  />
+                </div>
+              </div>
+
+              {/* 3rd Place */}
+              <div className="bg-background flex flex-col items-center justify-end py-6 sm:py-10 px-3 order-3">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center border border-amber-700/30 bg-amber-700/10 mb-3">
+                  <Medal className="w-6 h-6 sm:w-7 sm:h-7 text-amber-700" />
+                </div>
+                <span className="font-mono text-[20px] sm:text-[24px] font-bold text-amber-700 mb-1">
+                  3
+                </span>
+                <p className="font-semibold text-foreground text-[13px] sm:text-[15px] text-center truncate max-w-full">
+                  {MOCK_USERS[2].name}
+                </p>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono mt-0.5">
+                  {MOCK_USERS[2].username}
+                </p>
+                <p className="font-mono font-bold text-foreground text-[14px] sm:text-[16px] mt-2">
+                  {MOCK_USERS[2].points.toLocaleString()}
+                </p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground font-mono">
+                  {MOCK_USERS[2].challenges} {t("leaderboard.challenges")}
+                </p>
+                <div className="mt-3">
+                  <HonorBadge
+                    points={MOCK_USERS[2].points}
+                    size="sm"
+                    showLabel={true}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </ScrollReveal>
+
+      <SectionDivider />
+
+      {/* Badge Tiers */}
+      <ScrollReveal>
+        <section className="py-10 sm:py-14">
+          <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
+            <p className="text-[12px] sm:text-[13px] font-mono text-muted-foreground mb-4 uppercase tracking-widest">
               {t("badge.title")}
             </p>
-            <div className="grid grid-cols-5 gap-px bg-border border border-border">
+            <div className="flex border border-border divide-x divide-border">
               {BADGE_TIERS.map((tier) => (
-                <div key={tier.id} className="bg-background p-4 flex flex-col items-center text-center gap-2">
-                  <div className={`w-10 h-10 flex items-center justify-center border ${tier.borderClass} ${tier.bgClass}`}>
-                    <tier.icon className={`w-5 h-5 ${tier.colorClass}`} />
+                <div
+                  key={tier.id}
+                  className="flex-1 bg-background py-4 px-2 flex flex-col items-center text-center gap-1.5"
+                >
+                  <div
+                    className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center border ${tier.borderClass} ${tier.bgClass}`}
+                  >
+                    <tier.icon
+                      className={`w-4 h-4 sm:w-5 sm:h-5 ${tier.colorClass}`}
+                    />
                   </div>
-                  <span className={`text-[11px] font-mono font-bold ${tier.colorClass} uppercase`}>{t(tier.nameKey)}</span>
-                  <span className="text-[10px] text-muted-foreground font-mono">{tier.minPoints.toLocaleString()}+</span>
+                  <span
+                    className={`text-[10px] sm:text-[11px] font-mono font-bold ${tier.colorClass} uppercase`}
+                  >
+                    {t(tier.nameKey)}
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] text-muted-foreground font-mono">
+                    {tier.minPoints.toLocaleString()}+
+                  </span>
                 </div>
               ))}
             </div>
@@ -91,103 +421,21 @@ const Leaderboard = () => {
 
       <SectionDivider />
 
-      {/* Top 3 podium */}
-      <ScrollReveal>
-        <section className="py-12 sm:py-16">
-          <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
-            <div className="grid grid-cols-3 gap-px bg-border border border-border">
-              {[1, 0, 2].map((order, i) => {
-                const u = MOCK_USERS[order];
-                const heights = ["h-32", "h-40", "h-24"];
-                return (
-                  <div key={u.rank} className="bg-background p-6 flex flex-col items-center text-center">
-                    <RankBadge rank={u.rank} />
-                    <div className={`w-full ${heights[i]} bg-accent/50 border border-border mt-4 mb-4 flex items-end justify-center pb-3`}>
-                      <span className="font-mono text-2xl font-bold text-foreground">{u.points.toLocaleString()}</span>
-                    </div>
-                    <p className="font-bold text-foreground text-[15px]">{u.name}</p>
-                    <p className="text-[12px] text-muted-foreground font-mono">{u.username}</p>
-                    <div className="mt-2">
-                      <HonorBadge points={u.points} size="sm" />
-                    </div>
-                    <div className="flex items-center gap-1 mt-2">
-                      <Star className="w-3 h-3 text-amber-500" />
-                      <span className="text-[11px] text-muted-foreground font-mono">{u.streak}d {t("leaderboard.streak")}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      </ScrollReveal>
-
-      <SectionDivider />
-
-      {/* Filters */}
-      <div className="border-b border-border">
-        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0 flex items-center justify-between">
-          <div className="flex items-center">
-            {FILTERS.map(f => (
-              <button
-                key={f.key}
-                onClick={() => setTimeFilter(f.key)}
-                className={`px-4 py-3 text-[13px] font-medium transition-colors ${
-                  timeFilter === f.key
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-2 text-[12px] text-muted-foreground font-mono">
-            <TrendingUp className="w-3.5 h-3.5" />
-            {t("leaderboard.updated")}
-          </div>
-        </div>
-      </div>
-
-      <SectionDivider />
-
-      {/* Full Rankings */}
-      <ScrollReveal>
-        <section className="py-0">
-          <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
-            {MOCK_USERS.map((user) => (
-              <div key={user.rank}>
-                <div className="flex items-center gap-4 sm:gap-6 py-5 px-2 hover:bg-accent/30 transition-colors cursor-pointer group bg-background">
-                  <RankBadge rank={user.rank} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3">
-                      <p className="font-bold text-foreground text-[15px] truncate">{user.name}</p>
-                      <ChangeIndicator change={user.change} />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-[12px] text-muted-foreground font-mono">{user.username}</p>
-                      <HonorBadge points={user.points} size="sm" showLabel={true} />
-                    </div>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-1 flex-wrap justify-end max-w-[200px]">
-                    {user.tracks.map(track => (
-                      <span key={track} className="text-[10px] font-mono px-2 py-0.5 border border-border text-muted-foreground">
-                        {track}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="font-mono font-bold text-foreground text-[16px]">{user.points.toLocaleString()}</p>
-                    <p className="text-[11px] text-muted-foreground font-mono">{user.challenges} {t("leaderboard.challenges")}</p>
-                  </div>
-                </div>
-                <SectionDivider />
+      {/* Full Rankings (4th onward) */}
+      <section className="pb-0">
+        {MOCK_USERS.slice(3).map((user, i) => (
+          <ScrollReveal key={user.rank} delay={i * 30}>
+            <div className="group">
+              <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6 py-5 sm:py-6 hover:bg-accent/30 transition-colors duration-300 cursor-pointer">
+                <UserRow user={user} />
               </div>
-            ))}
-          </div>
-        </section>
-      </ScrollReveal>
+              {i < MOCK_USERS.slice(3).length - 1 && <SectionDivider />}
+            </div>
+          </ScrollReveal>
+        ))}
+      </section>
 
+      <SectionDivider />
       <Footer />
     </PageLayout>
   );

@@ -7,12 +7,48 @@ import ScrollReveal from "@/components/ScrollReveal";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 const events = [
-  { title: "Weekly Hackathon #127", date: "Mar 10–16, 2026", location: "Online", desc: "This week's theme: Build a developer tool that solves a real problem.", status: "upcoming" as const },
-  { title: "DevHustlers Meetup — London", date: "Mar 22, 2026", location: "London, UK", desc: "In-person networking and lightning talks at Shoreditch Works.", status: "upcoming" as const },
-  { title: "Open Source Sprint", date: "Apr 1–7, 2026", location: "Online", desc: "A week-long sprint to contribute to community open source projects.", status: "upcoming" as const },
-  { title: "DevHustlers Conference 2026", date: "May 15–16, 2026", location: "San Francisco, CA", desc: "Our annual conference. Two days of talks, workshops, and community.", status: "upcoming" as const },
-  { title: "Weekly Hackathon #126", date: "Mar 3–9, 2026", location: "Online", desc: "Theme: AI-powered tools. 48 submissions, 12 finalist projects.", status: "past" as const },
-  { title: "DevHustlers Meetup — Berlin", date: "Feb 20, 2026", location: "Berlin, DE", desc: "Community meetup with 60+ developers. Talks on Rust and WebAssembly.", status: "past" as const },
+  {
+    title: "Weekly Hackathon #127",
+    date: "Mar 10–16, 2026",
+    location: "Online",
+    desc: "This week's theme: Build a developer tool that solves a real problem.",
+    status: "upcoming" as const,
+  },
+  {
+    title: "DevHustlers Meetup — London",
+    date: "Mar 22, 2026",
+    location: "London, UK",
+    desc: "In-person networking and lightning talks at Shoreditch Works.",
+    status: "upcoming" as const,
+  },
+  {
+    title: "Open Source Sprint",
+    date: "Apr 1–7, 2026",
+    location: "Online",
+    desc: "A week-long sprint to contribute to community open source projects.",
+    status: "upcoming" as const,
+  },
+  {
+    title: "DevHustlers Conference 2026",
+    date: "May 15–16, 2026",
+    location: "San Francisco, CA",
+    desc: "Our annual conference. Two days of talks, workshops, and community.",
+    status: "upcoming" as const,
+  },
+  {
+    title: "Weekly Hackathon #126",
+    date: "Mar 3–9, 2026",
+    location: "Online",
+    desc: "Theme: AI-powered tools. 48 submissions, 12 finalist projects.",
+    status: "past" as const,
+  },
+  {
+    title: "DevHustlers Meetup — Berlin",
+    date: "Feb 20, 2026",
+    location: "Berlin, DE",
+    desc: "Community meetup with 60+ developers. Talks on Rust and WebAssembly.",
+    status: "past" as const,
+  },
 ];
 
 const Events = () => {
@@ -27,32 +63,49 @@ const Events = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
           <div className="max-w-3xl">
             <ScrollReveal>
-              <p className="text-[13px] font-medium text-muted-foreground mb-3 uppercase tracking-widest">{t("events.label")}</p>
+              <p className="text-[13px] font-medium text-muted-foreground mb-3 uppercase tracking-widest">
+                {t("events.label")}
+              </p>
               <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground leading-tight tracking-tight mb-4">
                 {t("events.title.1")}{" "}
-                <span className="font-serif text-muted-foreground font-normal">{t("events.title.2")}</span>
+                <span className="font-serif text-muted-foreground font-normal">
+                  {t("events.title.2")}
+                </span>
               </h1>
-              <p className="text-muted-foreground text-[15px] sm:text-base md:text-lg">{t("events.desc")}</p>
+              <p className="text-muted-foreground text-[15px] sm:text-base md:text-lg">
+                {t("events.desc")}
+              </p>
             </ScrollReveal>
           </div>
         </div>
       </section>
 
+      <SectionDivider />
       <section>
-          <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
-          <h2 className="text-[13px] font-medium text-muted-foreground mb-0 uppercase tracking-widest py-4">{t("events.upcoming")}</h2>
-          <div className="border border-border bg-border">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-[13px] font-medium text-muted-foreground mb-0 uppercase tracking-widest p-4 md:p-6">
+            {t("events.upcoming")}
+          </h2>
+          <div className="border-b-0 border-t border-border bg-border">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-px">
               {upcoming.map((event, i) => (
                 <ScrollReveal key={i} delay={i * 80}>
                   <div className="bg-background p-6 sm:p-8 flex flex-col justify-between hover:bg-accent/30 transition-colors duration-300 h-full">
                     <div>
-                      <h3 className="font-semibold text-foreground text-base sm:text-lg mb-2">{event.title}</h3>
-                      <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed mb-4">{event.desc}</p>
+                      <h3 className="font-semibold text-foreground text-base sm:text-lg mb-2">
+                        {event.title}
+                      </h3>
+                      <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed mb-4">
+                        {event.desc}
+                      </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-4 text-[12px] text-muted-foreground font-mono">
-                      <span className="inline-flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {event.date}</span>
-                      <span className="inline-flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {event.location}</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5" /> {event.date}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5" /> {event.location}
+                      </span>
                     </div>
                   </div>
                 </ScrollReveal>
@@ -65,20 +118,30 @@ const Events = () => {
       <SectionDivider />
 
       <section>
-          <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
-          <h2 className="text-[13px] font-medium text-muted-foreground mb-0 uppercase tracking-widest py-4">{t("events.past")}</h2>
-          <div className="border border-border bg-border">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-[13px] font-medium text-muted-foreground mb-0 uppercase tracking-widest p-4 md:p6">
+            {t("events.past")}
+          </h2>
+          <div className="border-b-0 border-t border-border bg-border">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-px opacity-60">
               {past.map((event, i) => (
                 <ScrollReveal key={i} delay={i * 80}>
                   <div className="bg-background p-6 sm:p-8 flex flex-col justify-between h-full">
                     <div>
-                      <h3 className="font-semibold text-foreground text-base sm:text-lg mb-2">{event.title}</h3>
-                      <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed mb-4">{event.desc}</p>
+                      <h3 className="font-semibold text-foreground text-base sm:text-lg mb-2">
+                        {event.title}
+                      </h3>
+                      <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed mb-4">
+                        {event.desc}
+                      </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-4 text-[12px] text-muted-foreground font-mono">
-                      <span className="inline-flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {event.date}</span>
-                      <span className="inline-flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {event.location}</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5" /> {event.date}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5" /> {event.location}
+                      </span>
                     </div>
                   </div>
                 </ScrollReveal>
