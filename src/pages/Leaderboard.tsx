@@ -116,6 +116,68 @@ const Leaderboard = () => {
 
       <SectionDivider />
 
+      {/* Top 3 Podium */}
+      <ScrollReveal>
+        <section className="py-10 sm:py-14">
+          <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
+            <p className="text-[12px] sm:text-[13px] font-mono text-muted-foreground mb-6 uppercase tracking-widest">
+              {t("leaderboard.top_players") || "Top Players"}
+            </p>
+            <div className="grid grid-cols-3 gap-px bg-border border border-border">
+              {/* 2nd Place */}
+              <div className="bg-background flex flex-col items-center justify-end py-6 sm:py-10 px-3 order-1">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center border border-zinc-400/30 bg-zinc-400/10 mb-3">
+                  <Medal className="w-6 h-6 sm:w-7 sm:h-7 text-zinc-400" />
+                </div>
+                <span className="font-mono text-[20px] sm:text-[24px] font-bold text-zinc-400 mb-1">2</span>
+                <p className="font-semibold text-foreground text-[13px] sm:text-[15px] text-center truncate max-w-full">{MOCK_USERS[1].name}</p>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono mt-0.5">{MOCK_USERS[1].username}</p>
+                <p className="font-mono font-bold text-foreground text-[14px] sm:text-[16px] mt-2">{MOCK_USERS[1].points.toLocaleString()}</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground font-mono">{MOCK_USERS[1].challenges} {t("leaderboard.challenges")}</p>
+                <div className="mt-3">
+                  <HonorBadge points={MOCK_USERS[1].points} size="sm" showLabel={true} />
+                </div>
+              </div>
+
+              {/* 1st Place */}
+              <div className="bg-background flex flex-col items-center justify-end py-8 sm:py-12 px-3 order-2 relative">
+                <div className="absolute top-3 sm:top-4 left-1/2 -translate-x-1/2">
+                  <Star className="w-4 h-4 text-amber-500/40" />
+                </div>
+                <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center border border-amber-500/30 bg-amber-500/10 mb-3">
+                  <Trophy className="w-7 h-7 sm:w-8 sm:h-8 text-amber-500" />
+                </div>
+                <span className="font-mono text-[24px] sm:text-[28px] font-bold text-amber-500 mb-1">1</span>
+                <p className="font-semibold text-foreground text-[14px] sm:text-[16px] text-center truncate max-w-full">{MOCK_USERS[0].name}</p>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono mt-0.5">{MOCK_USERS[0].username}</p>
+                <p className="font-mono font-bold text-foreground text-[16px] sm:text-[18px] mt-2">{MOCK_USERS[0].points.toLocaleString()}</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground font-mono">{MOCK_USERS[0].challenges} {t("leaderboard.challenges")}</p>
+                <div className="mt-3">
+                  <HonorBadge points={MOCK_USERS[0].points} size="sm" showLabel={true} />
+                </div>
+              </div>
+
+              {/* 3rd Place */}
+              <div className="bg-background flex flex-col items-center justify-end py-6 sm:py-10 px-3 order-3">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center border border-amber-700/30 bg-amber-700/10 mb-3">
+                  <Medal className="w-6 h-6 sm:w-7 sm:h-7 text-amber-700" />
+                </div>
+                <span className="font-mono text-[20px] sm:text-[24px] font-bold text-amber-700 mb-1">3</span>
+                <p className="font-semibold text-foreground text-[13px] sm:text-[15px] text-center truncate max-w-full">{MOCK_USERS[2].name}</p>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono mt-0.5">{MOCK_USERS[2].username}</p>
+                <p className="font-mono font-bold text-foreground text-[14px] sm:text-[16px] mt-2">{MOCK_USERS[2].points.toLocaleString()}</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground font-mono">{MOCK_USERS[2].challenges} {t("leaderboard.challenges")}</p>
+                <div className="mt-3">
+                  <HonorBadge points={MOCK_USERS[2].points} size="sm" showLabel={true} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </ScrollReveal>
+
+      <SectionDivider />
+
       {/* Badge Tiers */}
       <ScrollReveal>
         <section className="py-10 sm:py-14">
@@ -140,15 +202,15 @@ const Leaderboard = () => {
 
       <SectionDivider />
 
-      {/* Full Rankings */}
+      {/* Full Rankings (4th onward) */}
       <section className="pb-0">
-        {MOCK_USERS.map((user, i) => (
+        {MOCK_USERS.slice(3).map((user, i) => (
           <ScrollReveal key={user.rank} delay={i * 30}>
             <div className="group">
               <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6 py-5 sm:py-6 hover:bg-accent/30 transition-colors duration-300 cursor-pointer">
                 <UserRow user={user} />
               </div>
-              {i < MOCK_USERS.length - 1 && <SectionDivider />}
+              {i < MOCK_USERS.slice(3).length - 1 && <SectionDivider />}
             </div>
           </ScrollReveal>
         ))}
