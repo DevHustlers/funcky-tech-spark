@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   ArrowRight,
   Code,
@@ -9,6 +10,15 @@ import {
   Cpu,
   Palette,
   Wifi,
+  Search,
+  Users,
+  Trophy,
+  TrendingUp,
+  Layers,
+  Database,
+  Cloud,
+  Globe,
+  Terminal,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -16,113 +26,54 @@ import Footer from "@/components/Footer";
 import PageLayout from "@/components/PageLayout";
 import SectionDivider from "@/components/SectionDivider";
 import ScrollReveal from "@/components/ScrollReveal";
-import OrbitsBackground from "@/components/OrbitsBackground";
 import { useLanguage } from "@/i18n/LanguageContext";
+import OrbitsBackground from "@/components/OrbitsBackground";
+import { getTracks } from "@/services/tracks.service";
+import type { Tables } from "@/types/database";
 
-const PLANETS = [
-  {
-    slug: "frontend",
-    name: "Frontend",
-    icon: Code,
-    members: 342,
-    challenges: 28,
-    color: "text-blue-500",
-    borderColor: "border-blue-500/20",
-    description:
-      "Master the art of building beautiful, responsive user interfaces with modern frameworks and tools.",
-  },
-  {
-    slug: "backend",
-    name: "Backend",
-    icon: Server,
-    members: 278,
-    challenges: 24,
-    color: "text-green-500",
-    borderColor: "border-green-500/20",
-    description:
-      "Build robust server-side systems, APIs, and microservices that power modern applications.",
-  },
-  {
-    slug: "data-science",
-    name: "Data Science",
-    icon: BarChart3,
-    members: 195,
-    challenges: 18,
-    color: "text-purple-500",
-    borderColor: "border-purple-500/20",
-    description:
-      "Extract insights from data through statistical analysis, visualization, and predictive modeling.",
-  },
-  {
-    slug: "ai-ml",
-    name: "AI / ML",
-    icon: Brain,
-    members: 231,
-    challenges: 22,
-    color: "text-pink-500",
-    borderColor: "border-pink-500/20",
-    description:
-      "Explore machine learning, deep learning, and artificial intelligence applications.",
-  },
-  {
-    slug: "cybersecurity",
-    name: "Cybersecurity",
-    icon: Shield,
-    members: 167,
-    challenges: 20,
-    color: "text-red-500",
-    borderColor: "border-red-500/20",
-    description:
-      "Defend systems, discover vulnerabilities, and master the art of ethical hacking.",
-  },
-  {
-    slug: "mobile-dev",
-    name: "Mobile Dev",
-    icon: Smartphone,
-    members: 204,
-    challenges: 16,
-    color: "text-cyan-500",
-    borderColor: "border-cyan-500/20",
-    description:
-      "Create native and cross-platform mobile applications for iOS and Android.",
-  },
-  {
-    slug: "operating-systems",
-    name: "Operating Systems",
-    icon: Cpu,
-    members: 89,
-    challenges: 12,
-    color: "text-orange-500",
-    borderColor: "border-orange-500/20",
-    description:
-      "Dive deep into system programming, kernel development, and OS architecture.",
-  },
-  {
-    slug: "ui-ux",
-    name: "UI/UX",
-    icon: Palette,
-    members: 256,
-    challenges: 14,
-    color: "text-violet-500",
-    borderColor: "border-violet-500/20",
-    description:
-      "Design intuitive interfaces and user experiences that delight and engage.",
-  },
-  {
-    slug: "network",
-    name: "Network",
-    icon: Wifi,
-    members: 112,
-    challenges: 15,
-    color: "text-teal-500",
-    borderColor: "border-teal-500/20",
-    description:
-      "Master networking protocols, infrastructure, and distributed systems.",
-  },
-];
+type Track = Tables<"tracks">;
+
+const getTrackIcon = (iconKey: string | null) => {
+  switch (iconKey) {
+    case "Code": return Code;
+    case "Server": return Server;
+    case "BarChart3": return BarChart3;
+    case "Brain": return Brain;
+    case "Shield": return Shield;
+    case "Smartphone": return Smartphone;
+    case "Cpu": return Cpu;
+    case "Palette": return Palette;
+    case "Wifi": return Wifi;
+    case "Search": return Search;
+    case "Users": return Users;
+    case "Trophy": return Trophy;
+    case "TrendingUp": return TrendingUp;
+    case "Layers": return Layers;
+    case "Database": return Database;
+    case "Cloud": return Cloud;
+    case "Globe": return Globe;
+    default: return Terminal;
+  }
+};
 
 const Planets = () => {
-  const { t, dir } = useLanguage();
+  const { t } = useLanguage();
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const fetchTracks = async () => {
+      const { data } = await getTracks();
+      if (data) setTracks(data);
+      setLoading(false);
+    };
+    fetchTracks();
+  }, []);
+
+  const filtered = tracks.filter((t) =>
+    t.name.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <PageLayout>
@@ -154,63 +105,75 @@ const Planets = () => {
 
       <SectionDivider />
 
-      <ScrollReveal>
-        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border border-t-0 border-border">
-            {PLANETS.map((planet) => (
-              <Link
-                key={planet.slug}
-                to={`/planets/${planet.slug}`}
-                className="bg-background p-8 hover:bg-accent/30 transition-all group relative block"
-              >
-                <div
-                  className={`w-14 h-14 flex items-center justify-center border ${planet.borderColor} mb-6`}
-                >
-                  <planet.icon
-                    className={`w-7 h-7 ${planet.color}`}
-                    strokeWidth={1.5}
-                  />
-                </div>
+      <section className="pb-16 px-4 sm:px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="relative mb-12">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder={t("planets.searchPlaceholder") || "Search tracks..."}
+              className="w-full bg-background border border-border px-12 py-4 font-mono text-sm focus:outline-none focus:border-foreground/40 transition-colors"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
 
-                <h3 className={`text-xl font-bold mb-2 ${planet.color}`}>
-                  {planet.name}
-                </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border border border-border">
+            {filtered.map((track, i) => {
+              const Icon = getTrackIcon(track.icon_key);
+              return (
+                <ScrollReveal key={track.id} delay={i * 80}>
+                  <Link
+                    to={`/tracks/${track.slug}`}
+                    className="group bg-background p-8 hover:bg-accent/30 transition-all duration-500 flex flex-col h-full"
+                  >
+                    <div className="flex items-start justify-between mb-8">
+                      <div className="w-14 h-14 flex items-center justify-center border border-border group-hover:border-foreground/20 bg-accent transition-colors">
+                        <Icon className="w-7 h-7 text-foreground group-hover:scale-110 transition-transform duration-500" />
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all" />
+                    </div>
 
-                <p className="text-muted-foreground text-[14px] leading-relaxed mb-6">
-                  {planet.description}
-                </p>
+                    <div className="mt-auto">
+                      <h3 className="text-xl font-bold text-foreground mb-3">
+                        {track.name}
+                      </h3>
+                      <p className="text-muted-foreground text-[14px] leading-relaxed mb-6 line-clamp-2">
+                        {track.description}
+                      </p>
 
-                <div className="flex items-center gap-6 mb-6">
-                  <div>
-                    <p className="font-mono font-bold text-foreground text-[18px]">
-                      {planet.members}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-wider">
-                      {t("planets.members")}
-                    </p>
-                  </div>
-                  <div className="w-px h-8 bg-border" />
-                  <div>
-                    <p className="font-mono font-bold text-foreground text-[18px]">
-                      {planet.challenges}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-wider">
-                      {t("planets.challenges")}
-                    </p>
-                  </div>
-                </div>
-
-                <span
-                  className={`inline-flex items-center gap-2 text-[13px] font-medium ${planet.color} transition-colors`}
-                >
-                  {t("planets.explore")}{" "}
-                  <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
-                </span>
-              </Link>
-            ))}
+                      <div className="flex items-center gap-6 pt-6 border-t border-border/50">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-mono mb-1">
+                            {t("planets.members")}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <Users className="w-3.5 h-3.5 text-foreground" />
+                            <span className="text-[13px] font-mono font-bold">
+                              0
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-mono mb-1">
+                            {t("planets.challenges")}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <Trophy className="w-3.5 h-3.5 text-foreground" />
+                            <span className="text-[13px] font-mono font-bold">
+                              0
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </ScrollReveal>
+              );
+            })}
           </div>
         </div>
-      </ScrollReveal>
+      </section>
 
       <SectionDivider />
       <Footer />

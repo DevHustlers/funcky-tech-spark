@@ -1,11 +1,37 @@
+import { useState, useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Users, Target, Trophy, BookOpen, Code, Server, BarChart3, Brain, Shield, Smartphone, Cpu, Palette, Wifi } from "lucide-react";
+import {
+  Trophy,
+  Users,
+  Timer,
+  ArrowRight,
+  Shield,
+  Zap,
+  Globe,
+  Terminal,
+  ArrowLeft,
+  ChevronRight,
+  Code,
+  Server,
+  BarChart3,
+  Brain,
+  Smartphone,
+  Palette,
+  Wifi,
+  Cpu,
+  Target,
+  BookOpen,
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageLayout from "@/components/PageLayout";
 import SectionDivider from "@/components/SectionDivider";
 import ScrollReveal from "@/components/ScrollReveal";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { getTrackBySlug } from "@/services/tracks.service";
+import type { Tables } from "@/types/database";
+
+type Track = Tables<"tracks">;
 
 const TRACK_DATA: Record<string, {
   name: string;
@@ -224,20 +250,57 @@ const TRACK_DATA: Record<string, {
 const TrackDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { t } = useLanguage();
-  
-  if (!slug || !TRACK_DATA[slug]) {
+  const [track, setTrack] = useState<Track | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTrack = async () => {
+      if (slug) {
+        const { data } = await getTrackBySlug(slug);
+        if (data) setTrack(data);
+      }
+      setLoading(false);
+    };
+    fetchTrack();
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <PageLayout>
+        <Navbar />
+        <div className="pt-40 text-center font-mono animate-pulse">
+          INITIALIZING_TRACK_DATA...
+        </div>
+        <Footer />
+      </PageLayout>
+    );
+  }
+
+  const staticData = slug ? TRACK_DATA[slug] : null;
+  if (!slug || (!track && !staticData)) {
     return <Navigate to="/planets" replace />;
   }
 
-  const track = TRACK_DATA[slug];
-  const Icon = track.icon;
+  // Merge dynamic and static data
+  const name = track?.name || staticData?.name;
+  const description = track?.description || staticData?.description;
+  const longDescription = (track as any)?.long_description || staticData?.longDescription || description;
+  const members = (track as any)?.members || staticData?.members || 0;
+  const challenges = (track as any)?.challenges || staticData?.challenges || 0;
+  const Icon = staticData?.icon || Terminal;
+  const color = staticData?.color || "text-foreground";
+  const borderColor = staticData?.borderColor || "border-border";
+  const bgAccent = staticData?.bgAccent || "bg-accent";
+  const skills = staticData?.skills || [];
+  const roadmap = staticData?.roadmap || [];
+  const topChallenges = staticData?.topChallenges || [];
 
   return (
     <PageLayout>
       <Navbar />
 
       {/* Hero */}
-      <section className="pt-28 sm:pt-40 pb-16">
+      <section className={`pt-28 sm:pt-40 pb-16 ${bgAccent}`}>
         <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
           <Link 
             to="/planets" 
@@ -247,37 +310,37 @@ const TrackDetail = () => {
           </Link>
 
           <div className="flex items-start gap-6 mb-8">
-            <div className={`w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center border-2 ${track.borderColor} ${track.bgAccent} shrink-0`}>
-              <Icon className={`w-8 h-8 sm:w-10 sm:h-10 ${track.color}`} strokeWidth={1.5} />
+            <div className={`w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center border-2 ${borderColor} bg-background shrink-0`}>
+              <Icon className={`w-8 h-8 sm:w-10 sm:h-10 ${color}`} strokeWidth={1.5} />
             </div>
             <div className="flex-1">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3">
-                {track.name} Track
+                {name} Track
               </h1>
               <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-                {track.description}
+                {description}
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border">
             <div className="bg-background p-4 sm:p-6 text-center">
-              <Users className={`w-5 h-5 ${track.color} mx-auto mb-2`} />
-              <p className="text-xl sm:text-2xl font-bold font-mono text-foreground">{track.members}</p>
+              <Users className={`w-5 h-5 ${color} mx-auto mb-2`} />
+              <p className="text-xl sm:text-2xl font-bold font-mono text-foreground">{members}</p>
               <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-wider">Members</p>
             </div>
             <div className="bg-background p-4 sm:p-6 text-center">
-              <Target className={`w-5 h-5 ${track.color} mx-auto mb-2`} />
-              <p className="text-xl sm:text-2xl font-bold font-mono text-foreground">{track.challenges}</p>
+              <Target className={`w-5 h-5 ${color} mx-auto mb-2`} />
+              <p className="text-xl sm:text-2xl font-bold font-mono text-foreground">{challenges}</p>
               <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-wider">Challenges</p>
             </div>
             <div className="bg-background p-4 sm:p-6 text-center">
-              <Trophy className={`w-5 h-5 ${track.color} mx-auto mb-2`} />
+              <Trophy className={`w-5 h-5 ${color} mx-auto mb-2`} />
               <p className="text-xl sm:text-2xl font-bold font-mono text-foreground">12</p>
               <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-wider">Completed</p>
             </div>
             <div className="bg-background p-4 sm:p-6 text-center">
-              <BookOpen className={`w-5 h-5 ${track.color} mx-auto mb-2`} />
+              <BookOpen className={`w-5 h-5 ${color} mx-auto mb-2`} />
               <p className="text-xl sm:text-2xl font-bold font-mono text-foreground">6</p>
               <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-wider">Resources</p>
             </div>
@@ -295,7 +358,7 @@ const TrackDetail = () => {
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">About This Track</h2>
                 <p className="text-muted-foreground text-[15px] leading-relaxed mb-6">
-                  {track.longDescription}
+                  {longDescription}
                 </p>
                 <Link 
                   to="/challenges" 
@@ -308,9 +371,9 @@ const TrackDetail = () => {
               <div>
                 <h3 className="text-lg font-bold text-foreground mb-4">Key Skills You'll Learn</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {track.skills.map((skill, i) => (
+                  {skills.map((skill, i) => (
                     <div key={i} className="flex items-center gap-2 text-[14px] text-muted-foreground">
-                      <div className={`w-1.5 h-1.5 ${track.bgAccent} border ${track.borderColor}`} />
+                      <div className={`w-1.5 h-1.5 ${bgAccent} border ${borderColor}`} />
                       {skill}
                     </div>
                   ))}
@@ -329,10 +392,10 @@ const TrackDetail = () => {
           <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">Learning Roadmap</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border border border-border">
-              {track.roadmap.map((phase, i) => (
+              {roadmap.map((phase, i) => (
                 <ScrollReveal key={i} delay={i * 100}>
                   <div className="bg-background p-6 sm:p-8">
-                    <div className={`inline-block px-3 py-1 border ${track.borderColor} ${track.bgAccent} text-[11px] font-mono font-bold uppercase tracking-wider mb-4 ${track.color}`}>
+                    <div className={`inline-block px-3 py-1 border ${borderColor} ${bgAccent} text-[11px] font-mono font-bold uppercase tracking-wider mb-4 ${color}`}>
                       {phase.phase}
                     </div>
                     <h3 className="text-lg font-bold text-foreground mb-2">{phase.title}</h3>
@@ -361,7 +424,7 @@ const TrackDetail = () => {
               </Link>
             </div>
             <div className="space-y-px bg-border border border-border">
-              {track.topChallenges.map((challenge, i) => (
+              {topChallenges.map((challenge, i) => (
                 <ScrollReveal key={challenge.id} delay={i * 80}>
                   <div className="bg-background p-6 hover:bg-accent/30 transition-colors">
                     <div className="flex items-start justify-between gap-4">

@@ -16,6 +16,22 @@ export const getTracks = async (): Promise<ServiceResponse<Tables<'tracks'>[]>> 
   }
 };
 
+export const getTrackBySlug = async (slug: string): Promise<ServiceResponse<Tables<'tracks'>>> => {
+  try {
+    const { data, error } = await supabase
+      .from('tracks')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error: any) {
+    console.error('Error in getTrackBySlug:', error.message);
+    return { data: null, error: error.message };
+  }
+};
+
 export const createTrack = async (
   data: TablesInsert<'tracks'>
 ): Promise<ServiceResponse<Tables<'tracks'>>> => {

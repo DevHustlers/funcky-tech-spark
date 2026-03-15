@@ -17,6 +17,22 @@ export const getChallenges = async (): Promise<ServiceResponse<Tables<'challenge
   }
 };
 
+export const getChallengeById = async (id: string): Promise<ServiceResponse<Tables<'challenges'>>> => {
+  try {
+    const { data, error } = await supabase
+      .from('challenges')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error: any) {
+    console.error('Error in getChallengeById:', error.message);
+    return { data: null, error: error.message };
+  }
+};
+
 export const getChallengesByTrack = async (
   trackId: string
 ): Promise<ServiceResponse<Tables<'challenges'>[]>> => {

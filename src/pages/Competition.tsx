@@ -1,13 +1,32 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Clock, Users, Trophy, ArrowRight, CheckCircle2, XCircle,
-  Timer, Zap, Crown, Medal, Star, ChevronRight
+  Trophy,
+  Users,
+  Timer,
+  ArrowRight,
+  Shield,
+  Zap,
+  CheckCircle2,
+  XCircle,
+  Play,
+  Award,
+  Clock,
+  Crown,
+  Medal,
+  Star,
+  ChevronRight,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageLayout from "@/components/PageLayout";
 import SectionDivider from "@/components/SectionDivider";
+import ScrollReveal from "@/components/ScrollReveal";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { getActiveCompetitions } from "@/services/competitions.service";
+import type { Tables } from "@/types/database";
+
+type CompetitionType = Tables<"competitions">;
 
 // Mock competition data
 const MOCK_COMPETITION = {
@@ -73,6 +92,21 @@ type Phase = "lobby" | "countdown" | "question" | "reveal" | "results";
 
 const Competition = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+  const [competition, setCompetition] = useState<CompetitionType | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCompetition = async () => {
+      const { data } = await getActiveCompetitions();
+      if (data && data.length > 0) {
+        setCompetition(data[0]);
+      }
+      setLoading(false);
+    };
+    fetchCompetition();
+  }, []);
+
   const [phase, setPhase] = useState<Phase>("lobby");
   const [currentQ, setCurrentQ] = useState(0);
   const [timer, setTimer] = useState(MOCK_COMPETITION.timePerQuestion);
@@ -180,6 +214,21 @@ const Competition = () => {
   const yourRank = sortedParticipants.findIndex((p) => p.isYou) + 1;
   const question = MOCK_QUESTIONS[currentQ];
   const timerPercent = (timer / MOCK_COMPETITION.timePerQuestion) * 100;
+
+  if (loading) {
+    return (
+      <PageLayout>
+        <Navbar />
+        <div className="pt-40 text-center font-mono animate-pulse">
+          INITIALIZING_COMPETITION_PROTOCOL...
+        </div>
+        <Footer />
+      </PageLayout>
+    );
+  }
+
+  const currentComp = competition || MOCK_COMPETITION;
+  const currentQuestions = (currentComp as any).questions || MOCK_QUESTIONS;
 
   return (
     <PageLayout>
@@ -494,7 +543,7 @@ const Competition = () => {
                 Competition Complete!
               </h1>
               <p className="text-muted-foreground text-[15px]">
-                {MOCK_COMPETITION.title} — Final Results
+                {currentComp.title} — Final Results
               </p>
             </div>
 
@@ -502,20 +551,48 @@ const Competition = () => {
             <div className="border-2 border-foreground p-6 mb-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest mb-2">Your Result</p>
-                  <p className="text-3xl font-bold text-foreground font-mono">{score} <span className="text-[14px] text-muted-foreground font-normal">points</span></p>
+                  <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest mb-2">
+                    Your Result
+                  </p>
+                  <p className="text-3xl font-bold text-foreground font-mono">
+                    {score}{" "}
+                    <span className="text-[14px] text-muted-foreground font-normal">
+                      points
+                    </span>
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest mb-2">Rank</p>
-                  <p className="text-3xl font-bold text-foreground font-mono">#{yourRank}</p>
+                  <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest mb-2">
+                    Rank
+                  </p>
+                  <p className="text-3xl font-bold text-foreground font-mono">
+                    #{yourRank}
+                  </p>
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t border-border flex items-center gap-6 text-[13px] text-muted-foreground">
                 <span>
-                  <span className="font-mono font-bold text-emerald-500">{answers.filter((a, i) => a === MOCK_QUESTIONS[i].correctIndex).length}</span> / {MOCK_QUESTIONS.length} correct
+                  <span className="font-mono font-bold text-emerald-500">
+                    {
+                      answers.filter(
+                        (a, i) => a === currentQuestions[i].correctIndex,
+                      ).length
+                    }
+                  </span>{" "}
+                  / {currentQuestions.length} correct
                 </span>
                 <span>
-                  Accuracy: <span className="font-mono font-bold text-foreground">{Math.round((answers.filter((a, i) => a === MOCK_QUESTIONS[i].correctIndex).length / MOCK_QUESTIONS.length) * 100)}%</span>
+                  Accuracy:{" "}
+                  <span className="font-mono font-bold text-foreground">
+                    {Math.round(
+                      (answers.filter(
+                        (a, i) => a === currentQuestions[i].correctIndex,
+                      ).length /
+                        currentQuestions.length) *
+                        100,
+                    )}
+                    %
+                  </span>
                 </span>
               </div>
             </div>
@@ -530,19 +607,34 @@ const Competition = () => {
                 ];
                 const m = medals[i];
                 return (
-                  <div key={i} className={`bg-background p-6 text-center ${p.isYou ? "bg-accent/30" : ""}`}>
+                  <div
+                    key={i}
+                    className={`bg-background p-6 text-center ${
+                      p.isYou ? "bg-accent/30" : ""
+                    }`}
+                  >
                     <m.icon className={`w-8 h-8 ${m.color} mx-auto mb-3`} />
-                    <div className={`w-12 h-12 mx-auto flex items-center justify-center border font-mono font-bold text-[14px] mb-3 ${
-                      p.isYou ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground bg-accent"
-                    }`}>
+                    <div
+                      className={`w-12 h-12 mx-auto flex items-center justify-center border font-mono font-bold text-[14px] mb-3 ${
+                        p.isYou
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border text-muted-foreground bg-accent"
+                      }`}
+                    >
                       {p.avatar}
                     </div>
                     <p className="text-[14px] font-bold text-foreground mb-1">
                       {p.name} {p.isYou && "🎉"}
                     </p>
-                    <p className="text-[11px] text-muted-foreground font-mono">{m.label}</p>
-                    <p className="font-mono font-bold text-foreground text-lg mt-2">{p.score}</p>
-                    <p className="text-[10px] text-muted-foreground font-mono">points</p>
+                    <p className="text-[11px] text-muted-foreground font-mono">
+                      {m.label}
+                    </p>
+                    <p className="font-mono font-bold text-foreground text-lg mt-2">
+                      {p.score}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground font-mono">
+                      points
+                    </p>
                   </div>
                 );
               })}
@@ -551,31 +643,58 @@ const Competition = () => {
             {/* Full leaderboard */}
             <div className="border border-border mb-8">
               <div className="px-5 py-4 border-b border-border">
-                <h3 className="text-[14px] font-bold text-foreground">Full Leaderboard</h3>
+                <h3 className="text-[14px] font-bold text-foreground">
+                  Full Leaderboard
+                </h3>
               </div>
               <div className="divide-y divide-border">
                 {sortedParticipants.map((p, i) => (
-                  <div key={i} className={`px-5 py-4 flex items-center justify-between ${p.isYou ? "bg-accent/30" : ""}`}>
+                  <div
+                    key={i}
+                    className={`px-5 py-4 flex items-center justify-between ${
+                      p.isYou ? "bg-accent/30" : ""
+                    }`}
+                  >
                     <div className="flex items-center gap-4">
-                      <span className={`text-[14px] font-mono font-bold w-8 ${
-                        i === 0 ? "text-amber-500" : i === 1 ? "text-zinc-400" : i === 2 ? "text-amber-700" : "text-muted-foreground"
-                      }`}>
+                      <span
+                        className={`text-[14px] font-mono font-bold w-8 ${
+                          i === 0
+                            ? "text-amber-500"
+                            : i === 1
+                              ? "text-zinc-400"
+                              : i === 2
+                                ? "text-amber-700"
+                                : "text-muted-foreground"
+                        }`}
+                      >
                         #{i + 1}
                       </span>
-                      <div className={`w-9 h-9 flex items-center justify-center border text-[11px] font-bold font-mono ${
-                        p.isYou ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground bg-accent"
-                      }`}>
+                      <div
+                        className={`w-9 h-9 flex items-center justify-center border text-[11px] font-bold font-mono ${
+                          p.isYou
+                            ? "border-foreground bg-foreground text-background"
+                            : "border-border text-muted-foreground bg-accent"
+                        }`}
+                      >
                         {p.avatar}
                       </div>
                       <div>
-                        <p className={`text-[14px] font-medium ${p.isYou ? "text-foreground" : "text-muted-foreground"}`}>
+                        <p
+                          className={`text-[14px] font-medium ${
+                            p.isYou ? "text-foreground" : "text-muted-foreground"
+                          }`}
+                        >
                           {p.name} {p.isYou && "(You)"}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="font-mono font-bold text-foreground text-[15px]">{p.score}</span>
-                      <span className="text-[11px] text-muted-foreground font-mono">pts</span>
+                      <span className="font-mono font-bold text-foreground text-[15px]">
+                        {p.score}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground font-mono">
+                        pts
+                      </span>
                     </div>
                   </div>
                 ))}

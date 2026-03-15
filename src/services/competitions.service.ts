@@ -16,6 +16,22 @@ export const getCompetitions = async (): Promise<ServiceResponse<Tables<'competi
   }
 };
 
+export const getActiveCompetitions = async (): Promise<ServiceResponse<Tables<'competitions'>[]>> => {
+  try {
+    const { data, error } = await supabase
+      .from('competitions')
+      .select('*')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error: any) {
+    console.error('Error in getActiveCompetitions:', error.message);
+    return { data: null, error: error.message };
+  }
+};
+
 export const createCompetition = async (
   data: TablesInsert<'competitions'>
 ): Promise<ServiceResponse<Tables<'competitions'>>> => {

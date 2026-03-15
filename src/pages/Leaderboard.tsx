@@ -15,129 +15,8 @@ import SectionDivider from "@/components/SectionDivider";
 import ScrollReveal from "@/components/ScrollReveal";
 import HonorBadge, { BADGE_TIERS } from "@/components/HonorBadge";
 import { useLanguage } from "@/i18n/LanguageContext";
-
-const MOCK_USERS = [
-  {
-    rank: 1,
-    name: "Sarah Chen",
-    username: "@sarachen",
-    points: 12450,
-    change: 2,
-    challenges: 34,
-    streak: 15,
-    tracks: ["Frontend", "UI/UX"],
-  },
-  {
-    rank: 2,
-    name: "Ahmed Hassan",
-    username: "@ahmedh",
-    points: 11200,
-    change: -1,
-    challenges: 29,
-    streak: 12,
-    tracks: ["Backend", "Network"],
-  },
-  {
-    rank: 3,
-    name: "Maria Rodriguez",
-    username: "@mariar",
-    points: 10800,
-    change: 1,
-    challenges: 31,
-    streak: 8,
-    tracks: ["AI / ML", "Data Science"],
-  },
-  {
-    rank: 4,
-    name: "James Park",
-    username: "@jamesp",
-    points: 9650,
-    change: 0,
-    challenges: 27,
-    streak: 20,
-    tracks: ["Cybersecurity"],
-  },
-  {
-    rank: 5,
-    name: "Fatima Al-Sayed",
-    username: "@fatimas",
-    points: 8900,
-    change: 3,
-    challenges: 25,
-    streak: 6,
-    tracks: ["Mobile Dev", "Frontend"],
-  },
-  {
-    rank: 6,
-    name: "Liam O'Brien",
-    username: "@liamob",
-    points: 8200,
-    change: -2,
-    challenges: 22,
-    streak: 9,
-    tracks: ["Backend", "OS"],
-  },
-  {
-    rank: 7,
-    name: "Yuki Tanaka",
-    username: "@yukit",
-    points: 7800,
-    change: 1,
-    challenges: 20,
-    streak: 11,
-    tracks: ["Data Science", "AI / ML"],
-  },
-  {
-    rank: 8,
-    name: "Noah Williams",
-    username: "@noahw",
-    points: 7350,
-    change: 0,
-    challenges: 19,
-    streak: 5,
-    tracks: ["Frontend"],
-  },
-  {
-    rank: 9,
-    name: "Priya Patel",
-    username: "@priyap",
-    points: 6900,
-    change: -1,
-    challenges: 18,
-    streak: 7,
-    tracks: ["UI/UX", "Mobile Dev"],
-  },
-  {
-    rank: 10,
-    name: "Alex Kim",
-    username: "@alexk",
-    points: 6500,
-    change: 4,
-    challenges: 16,
-    streak: 3,
-    tracks: ["Network", "Cybersecurity"],
-  },
-  {
-    rank: 11,
-    name: "Emma Brown",
-    username: "@emmab",
-    points: 6100,
-    change: 0,
-    challenges: 15,
-    streak: 14,
-    tracks: ["Backend"],
-  },
-  {
-    rank: 12,
-    name: "Omar Farooq",
-    username: "@omarf",
-    points: 5800,
-    change: -3,
-    challenges: 14,
-    streak: 2,
-    tracks: ["OS", "Network"],
-  },
-];
+import { useRealtimeLeaderboard } from "@/hooks/useRealtimeLeaderboard";
+import type { LeaderboardUser } from "@/services/leaderboard.service";
 
 const RankBadge = ({ rank }: { rank: number }) => {
   if (rank === 1)
@@ -187,7 +66,7 @@ const ChangeIndicator = ({ change }: { change: number }) => {
   );
 };
 
-const UserRow = ({ user }: { user: (typeof MOCK_USERS)[0] }) => {
+const UserRow = ({ user }: { user: LeaderboardUser }) => {
   const { t } = useLanguage();
   return (
     <div className="flex items-center gap-4 sm:gap-6">
@@ -195,33 +74,29 @@ const UserRow = ({ user }: { user: (typeof MOCK_USERS)[0] }) => {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-0.5">
           <p className="font-semibold text-foreground text-[14px] sm:text-[15px] truncate">
-            {user.name}
+            {user.full_name || user.username || "Anonymous"}
           </p>
-          <ChangeIndicator change={user.change} />
+          <ChangeIndicator change={0} />
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <p className="text-[11px] sm:text-[12px] text-muted-foreground font-mono">
-            {user.username}
+            @{user.username || "user"}
           </p>
-          <HonorBadge points={user.points} size="sm" showLabel={true} />
+          <HonorBadge points={user.points || 0} size="sm" showLabel={true} />
         </div>
       </div>
       <div className="hidden sm:flex items-center gap-1 flex-wrap justify-end max-w-[200px]">
-        {user.tracks.map((track) => (
-          <span
-            key={track}
-            className="text-[10px] font-mono px-2 py-0.5 border border-border text-muted-foreground"
-          >
-            {track}
-          </span>
-        ))}
+        {/* Mock tracks since not in schema */}
+        <span className="text-[10px] font-mono px-2 py-0.5 border border-border text-muted-foreground">
+          Member
+        </span>
       </div>
       <div className="text-right shrink-0">
         <p className="font-mono font-bold text-foreground text-[15px] sm:text-[16px]">
-          {user.points.toLocaleString()}
+          {(user.points || 0).toLocaleString()}
         </p>
         <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono">
-          {user.challenges} {t("leaderboard.challenges")}
+          0 {t("leaderboard.challenges")}
         </p>
       </div>
     </div>
@@ -231,12 +106,33 @@ const UserRow = ({ user }: { user: (typeof MOCK_USERS)[0] }) => {
 const Leaderboard = () => {
   const [timeFilter, setTimeFilter] = useState("all_time");
   const { t } = useLanguage();
+  const { leaderboard, loading } = useRealtimeLeaderboard(50);
 
   const FILTERS = [
     { key: "all_time", label: t("leaderboard.all_time") },
     { key: "this_month", label: t("leaderboard.this_month") },
     { key: "this_week", label: t("leaderboard.this_week") },
   ];
+
+  if (loading) {
+    return (
+      <PageLayout>
+        <Navbar />
+        <div className="pt-40 text-center font-mono animate-pulse">
+          LOADING_DATABASE_RECORDS...
+        </div>
+        <Footer />
+      </PageLayout>
+    );
+  }
+
+  const topThree = leaderboard.slice(0, 3);
+  const remaining = leaderboard.slice(3);
+  
+  // Pad topThree if less than 3
+  const first = topThree[0] || null;
+  const second = topThree[1] || null;
+  const third = topThree[2] || null;
 
   return (
     <PageLayout>
@@ -297,20 +193,20 @@ const Leaderboard = () => {
                   2
                 </span>
                 <p className="font-semibold text-foreground text-[13px] sm:text-[15px] text-center truncate max-w-full">
-                  {MOCK_USERS[1].name}
+                  {second?.full_name || second?.username || "---"}
                 </p>
                 <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono mt-0.5">
-                  {MOCK_USERS[1].username}
+                  @{second?.username || "user"}
                 </p>
                 <p className="font-mono font-bold text-foreground text-[14px] sm:text-[16px] mt-2">
-                  {MOCK_USERS[1].points.toLocaleString()}
+                  {(second?.points || 0).toLocaleString()}
                 </p>
                 <p className="text-[9px] sm:text-[10px] text-muted-foreground font-mono">
-                  {MOCK_USERS[1].challenges} {t("leaderboard.challenges")}
+                  0 {t("leaderboard.challenges")}
                 </p>
                 <div className="mt-3">
                   <HonorBadge
-                    points={MOCK_USERS[1].points}
+                    points={second?.points || 0}
                     size="sm"
                     showLabel={true}
                   />
@@ -329,20 +225,20 @@ const Leaderboard = () => {
                   1
                 </span>
                 <p className="font-semibold text-foreground text-[14px] sm:text-[16px] text-center truncate max-w-full">
-                  {MOCK_USERS[0].name}
+                  {first?.full_name || first?.username || "---"}
                 </p>
                 <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono mt-0.5">
-                  {MOCK_USERS[0].username}
+                  @{first?.username || "user"}
                 </p>
                 <p className="font-mono font-bold text-foreground text-[16px] sm:text-[18px] mt-2">
-                  {MOCK_USERS[0].points.toLocaleString()}
+                  {(first?.points || 0).toLocaleString()}
                 </p>
                 <p className="text-[9px] sm:text-[10px] text-muted-foreground font-mono">
-                  {MOCK_USERS[0].challenges} {t("leaderboard.challenges")}
+                  0 {t("leaderboard.challenges")}
                 </p>
                 <div className="mt-3">
                   <HonorBadge
-                    points={MOCK_USERS[0].points}
+                    points={first?.points || 0}
                     size="sm"
                     showLabel={true}
                   />
@@ -358,20 +254,20 @@ const Leaderboard = () => {
                   3
                 </span>
                 <p className="font-semibold text-foreground text-[13px] sm:text-[15px] text-center truncate max-w-full">
-                  {MOCK_USERS[2].name}
+                  {third?.full_name || third?.username || "---"}
                 </p>
                 <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono mt-0.5">
-                  {MOCK_USERS[2].username}
+                  @{third?.username || "user"}
                 </p>
                 <p className="font-mono font-bold text-foreground text-[14px] sm:text-[16px] mt-2">
-                  {MOCK_USERS[2].points.toLocaleString()}
+                  {(third?.points || 0).toLocaleString()}
                 </p>
                 <p className="text-[9px] sm:text-[10px] text-muted-foreground font-mono">
-                  {MOCK_USERS[2].challenges} {t("leaderboard.challenges")}
+                  0 {t("leaderboard.challenges")}
                 </p>
                 <div className="mt-3">
                   <HonorBadge
-                    points={MOCK_USERS[2].points}
+                    points={third?.points || 0}
                     size="sm"
                     showLabel={true}
                   />
@@ -423,13 +319,13 @@ const Leaderboard = () => {
 
       {/* Full Rankings (4th onward) */}
       <section className="pb-0">
-        {MOCK_USERS.slice(3).map((user, i) => (
-          <ScrollReveal key={user.rank} delay={i * 30}>
+        {remaining.map((user, i) => (
+          <ScrollReveal key={user.id} delay={i * 30}>
             <div className="group">
               <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6 py-5 sm:py-6 hover:bg-accent/30 transition-colors duration-300 cursor-pointer">
                 <UserRow user={user} />
               </div>
-              {i < MOCK_USERS.slice(3).length - 1 && <SectionDivider />}
+              {i < remaining.length - 1 && <SectionDivider />}
             </div>
           </ScrollReveal>
         ))}

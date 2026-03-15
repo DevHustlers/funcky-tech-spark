@@ -5,56 +5,26 @@ import PageLayout from "@/components/PageLayout";
 import SectionDivider from "@/components/SectionDivider";
 import ScrollReveal from "@/components/ScrollReveal";
 import { useLanguage } from "@/i18n/LanguageContext";
-
-const events = [
-  {
-    title: "Weekly Hackathon #127",
-    date: "Mar 10–16, 2026",
-    location: "Online",
-    desc: "This week's theme: Build a developer tool that solves a real problem.",
-    status: "upcoming" as const,
-  },
-  {
-    title: "DevHustlers Meetup — London",
-    date: "Mar 22, 2026",
-    location: "London, UK",
-    desc: "In-person networking and lightning talks at Shoreditch Works.",
-    status: "upcoming" as const,
-  },
-  {
-    title: "Open Source Sprint",
-    date: "Apr 1–7, 2026",
-    location: "Online",
-    desc: "A week-long sprint to contribute to community open source projects.",
-    status: "upcoming" as const,
-  },
-  {
-    title: "DevHustlers Conference 2026",
-    date: "May 15–16, 2026",
-    location: "San Francisco, CA",
-    desc: "Our annual conference. Two days of talks, workshops, and community.",
-    status: "upcoming" as const,
-  },
-  {
-    title: "Weekly Hackathon #126",
-    date: "Mar 3–9, 2026",
-    location: "Online",
-    desc: "Theme: AI-powered tools. 48 submissions, 12 finalist projects.",
-    status: "past" as const,
-  },
-  {
-    title: "DevHustlers Meetup — Berlin",
-    date: "Feb 20, 2026",
-    location: "Berlin, DE",
-    desc: "Community meetup with 60+ developers. Talks on Rust and WebAssembly.",
-    status: "past" as const,
-  },
-];
+import { useRealtimeEvents } from "@/hooks/useRealtimeEvents";
 
 const Events = () => {
   const { t } = useLanguage();
+  const { events, loading } = useRealtimeEvents();
+
   const upcoming = events.filter((e) => e.status === "upcoming");
   const past = events.filter((e) => e.status === "past");
+
+  if (loading) {
+    return (
+      <PageLayout>
+        <Navbar />
+        <div className="pt-40 text-center font-mono animate-pulse">
+          FETCHING_COMMUNITY_EVENTS...
+        </div>
+        <Footer />
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
@@ -96,7 +66,7 @@ const Events = () => {
                         {event.title}
                       </h3>
                       <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed mb-4">
-                        {event.desc}
+                        {event.description}
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-4 text-[12px] text-muted-foreground font-mono">
@@ -132,7 +102,7 @@ const Events = () => {
                         {event.title}
                       </h3>
                       <p className="text-[13px] sm:text-sm text-muted-foreground leading-relaxed mb-4">
-                        {event.desc}
+                        {event.description}
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-4 text-[12px] text-muted-foreground font-mono">

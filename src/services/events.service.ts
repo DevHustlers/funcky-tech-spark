@@ -16,6 +16,24 @@ export const getEvents = async (): Promise<ServiceResponse<Tables<'events'>[]>> 
   }
 };
 
+export const getUpcomingEvents = async (limit: number = 3): Promise<ServiceResponse<Tables<'events'>[]>> => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .gte('date', today)
+      .order('date', { ascending: true })
+      .limit(limit);
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error: any) {
+    console.error('Error in getUpcomingEvents:', error.message);
+    return { data: null, error: error.message };
+  }
+};
+
 export const createEvent = async (
   data: TablesInsert<'events'>
 ): Promise<ServiceResponse<Tables<'events'>>> => {

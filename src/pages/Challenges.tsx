@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Clock,
   Users,
@@ -16,126 +16,9 @@ import PageLayout from "@/components/PageLayout";
 import SectionDivider from "@/components/SectionDivider";
 import ScrollReveal from "@/components/ScrollReveal";
 import { useLanguage } from "@/i18n/LanguageContext";
-
-const TRACKS = [
-  "All",
-  "Frontend",
-  "Backend",
-  "Data Science",
-  "AI / ML",
-  "Cybersecurity",
-  "Mobile Dev",
-  "OS",
-  "UI/UX",
-  "Network",
-];
-
-const MOCK_CHALLENGES = [
-  {
-    id: 1,
-    title: "Build a Real-Time Chat UI",
-    track: "Frontend",
-    difficulty: "Medium",
-    points: 500,
-    participants: 128,
-    timeLeft: "2d 14h",
-    status: "live" as const,
-    description:
-      "Create a responsive chat interface with message threading and reactions.",
-  },
-  {
-    id: 2,
-    title: "REST API Rate Limiter",
-    track: "Backend",
-    difficulty: "Hard",
-    points: 750,
-    participants: 89,
-    timeLeft: "1d 6h",
-    status: "live" as const,
-    description:
-      "Implement a distributed rate limiter using sliding window algorithm.",
-  },
-  {
-    id: 3,
-    title: "Neural Network from Scratch",
-    track: "AI / ML",
-    difficulty: "Expert",
-    points: 1000,
-    participants: 45,
-    timeLeft: "5d 0h",
-    status: "live" as const,
-    description: "Build a multi-layer perceptron without any ML framework.",
-  },
-  {
-    id: 4,
-    title: "XSS Detection Scanner",
-    track: "Cybersecurity",
-    difficulty: "Hard",
-    points: 800,
-    participants: 67,
-    timeLeft: "3d 8h",
-    status: "live" as const,
-    description:
-      "Create an automated tool that detects XSS vulnerabilities in web apps.",
-  },
-  {
-    id: 5,
-    title: "Predictive Analytics Dashboard",
-    track: "Data Science",
-    difficulty: "Medium",
-    points: 600,
-    participants: 92,
-    timeLeft: "4d 12h",
-    status: "upcoming" as const,
-    description: "Build a dashboard with predictive models for sales data.",
-  },
-  {
-    id: 6,
-    title: "Cross-Platform Widget",
-    track: "Mobile Dev",
-    difficulty: "Medium",
-    points: 550,
-    participants: 0,
-    timeLeft: "Starts in 2d",
-    status: "upcoming" as const,
-    description: "Create a reusable widget that works on both iOS and Android.",
-  },
-  {
-    id: 7,
-    title: "Custom Shell Implementation",
-    track: "OS",
-    difficulty: "Expert",
-    points: 1200,
-    participants: 34,
-    timeLeft: "Ended",
-    status: "ended" as const,
-    description:
-      "Build a Unix-like shell with piping, redirection, and job control.",
-  },
-  {
-    id: 8,
-    title: "Design System from Scratch",
-    track: "UI/UX",
-    difficulty: "Medium",
-    points: 500,
-    participants: 156,
-    timeLeft: "Ended",
-    status: "ended" as const,
-    description:
-      "Create a comprehensive design system with tokens, components, and docs.",
-  },
-  {
-    id: 9,
-    title: "Packet Sniffer Tool",
-    track: "Network",
-    difficulty: "Hard",
-    points: 700,
-    participants: 41,
-    timeLeft: "6d 0h",
-    status: "live" as const,
-    description: "Build a network packet analyzer with protocol decoding.",
-  },
-];
+import { useRealtimeChallenges } from "@/hooks/useRealtimeChallenges";
+import { getTracks } from "@/services/tracks.service";
+import type { Tables } from "@/types/database";
 
 const difficultyColor = (d: string) => {
   switch (d) {
@@ -171,8 +54,20 @@ const Challenges = () => {
     "live",
   );
   const { t } = useLanguage();
+  const { challenges, loading } = useRealtimeChallenges();
+  const [tracks, setTracks] = useState<string[]>(["All"]);
 
-  const filtered = MOCK_CHALLENGES.filter((c) => {
+  useEffect(() => {
+    const fetchTracks = async () => {
+      const { data } = await getTracks();
+      if (data) {
+        setTracks(["All", ...data.map((t) => t.name)]);
+      }
+    };
+    fetchTracks();
+  }, []);
+
+  const filtered = challenges.filter((c) => {
     const trackMatch = activeTrack === "All" || c.track === activeTrack;
     const statusMatch = c.status === activeTab;
     return trackMatch && statusMatch;
@@ -183,6 +78,18 @@ const Challenges = () => {
     upcoming: t("challenges.upcoming"),
     ended: t("challenges.ended"),
   };
+
+  if (loading) {
+    return (
+      <PageLayout>
+        <Navbar />
+        <div className="pt-40 text-center font-mono animate-pulse">
+          FETCHING_CHALLENGES...
+        </div>
+        <Footer />
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
@@ -270,7 +177,7 @@ const Challenges = () => {
 
             {/* Category filters */}
             <div className="flex items-center overflow-x-auto">
-              {TRACKS.map((track) => (
+              {tracks.map((track) => (
                 <button
                   key={track}
                   onClick={() => setActiveTrack(track)}
@@ -335,11 +242,12 @@ const Challenges = () => {
                           </div>
                           <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
                             <Users className="w-3.5 h-3.5" />
-                            {challenge.participants}
+                            {/* participants not in schema */}
+                            0
                           </div>
                           <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
                             <Clock className="w-3.5 h-3.5" />
-                            {challenge.timeLeft}
+                            {challenge.duration || "---"}
                           </div>
                         </div>
                       </div>
