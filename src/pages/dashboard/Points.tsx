@@ -1,10 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Zap, Pencil, Trash2 } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
 import { PointRuleForm } from "./components/PointRuleForm";
 import { AwardPointsForm } from "./components/AwardPointsForm";
 import { BottomDrawer } from "./components/BottomDrawer";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { 
+  getPointRules, 
+  createPointRule, 
+  updatePointRule, 
+  deletePointRule as removePointRule,
+  getPointsLog 
+} from "@/services/points.service";
+import { getUsers } from "@/services/users.service";
+import { awardPoints as awardPointsDb } from "@/services/gamification.service";
+import type { Tables } from "@/types/database";
 
 interface UserData {
   id: string;
@@ -32,149 +42,21 @@ interface PointAward {
   time: string;
 }
 
-const MOCK_USERS: UserData[] = [
-  {
-    id: "u-1",
-    name: "Sarah Chen",
-    email: "sarah@example.com",
-    joined: "2h ago",
-    points: 12450,
-    status: "active",
-    role: "admin",
-    bio: "Full-stack developer passionate about React and TypeScript.",
-  },
-  {
-    id: "u-2",
-    name: "Ahmed Hassan",
-    email: "ahmed@example.com",
-    joined: "5h ago",
-    points: 11200,
-    status: "active",
-    role: "moderator",
-    bio: "Backend engineer specializing in Node.js and Python.",
-  },
-  {
-    id: "u-3",
-    name: "Maria Rodriguez",
-    email: "maria@example.com",
-    joined: "1d ago",
-    points: 10800,
-    status: "active",
-    role: "member",
-    bio: "UI/UX designer turned frontend developer.",
-  },
-  {
-    id: "u-4",
-    name: "James Park",
-    email: "james@example.com",
-    joined: "2d ago",
-    points: 9650,
-    status: "inactive",
-    role: "member",
-    bio: "Data scientist exploring ML and AI.",
-  },
-  {
-    id: "u-5",
-    name: "Fatima Al-Sayed",
-    email: "fatima@example.com",
-    joined: "3d ago",
-    points: 8900,
-    status: "active",
-    role: "member",
-    bio: "Cybersecurity enthusiast and CTF player.",
-  },
-];
+// Helper maps
+const mapDBRuleToRule = (r: Tables<'point_rules'>): PointRule => ({
+  id: r.id,
+  action: r.action,
+  points: r.points,
+  active: r.active ?? true,
+});
 
-const MOCK_POINT_RULES: PointRule[] = [
-  { id: "pr-1", action: "Complete a challenge", points: 500, active: true },
-  { id: "pr-2", action: "Daily login", points: 10, active: true },
-  { id: "pr-3", action: "Login streak (7d)", points: 50, active: true },
-  { id: "pr-4", action: "Login streak (30d)", points: 200, active: true },
-  { id: "pr-5", action: "Follow Discord", points: 50, active: true },
-  { id: "pr-6", action: "Follow Twitter/X", points: 50, active: true },
-  { id: "pr-7", action: "Follow LinkedIn", points: 30, active: false },
-  { id: "pr-8", action: "Follow GitHub", points: 40, active: true },
-  { id: "pr-9", action: "Follow Telegram", points: 30, active: true },
-  { id: "pr-10", action: "Follow WhatsApp", points: 20, active: false },
-  { id: "pr-11", action: "Follow YouTube", points: 30, active: true },
-  { id: "pr-12", action: "Refer a friend", points: 200, active: true },
-  { id: "pr-13", action: "Submit bug report", points: 100, active: true },
-  { id: "pr-14", action: "Complete tutorial", points: 150, active: true },
-  { id: "pr-15", action: "Share on social media", points: 25, active: true },
-];
-
-const MOCK_POINT_LOG: PointAward[] = [
-  {
-    id: "pl-1",
-    user: "Sarah Chen",
-    action: "Completed challenge",
-    points: "+500",
-    time: "10m ago",
-  },
-  {
-    id: "pl-2",
-    user: "Ahmed Hassan",
-    action: "Followed Discord",
-    points: "+50",
-    time: "25m ago",
-  },
-  {
-    id: "pl-3",
-    user: "Maria Rodriguez",
-    action: "Daily login streak (12d)",
-    points: "+120",
-    time: "1h ago",
-  },
-  {
-    id: "pl-4",
-    user: "James Park",
-    action: "Referral bonus",
-    points: "+200",
-    time: "2h ago",
-  },
-  {
-    id: "pl-5",
-    user: "Fatima Al-Sayed",
-    action: "Manual award (Admin)",
-    points: "+300",
-    time: "3h ago",
-  },
-  {
-    id: "pl-6",
-    user: "Omar Mostafa",
-    action: "Completed challenge",
-    points: "+750",
-    time: "4h ago",
-  },
-  {
-    id: "pl-7",
-    user: "Lisa Wang",
-    action: "Bug report reward",
-    points: "+100",
-    time: "5h ago",
-  },
-  {
-    id: "pl-8",
-    user: "John Smith",
-    action: "Daily login",
-    points: "+10",
-    time: "6h ago",
-  },
-  {
-    id: "pl-9",
-    user: "Emma Wilson",
-    action: "Followed GitHub",
-    points: "+40",
-    time: "7h ago",
-  },
-  {
-    id: "pl-10",
-    user: "Michael Brown",
-    action: "Tutorial completion",
-    points: "+150",
-    time: "8h ago",
-  },
-];
+const mapDBLogToAward = (l: any): PointAward => ({
+  id: l.id,
+  user: l.profiles?.full_name || "Unknown",
+  action: l.reason || "Manual award",
+  points: `+${l.amount}`,
+  time: new Date(l.created_at).toLocaleString(),
+});
 
 const PrimaryBtn = ({
   children,
@@ -202,46 +84,103 @@ const SecondaryBtn = ({
 
 export default function Points() {
   const { t } = useLanguage();
-  const [pointRules, setPointRules] = useState<PointRule[]>(MOCK_POINT_RULES);
-  const [pointLog, setPointLog] = useState<PointAward[]>(MOCK_POINT_LOG);
+  const [pointRules, setPointRules] = useState<PointRule[]>([]);
+  const [pointLog, setPointLog] = useState<PointAward[]>([]);
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [ruleFormMode, setRuleFormMode] = useState<"none" | "create" | "edit">(
     "none",
   );
   const [editingRule, setEditingRule] = useState<PointRule | undefined>();
   const [showAwardForm, setShowAwardForm] = useState(false);
 
-  const savePointRule = (rule: PointRule) => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    const [rulesRes, logRes, usersRes] = await Promise.all([
+      getPointRules(),
+      getPointsLog(),
+      getUsers()
+    ]);
+
+    if (rulesRes.data) setPointRules(rulesRes.data.map(mapDBRuleToRule));
+    if (logRes.data) setPointLog(logRes.data.map(mapDBLogToAward));
+    if (usersRes.data) {
+      setUsers(usersRes.data.map(u => ({
+        id: u.id,
+        name: u.full_name || u.email || "Anonymous",
+        email: u.email || "",
+        joined: u.created_at ? new Date(u.created_at).toLocaleDateString() : "",
+        points: u.points || 0,
+        status: (u.status as any) || "active",
+        role: u.role === 'admin' ? 'admin' : u.role === 'mod' ? 'moderator' : 'member',
+        bio: u.bio || "",
+      })));
+    }
+    setLoading(false);
+  };
+
+  const savePointRule = async (rule: PointRule) => {
+    const dbPayload = {
+      action: rule.action,
+      points: rule.points,
+      active: rule.active,
+    };
+
     if (ruleFormMode === "edit") {
-      setPointRules((prev) => prev.map((r) => (r.id === rule.id ? rule : r)));
+      const { data, error } = await updatePointRule(rule.id, dbPayload);
+      if (!error && data) {
+        setPointRules((prev) => prev.map((r) => (r.id === rule.id ? mapDBRuleToRule(data) : r)));
+      }
     } else {
-      setPointRules((prev) => [...prev, rule]);
+      const { data, error } = await createPointRule(dbPayload as any);
+      if (!error && data) {
+        setPointRules((prev) => [...prev, mapDBRuleToRule(data)]);
+      }
     }
     setRuleFormMode("none");
     setEditingRule(undefined);
   };
 
-  const deletePointRule = (id: string) =>
-    setPointRules((prev) => prev.filter((r) => r.id !== id));
-  const togglePointRule = (id: string) =>
-    setPointRules((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, active: !r.active } : r)),
-    );
+  const deletePointRule = async (id: string) => {
+    const { error } = await removePointRule(id);
+    if (!error) {
+      setPointRules((prev) => prev.filter((r) => r.id !== id));
+    }
+  };
 
-  const awardPoints = (
+  const togglePointRule = async (id: string) => {
+    const rule = pointRules.find(r => r.id === id);
+    if (!rule) return;
+    const { data, error } = await updatePointRule(id, { active: !rule.active });
+    if (!error && data) {
+      setPointRules((prev) =>
+        prev.map((r) => (r.id === id ? mapDBRuleToRule(data) : r)),
+      );
+    }
+  };
+
+  const awardPoints = async (
     userId: string,
     userName: string,
     points: number,
     reason: string,
   ) => {
-    const newAward: PointAward = {
-      id: `pl-${Date.now()}`,
-      user: userName,
-      action: reason,
-      points: `+${points}`,
-      time: "Just now",
-    };
-    setPointLog((prev) => [newAward, ...prev]);
-    setShowAwardForm(false);
+    const { error } = await awardPointsDb(userId, points, reason);
+    if (!error) {
+      const newAward: PointAward = {
+        id: `pl-${Date.now()}`,
+        user: userName,
+        action: reason,
+        points: `+${points}`,
+        time: "Just now",
+      };
+      setPointLog((prev) => [newAward, ...prev]);
+      setShowAwardForm(false);
+    }
   };
 
   return (
@@ -274,7 +213,7 @@ export default function Points() {
           title={t("dash.award_points")}
         >
           <AwardPointsForm
-            users={MOCK_USERS}
+            users={users}
             onAward={awardPoints}
             onCancel={() => setShowAwardForm(false)}
           />

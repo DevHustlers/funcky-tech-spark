@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Sparkles,
   Flame,
@@ -29,6 +29,9 @@ import PageTransition from "@/components/PageTransition";
 import { TrackForm } from "./components/TrackForm";
 import { BottomDrawer } from "./components/BottomDrawer";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { supabase } from "@/lib/supabase";
+import { getTracks, createTrack, updateTrack } from "@/services/tracks.service";
+import type { Tables } from "@/types/database";
 
 interface TrackData {
   id: string;
@@ -37,6 +40,15 @@ interface TrackData {
   description: string;
   iconName: string;
 }
+
+// Helper to map DB track to UI TrackData
+const mapDBTrackToTrackData = (track: Tables<'tracks'>): TrackData => ({
+  id: track.id,
+  name: track.name,
+  slug: track.slug,
+  description: track.description || "",
+  iconName: track.icon_key || "Sparkles",
+});
 
 const AVAILABLE_ICONS = [
   { name: "Sparkles", icon: Sparkles },
@@ -61,89 +73,6 @@ const AVAILABLE_ICONS = [
   { name: "Zap", icon: Zap },
 ];
 
-const MOCK_TRACKS: TrackData[] = [
-  {
-    id: "tr-1",
-    name: "Frontend",
-    slug: "frontend",
-    description:
-      "Master the art of building beautiful, responsive user interfaces with React, Vue, and modern CSS frameworks.",
-    iconName: "Sparkles",
-  },
-  {
-    id: "tr-2",
-    name: "Backend",
-    slug: "backend",
-    description:
-      "Build robust server-side systems, APIs, and microservices with Node.js, Python, and Go.",
-    iconName: "Shield",
-  },
-  {
-    id: "tr-3",
-    name: "AI / ML",
-    slug: "ai-ml",
-    description:
-      "Explore machine learning, deep learning, and AI applications using TensorFlow and PyTorch.",
-    iconName: "Lightbulb",
-  },
-  {
-    id: "tr-4",
-    name: "Cybersecurity",
-    slug: "cybersecurity",
-    description:
-      "Defend systems, discover vulnerabilities, and master ethical hacking and penetration testing.",
-    iconName: "Shield",
-  },
-  {
-    id: "tr-5",
-    name: "Data Science",
-    slug: "data-science",
-    description:
-      "Extract insights from data through statistical analysis, visualization, and predictive modeling.",
-    iconName: "Target",
-  },
-  {
-    id: "tr-6",
-    name: "DevOps",
-    slug: "devops",
-    description:
-      "Automate deployments, CI/CD pipelines, and infrastructure management with Docker and Kubernetes.",
-    iconName: "Bolt",
-  },
-  {
-    id: "tr-7",
-    name: "Mobile",
-    slug: "mobile",
-    description:
-      "Create native and cross-platform mobile applications using React Native and Flutter.",
-    iconName: "Rocket",
-  },
-  {
-    id: "tr-8",
-    name: "Full Stack",
-    slug: "full-stack",
-    description:
-      "End-to-end development spanning frontend, backend, databases, and cloud infrastructure.",
-    iconName: "Crown",
-  },
-  {
-    id: "tr-9",
-    name: "Blockchain",
-    slug: "blockchain",
-    description:
-      "Build decentralized applications, smart contracts, and understand Web3 technologies.",
-    iconName: "Diamond",
-  },
-  {
-    id: "tr-10",
-    name: "Game Dev",
-    slug: "game-dev",
-    description:
-      "Create engaging games using Unity, Godot, and modern web-based game engines.",
-    iconName: "Trophy",
-  },
-];
-
 const PrimaryBtn = ({
   children,
   ...props
@@ -158,24 +87,59 @@ const PrimaryBtn = ({
 
 export default function Tracks() {
   const { t } = useLanguage();
-  const [tracks, setTracks] = useState<TrackData[]>(MOCK_TRACKS);
+  const [tracks, setTracks] = useState<TrackData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [trackFormMode, setTrackFormMode] = useState<
     "none" | "create" | "edit"
   >("none");
   const [editingTrack, setEditingTrack] = useState<TrackData | undefined>();
 
-  const saveTrack = (track: TrackData) => {
+  useEffect(() => {
+    fetchTracks();
+  }, []);
+
+  const fetchTracks = async () => {
+    setLoading(true);
+    const { data, error } = await getTracks();
+    if (!error && data) {
+      setTracks(data.map(mapDBTrackToTrackData));
+    }
+    setLoading(false);
+  };
+
+  const saveTrack = async (track: TrackData) => {
     if (trackFormMode === "edit") {
-      setTracks((prev) => prev.map((t) => (t.id === track.id ? track : t)));
+      const { data, error } = await updateTrack(track.id, {
+        name: track.name,
+        slug: track.slug,
+        description: track.description,
+        icon_key: track.iconName,
+      });
+      if (!error && data) {
+        setTracks((prev) => prev.map((t) => (t.id === track.id ? mapDBTrackToTrackData(data) : t)));
+      }
     } else {
-      setTracks((prev) => [track, ...prev]);
+      const { data, error } = await createTrack({
+        name: track.name,
+        slug: track.slug,
+        description: track.description,
+        icon_key: track.iconName,
+      });
+      if (!error && data) {
+        setTracks((prev) => [mapDBTrackToTrackData(data), ...prev]);
+      }
     }
     setTrackFormMode("none");
     setEditingTrack(undefined);
   };
 
-  const deleteTrack = (id: string) =>
-    setTracks((prev) => prev.filter((t) => t.id !== id));
+  const deleteTrack = async (id: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { error } = await supabase.from('tracks').delete().eq('id', id);
+    if (!error) {
+      setTracks((prev) => prev.filter((t) => t.id !== id));
+    }
+  };
 
   return (
     <PageTransition>

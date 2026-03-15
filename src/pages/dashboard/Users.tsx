@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
 import { BottomDrawer } from "./components/BottomDrawer";
@@ -7,6 +7,8 @@ import { PrimaryBtn } from "./components/ui/PrimaryBtn";
 import { UserForm } from "./components/UserForm";
 import { UserCard } from "./components/UserCard";
 import { UserDetail } from "./components/UserDetail";
+import { getUsers, updateUserRoleAndPoints, deleteUser as deleteUserService } from "@/services/users.service";
+import type { Tables } from "@/types/database";
 
 interface UserData {
   id: string;
@@ -19,33 +21,70 @@ interface UserData {
   bio: string;
 }
 
-const MOCK_USERS: UserData[] = [
-  { id: "u-1", name: "Sarah Chen", email: "sarah@example.com", joined: "2h ago", points: 12450, status: "active", role: "admin", bio: "Full-stack developer passionate about React and TypeScript." },
-  { id: "u-2", name: "Ahmed Hassan", email: "ahmed@example.com", joined: "5h ago", points: 11200, status: "active", role: "moderator", bio: "Backend engineer specializing in Node.js and Python." },
-  { id: "u-3", name: "Maria Rodriguez", email: "maria@example.com", joined: "1d ago", points: 10800, status: "active", role: "member", bio: "UI/UX designer turned frontend developer." },
-  { id: "u-4", name: "James Park", email: "james@example.com", joined: "2d ago", points: 9650, status: "inactive", role: "member", bio: "Data scientist exploring ML and AI." },
-  { id: "u-5", name: "Fatima Al-Sayed", email: "fatima@example.com", joined: "3d ago", points: 8900, status: "active", role: "member", bio: "Cybersecurity enthusiast and CTF player." },
-  { id: "u-6", name: "Omar Mostafa", email: "omar@example.com", joined: "4d ago", points: 8450, status: "active", role: "member", bio: "Mobile developer and Flutter enthusiast." },
-];
+// Helper to map DB profile to UI UserData
+const mapProfileToUserData = (profile: Tables<'profiles'>): UserData => ({
+  id: profile.id,
+  name: profile.full_name || profile.name || "Unknown User",
+  email: profile.email || "",
+  joined: profile.created_at ? new Date(profile.created_at).toLocaleDateString() : "Unknown",
+  points: profile.points || 0,
+  status: (profile.status as any) || "active",
+  role: profile.role === "admin" ? "admin" : profile.role === "mod" ? "moderator" : "member",
+  bio: profile.bio || "",
+});
+
+// Helper to map UI UserData to DB profile update
+const mapUserDataToProfileUpdate = (user: UserData) => ({
+  full_name: user.name,
+  points: user.points,
+  status: (user.status === "banned" ? "inactive" : user.status) as "active" | "inactive",
+  role: (user.role === "admin" ? "admin" : user.role === "moderator" ? "mod" : "user") as "admin" | "mod" | "user",
+  bio: user.bio,
+});
 
 export default function Users() {
   const { t } = useLanguage();
-  const [users, setUsers] = useState<UserData[]>(MOCK_USERS);
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [userFormMode, setUserFormMode] = useState<"none" | "create" | "edit">("none");
   const [editingUser, setEditingUser] = useState<UserData | undefined>();
   const [viewingUser, setViewingUser] = useState<UserData | null>(null);
 
-  const saveUser = (user: UserData) => {
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    const { data, error } = await getUsers();
+    if (!error && data) {
+      setUsers(data.map(mapProfileToUserData));
+    }
+    setLoading(false);
+  };
+
+  const saveUser = async (user: UserData) => {
     if (userFormMode === "edit") {
-      setUsers((prev) => prev.map((u) => (u.id === user.id ? user : u)));
+      const { error } = await updateUserRoleAndPoints(user.id, mapUserDataToProfileUpdate(user));
+      if (!error) {
+        setUsers((prev) => prev.map((u) => (u.id === user.id ? user : u)));
+      }
     } else {
+      // In a real app, you'd call a createUserService here. 
+      // Profiles are usually created via Auth signup, so maybe we just update local state or log?
+      // For now, let's just update local state since createProfile might need an Auth user.
       setUsers((prev) => [user, ...prev]);
     }
     setUserFormMode("none");
     setEditingUser(undefined);
   };
 
-  const deleteUser = (id: string) => setUsers((prev) => prev.filter((u) => u.id !== id));
+  const deleteUser = async (id: string) => {
+    const { error } = await deleteUserService(id);
+    if (!error) {
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+    }
+  };
 
   return (
     <PageTransition>

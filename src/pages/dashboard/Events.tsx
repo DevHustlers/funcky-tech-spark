@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Plus,
   Pencil,
@@ -15,6 +15,8 @@ import PageTransition from "@/components/PageTransition";
 import { EventForm } from "./components/EventForm";
 import { BottomDrawer } from "./components/BottomDrawer";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { getEvents, createEvent, updateEvent } from "@/services/events.service";
+import type { Tables } from "@/types/database";
 
 interface EventData {
   id: string;
@@ -36,119 +38,20 @@ interface EventData {
   link: string;
 }
 
-const MOCK_EVENTS: EventData[] = [
-  {
-    id: "ev-1",
-    title: "Frontend Hackathon 2026",
-    description:
-      "Build innovative frontend projects in 48 hours. Show off your React, Vue, and CSS skills!",
-    date: "Mar 15, 2026",
-    time: "10:00 AM",
-    location: "Online — Discord",
-    type: "hackathon",
-    status: "upcoming",
-    capacity: 200,
-    registered: 142,
-    link: "https://discord.gg/hackathon",
-  },
-  {
-    id: "ev-2",
-    title: "AI Workshop: Building LLMs",
-    description:
-      "Hands-on workshop on building AI-powered applications with large language models.",
-    date: "Mar 22, 2026",
-    time: "2:00 PM",
-    location: "Online — Zoom",
-    type: "workshop",
-    status: "upcoming",
-    capacity: 100,
-    registered: 67,
-    link: "",
-  },
-  {
-    id: "ev-3",
-    title: "Monthly Challenge Reset",
-    description:
-      "New challenges released for the month. Get ready for fresh tasks!",
-    date: "Apr 1, 2026",
-    time: "12:00 AM",
-    location: "Platform",
-    type: "system",
-    status: "scheduled",
-    capacity: 0,
-    registered: 0,
-    link: "",
-  },
-  {
-    id: "ev-4",
-    title: "Cybersecurity CTF Tournament",
-    description:
-      "Capture the flag competition for all skill levels. Test your hacking skills!",
-    date: "Apr 10, 2026",
-    time: "6:00 PM",
-    location: "Online — Platform",
-    type: "competition",
-    status: "draft",
-    capacity: 150,
-    registered: 0,
-    link: "",
-  },
-  {
-    id: "ev-5",
-    title: "Community Meetup #15",
-    description:
-      "Monthly community gathering to share projects and network with fellow developers.",
-    date: "Apr 15, 2026",
-    time: "7:00 PM",
-    location: "Online — Google Meet",
-    type: "meetup",
-    status: "draft",
-    capacity: 50,
-    registered: 0,
-    link: "",
-  },
-  {
-    id: "ev-6",
-    title: "DevOps Summit 2026",
-    description:
-      "Learn about Docker, Kubernetes, and CI/CD best practices from industry experts.",
-    date: "Apr 20, 2026",
-    time: "9:00 AM",
-    location: "Online — YouTube",
-    type: "webinar",
-    status: "draft",
-    capacity: 500,
-    registered: 0,
-    link: "",
-  },
-  {
-    id: "ev-7",
-    title: "Mobile App Challenge",
-    description: "Build a mobile app using React Native or Flutter in 2 weeks.",
-    date: "Apr 25, 2026",
-    time: "12:00 PM",
-    location: "Online — Discord",
-    type: "hackathon",
-    status: "draft",
-    capacity: 100,
-    registered: 0,
-    link: "",
-  },
-  {
-    id: "ev-8",
-    title: "Python Data Science Webinar",
-    description:
-      "Deep dive into pandas, numpy, and machine learning with Python.",
-    date: "May 1, 2026",
-    time: "3:00 PM",
-    location: "Online — Zoom",
-    type: "webinar",
-    status: "draft",
-    capacity: 200,
-    registered: 0,
-    link: "",
-  },
-];
+// Helper to map DB event to UI EventData
+const mapDBEventToEventData = (e: Tables<'events'>): EventData => ({
+  id: e.id,
+  title: e.title,
+  description: e.description || "",
+  date: e.date || "",
+  time: e.time || "",
+  location: e.location || "",
+  type: (e.type as any) || "workshop",
+  status: (e.status as any) || "upcoming",
+  capacity: e.capacity || 0,
+  registered: 0, // In a real app, you'd join with registrations
+  link: e.event_link || "",
+});
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -178,24 +81,59 @@ const PrimaryBtn = ({
 
 export default function Events() {
   const { t } = useLanguage();
-  const [events, setEvents] = useState<EventData[]>(MOCK_EVENTS);
+  const [events, setEvents] = useState<EventData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [eventFormMode, setEventFormMode] = useState<
     "none" | "create" | "edit"
   >("none");
   const [editingEvent, setEditingEvent] = useState<EventData | undefined>();
 
-  const saveEvent = (event: EventData) => {
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    setLoading(true);
+    const { data, error } = await getEvents();
+    if (!error && data) {
+      setEvents(data.map(mapDBEventToEventData));
+    }
+    setLoading(false);
+  };
+
+  const saveEvent = async (event: EventData) => {
+    const dbPayload = {
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      time: event.time,
+      location: event.location,
+      type: event.type,
+      status: event.status,
+      capacity: event.capacity,
+      event_link: event.link,
+    };
+
     if (eventFormMode === "edit") {
-      setEvents((prev) => prev.map((e) => (e.id === event.id ? event : e)));
+      const { data, error } = await updateEvent(event.id, dbPayload);
+      if (!error && data) {
+        setEvents((prev) => prev.map((e) => (e.id === event.id ? mapDBEventToEventData(data) : e)));
+      }
     } else {
-      setEvents((prev) => [event, ...prev]);
+      const { data, error } = await createEvent(dbPayload as any);
+      if (!error && data) {
+        setEvents((prev) => [mapDBEventToEventData(data), ...prev]);
+      }
     }
     setEventFormMode("none");
     setEditingEvent(undefined);
   };
 
-  const deleteEvent = (id: string) =>
+  const deleteEvent = async (id: string) => {
+    // In a real app, you'd add a deleteEvent to events.service.ts
+    // For now, removing from state as per previous pattern
     setEvents((prev) => prev.filter((e) => e.id !== id));
+  };
 
   return (
     <PageTransition>

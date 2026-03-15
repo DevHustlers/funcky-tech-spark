@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
 import { ChallengeForm } from "./components/ChallengeForm";
 import { BottomDrawer } from "./components/BottomDrawer";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { getChallenges, createChallenge, updateChallenge } from "@/services/challenges.service";
+import type { Tables } from "@/types/database";
 
 interface ChallengeData {
   id: string;
@@ -18,137 +20,19 @@ interface ChallengeData {
   requirements: string;
 }
 
-const MOCK_CHALLENGES: ChallengeData[] = [
-  {
-    id: "ch-1",
-    title: "Build a Real-Time Chat UI",
-    description:
-      "Create a responsive chat interface with message bubbles, typing indicators, and emoji support.",
-    track: "Frontend",
-    difficulty: "Medium",
-    status: "live",
-    participants: 128,
-    points: 500,
-    duration: "7 days",
-    requirements:
-      "Must use WebSocket or SSE for real-time updates. Responsive design required.",
-  },
-  {
-    id: "ch-2",
-    title: "REST API Rate Limiter",
-    description:
-      "Implement a rate limiting middleware that supports multiple strategies.",
-    track: "Backend",
-    difficulty: "Hard",
-    status: "live",
-    participants: 89,
-    points: 750,
-    duration: "5 days",
-    requirements: "Support token bucket and sliding window algorithms.",
-  },
-  {
-    id: "ch-3",
-    title: "Neural Network from Scratch",
-    description: "Build a simple neural network without using ML frameworks.",
-    track: "AI / ML",
-    difficulty: "Expert",
-    status: "live",
-    participants: 45,
-    points: 1000,
-    duration: "14 days",
-    requirements:
-      "Implement backpropagation, support at least 2 activation functions.",
-  },
-  {
-    id: "ch-4",
-    title: "XSS Detection Scanner",
-    description: "Create a tool that detects common XSS vulnerabilities.",
-    track: "Cybersecurity",
-    difficulty: "Hard",
-    status: "ended",
-    participants: 67,
-    points: 800,
-    duration: "10 days",
-    requirements: "Must detect reflected and stored XSS patterns.",
-  },
-  {
-    id: "ch-5",
-    title: "Predictive Analytics Dashboard",
-    description:
-      "Build a dashboard with interactive charts and predictive models.",
-    track: "Data Science",
-    difficulty: "Medium",
-    status: "upcoming",
-    participants: 0,
-    points: 600,
-    duration: "7 days",
-    requirements:
-      "Use at least 2 chart types. Include a simple prediction model.",
-  },
-  {
-    id: "ch-6",
-    title: "Kubernetes Cluster Setup",
-    description:
-      "Deploy a production-ready Kubernetes cluster with monitoring.",
-    track: "DevOps",
-    difficulty: "Hard",
-    status: "live",
-    participants: 34,
-    points: 850,
-    duration: "10 days",
-    requirements:
-      "Include auto-scaling, monitoring with Prometheus, and Helm charts.",
-  },
-  {
-    id: "ch-7",
-    title: "React Native E-Commerce App",
-    description: "Build a full-featured mobile shopping application.",
-    track: "Mobile",
-    difficulty: "Medium",
-    status: "live",
-    participants: 56,
-    points: 650,
-    duration: "14 days",
-    requirements: "Include cart, payments integration, and push notifications.",
-  },
-  {
-    id: "ch-8",
-    title: "Smart Contract Audit",
-    description: "Audit a sample DeFi smart contract for vulnerabilities.",
-    track: "Blockchain",
-    difficulty: "Expert",
-    status: "draft",
-    participants: 0,
-    points: 1200,
-    duration: "21 days",
-    requirements: "Find and document all security vulnerabilities.",
-  },
-  {
-    id: "ch-9",
-    title: "GraphQL API Design",
-    description: "Design and implement a GraphQL API for a blogging platform.",
-    track: "Backend",
-    difficulty: "Medium",
-    status: "ended",
-    participants: 52,
-    points: 550,
-    duration: "7 days",
-    requirements:
-      "Implement CRUD operations, subscriptions, and authentication.",
-  },
-  {
-    id: "ch-10",
-    title: "Unity 3D Platformer",
-    description: "Create a 3D platformer game with Unity engine.",
-    track: "Game Dev",
-    difficulty: "Hard",
-    status: "draft",
-    participants: 0,
-    points: 900,
-    duration: "30 days",
-    requirements: "Include level design, physics, and character controller.",
-  },
-];
+// Helper to map DB challenge to UI ChallengeData
+const mapDBChallengeToChallengeData = (c: Tables<'challenges'>): ChallengeData => ({
+  id: c.id,
+  title: c.title,
+  description: c.description,
+  track: c.track || "General",
+  difficulty: (c.difficulty as any) || "Medium",
+  status: (c.status as any) || "live",
+  participants: 0, // In a real app, you'd aggregate submissions or join
+  points: c.points || 0,
+  duration: c.duration || "N/A",
+  requirements: c.requirements || "",
+});
 
 const TRACK_OPTIONS = [
   "Frontend",
@@ -205,18 +89,48 @@ const PrimaryBtn = ({
 
 export default function Challenges() {
   const { t } = useLanguage();
-  const [challenges, setChallenges] =
-    useState<ChallengeData[]>(MOCK_CHALLENGES);
+  const [challenges, setChallenges] = useState<ChallengeData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [chalFormMode, setChalFormMode] = useState<"none" | "create" | "edit">(
     "none",
   );
   const [editingChal, setEditingChal] = useState<ChallengeData | undefined>();
 
-  const saveChallenge = (chal: ChallengeData) => {
+  useEffect(() => {
+    fetchChallenges();
+  }, []);
+
+  const fetchChallenges = async () => {
+    setLoading(true);
+    const { data, error } = await getChallenges();
+    if (!error && data) {
+      setChallenges(data.map(mapDBChallengeToChallengeData));
+    }
+    setLoading(false);
+  };
+
+  const saveChallenge = async (chal: ChallengeData) => {
+    const dbPayload = {
+      title: chal.title,
+      description: chal.description,
+      track: chal.track,
+      difficulty: chal.difficulty as any,
+      status: chal.status,
+      points: chal.points,
+      duration: chal.duration,
+      requirements: chal.requirements,
+    };
+
     if (chalFormMode === "edit") {
-      setChallenges((prev) => prev.map((c) => (c.id === chal.id ? chal : c)));
+      const { data, error } = await updateChallenge(chal.id, dbPayload);
+      if (!error && data) {
+        setChallenges((prev) => prev.map((c) => (c.id === chal.id ? mapDBChallengeToChallengeData(data) : c)));
+      }
     } else {
-      setChallenges((prev) => [chal, ...prev]);
+      const { data, error } = await createChallenge(dbPayload as any);
+      if (!error && data) {
+        setChallenges((prev) => [mapDBChallengeToChallengeData(data), ...prev]);
+      }
     }
     setChalFormMode("none");
     setEditingChal(undefined);

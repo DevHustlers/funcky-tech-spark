@@ -18,9 +18,22 @@ export const AdminProtectedRoute = ({ children }: AdminProtectedRouteProps) => {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
-          // Role is stored in user_metadata as per set_admin_role.sql
-          const role = session.user.user_metadata?.role;
-          setIsAdmin(role === "admin");
+          // 1. Fast path: check user_metadata in the access token/session
+          const metadataRole = session.user.user_metadata?.role;
+          if (metadataRole === "admin") {
+            setIsAdmin(true);
+            setLoading(false);
+            return;
+          }
+
+          // 2. Secure path: verify against database profiles table
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
+          
+          setIsAdmin(profile?.role === "admin");
         } else {
           setIsAdmin(false);
         }
@@ -34,9 +47,20 @@ export const AdminProtectedRoute = ({ children }: AdminProtectedRouteProps) => {
 
     checkAdmin();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        setIsAdmin(session.user.user_metadata?.role === "admin");
+        // Check metadata first
+        if (session.user.user_metadata?.role === "admin") {
+          setIsAdmin(true);
+        } else {
+          // Fallback to DB check
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
+          setIsAdmin(profile?.role === "admin");
+        }
       } else {
         setIsAdmin(false);
       }

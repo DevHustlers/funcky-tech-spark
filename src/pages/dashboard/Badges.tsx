@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Check, X, Sparkles, Flame, Rocket, Gem, Crown, Star, Heart, Trophy, Shield, Target, Swords, Diamond, Hexagon, Compass, Anchor, Lightbulb, Bolt, Medal, BadgeCheck, Zap } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
 import { BADGE_TIERS, type BadgeTier } from "@/components/HonorBadge";
 import { BadgeForm } from "./components/BadgeForm";
 import { BottomDrawer } from "./components/BottomDrawer";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { getBadges, createBadge, updateBadge, deleteBadge as removeBadge } from "@/services/badges.service";
+import type { Tables } from "@/types/database";
 
 const AVAILABLE_ICONS = [
   { name: "Sparkles", icon: Sparkles },
@@ -31,7 +33,31 @@ const AVAILABLE_ICONS = [
 
 interface BadgeWithIcon extends BadgeTier {
   iconName: string;
+  dbId?: string; // Add dbId to store the actual database ID
 }
+
+// Helper to determine styling based on points
+const getBadgeStyles = (points: number) => {
+  if (points >= 10000) return { id: "mythic", borderClass: "border-purple-500/50", bgClass: "bg-purple-500/10", colorClass: "text-purple-500" };
+  if (points >= 5000) return { id: "titan", borderClass: "border-blue-500/50", bgClass: "bg-blue-500/10", colorClass: "text-blue-500" };
+  if (points >= 2000) return { id: "voyager", borderClass: "border-emerald-500/50", bgClass: "bg-emerald-500/10", colorClass: "text-emerald-500" };
+  if (points >= 500) return { id: "igniter", borderClass: "border-amber-500/50", bgClass: "bg-amber-500/10", colorClass: "text-amber-500" };
+  return { id: "spark", borderClass: "border-muted-foreground/30", bgClass: "bg-muted-foreground/5", colorClass: "text-muted-foreground" };
+};
+
+const mapDBBadgeToBadge = (b: Tables<'badges'>): BadgeWithIcon => {
+  const styles = getBadgeStyles(b.min_points);
+  const IconObj = AVAILABLE_ICONS.find(i => i.name === b.icon_key) || AVAILABLE_ICONS[0];
+  return {
+    dbId: b.id, // Store the database ID
+    id: styles.id as any, // This is the tiered ID (spark, igniter, etc.)
+    nameKey: b.name,
+    minPoints: b.min_points,
+    icon: IconObj.icon,
+    iconName: IconObj.name,
+    ...styles
+  };
+};
 
 const PrimaryBtn = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button {...props} className="inline-flex items-center gap-2 px-4 py-2 bg-foreground text-background text-[13px] font-medium rounded-xl hover:bg-foreground/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100">{children}</button>
@@ -54,17 +80,71 @@ const FieldInput = ({ className = "", ...props }: React.InputHTMLAttributes<HTML
 
 export default function Badges() {
   const { t } = useLanguage();
-  const [badges, setBadges] = useState<BadgeWithIcon[]>(() =>
-    BADGE_TIERS.map(b => ({
-      ...b,
-      iconName: b.id === "spark" ? "Sparkles" : b.id === "igniter" ? "Flame" : b.id === "voyager" ? "Rocket" : b.id === "titan" ? "Gem" : "Crown",
-    }))
-  );
-  const [editingBadgeId, setEditingBadgeId] = useState<string | null>(null);
+  const [badges, setBadges] = useState<BadgeWithIcon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingBadgeId, setEditingBadgeId] = useState<string | null>(null); // This will be the dbId for editing
   const [editName, setEditName] = useState("");
   const [editMinPoints, setEditMinPoints] = useState(0);
   const [showIconPicker, setShowIconPicker] = useState<string | null>(null);
   const [showBadgeForm, setShowBadgeForm] = useState(false);
+
+  useEffect(() => {
+    fetchBadges();
+  }, []);
+
+  const fetchBadges = async () => {
+    setLoading(true);
+    const { data, error } = await getBadges();
+    if (!error && data) {
+      setBadges(data.map(mapDBBadgeToBadge));
+    } else {
+      console.error("Error fetching badges:", error);
+    }
+    setLoading(false);
+  };
+
+  const saveBadge = async (badgeToSave: Omit<BadgeWithIcon, 'id' | 'icon' | 'borderClass' | 'bgClass' | 'colorClass'> & { dbId?: string }) => {
+    const dbPayload = {
+      name: badgeToSave.nameKey,
+      min_points: badgeToSave.minPoints,
+      icon_key: badgeToSave.iconName,
+    };
+
+    if (badgeToSave.dbId) { // If dbId exists, it's an update
+      const { data, error } = await updateBadge(badgeToSave.dbId, dbPayload);
+      if (!error && data) {
+        setBadges(prev => prev.map(b => b.dbId === badgeToSave.dbId ? mapDBBadgeToBadge(data) : b));
+      } else {
+        console.error("Error updating badge:", error);
+      }
+    } else { // Otherwise, it's a new badge
+      const { data, error } = await createBadge(dbPayload as any); // Type assertion needed as 'id' is not in payload
+      if (!error && data) {
+        setBadges(prev => [...prev, mapDBBadgeToBadge(data)]);
+      } else {
+        console.error("Error creating badge:", error);
+      }
+    }
+    setShowBadgeForm(false);
+    setEditingBadgeId(null);
+  };
+
+  const deleteBadge = async (dbId: string) => {
+    const { error } = await removeBadge(dbId);
+    if (!error) {
+      setBadges(prev => prev.filter(b => b.dbId !== dbId));
+    } else {
+      console.error("Error deleting badge:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <PageTransition>
+        <div className="flex items-center justify-center h-48 text-muted-foreground">Loading badges...</div>
+      </PageTransition>
+    );
+  }
 
   return (
     <PageTransition>
@@ -84,9 +164,8 @@ export default function Badges() {
           title={t("dash.add_badge")}
         >
           <BadgeForm
-            onSave={(badge) => {
-              setBadges(prev => [...prev, badge]);
-              setShowBadgeForm(false);
+            onSave={(newBadge) => {
+              saveBadge(newBadge);
             }}
             onCancel={() => setShowBadgeForm(false)}
           />
@@ -96,16 +175,16 @@ export default function Badges() {
           <div className="divide-y divide-border">
             {badges.map((badge) => {
             const Icon = badge.icon;
-            const isEditing = editingBadgeId === badge.id;
+            const isEditing = editingBadgeId === badge.dbId;
 
             return (
-              <div key={badge.id} className="p-4 sm:p-5 hover:bg-accent/30 transition-all duration-200 group/badge last:border-b-0 last:rounded-b-2xl">
+              <div key={badge.dbId} className="p-4 sm:p-5 hover:bg-accent/30 transition-all duration-200 group/badge last:border-b-0 last:rounded-b-2xl">
                 {isEditing ? (
                   <div className="space-y-4">
                     <div className="flex items-start gap-4">
                       <div className="shrink-0">
                         <button
-                          onClick={() => setShowIconPicker(showIconPicker === badge.id ? null : badge.id)}
+                          onClick={() => setShowIconPicker(showIconPicker === badge.dbId ? null : badge.dbId)}
                           className={`w-14 h-14 flex items-center justify-center border-2 border-dashed ${badge.borderClass} ${badge.bgClass} hover:border-foreground/40 transition-colors relative rounded-xl`}
                         >
                           <Icon className={`w-7 h-7 ${badge.colorClass}`} />
@@ -126,7 +205,7 @@ export default function Badges() {
                       </div>
                     </div>
 
-                    {showIconPicker === badge.id && (
+                    {showIconPicker === badge.dbId && (
                       <div className="border border-border p-4 rounded-xl">
                         <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest mb-3">Choose Icon</p>
                         <div className="grid grid-cols-10 gap-1">
@@ -138,7 +217,7 @@ export default function Badges() {
                                 key={iconOption.name}
                                 onClick={() => {
                                   setBadges(prev => prev.map(b =>
-                                    b.id === badge.id ? { ...b, icon: iconOption.icon, iconName: iconOption.name } : b
+                                    b.dbId === badge.dbId ? { ...b, icon: iconOption.icon, iconName: iconOption.name } : b
                                   ));
                                   setShowIconPicker(null);
                                 }}
@@ -158,11 +237,12 @@ export default function Badges() {
 
                     <div className="flex items-center gap-2">
                       <PrimaryBtn onClick={() => {
-                        setBadges(prev => prev.map(b =>
-                          b.id === badge.id ? { ...b, nameKey: editName, minPoints: editMinPoints } : b
-                        ));
-                        setEditingBadgeId(null);
-                        setShowIconPicker(null);
+                        saveBadge({
+                          dbId: badge.dbId,
+                          nameKey: editName,
+                          minPoints: editMinPoints,
+                          iconName: badge.iconName
+                        });
                       }}>
                         <Check className="w-3.5 h-3.5" /> Save
                       </PrimaryBtn>
@@ -189,7 +269,7 @@ export default function Badges() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => {
-                          setEditingBadgeId(badge.id);
+                          setEditingBadgeId(badge.dbId!);
                           setEditName(badge.nameKey);
                           setEditMinPoints(badge.minPoints);
                           setShowIconPicker(null);
@@ -199,7 +279,7 @@ export default function Badges() {
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => setBadges(prev => prev.filter(b => b.id !== badge.id))}
+                        onClick={() => deleteBadge(badge.dbId!)}
                         className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors rounded-lg"
                       >
                         <Trash2 className="w-4 h-4" />

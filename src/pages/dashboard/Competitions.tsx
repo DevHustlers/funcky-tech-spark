@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Plus,
   Pencil,
@@ -17,6 +17,8 @@ import PageTransition from "@/components/PageTransition";
 import { CompetitionForm } from "./components/CompetitionForm";
 import { BottomDrawer } from "./components/BottomDrawer";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { getCompetitions, createCompetition, updateCompetition } from "@/services/competitions.service";
+import type { Tables } from "@/types/database";
 
 interface CompetitionQuestion {
   id: number;
@@ -38,116 +40,18 @@ interface CompetitionData {
   participants: number;
 }
 
-const MOCK_COMPETITIONS: CompetitionData[] = [
-  {
-    id: "comp-1",
-    title: "Frontend Mastery Showdown",
-    description: "Test your frontend knowledge in React, CSS, and JavaScript",
-    status: "live",
-    scheduledDate: "Mar 9, 2026 — 8:00 PM",
-    timePerQuestion: 15,
-    prize: "500 pts + Gold Badge",
-    participants: 128,
-    questions: [
-      {
-        id: 1,
-        question: "Which CSS property is used to create a flexible box layout?",
-        options: [
-          "display: grid",
-          "display: flex",
-          "display: block",
-          "display: inline",
-        ],
-        correctIndex: 1,
-        timeLimit: 15,
-      },
-      {
-        id: 2,
-        question: "What does the 'useEffect' hook do in React?",
-        options: [
-          "Manages state",
-          "Creates a component",
-          "Performs side effects after render",
-          "Optimizes re-renders",
-        ],
-        correctIndex: 2,
-        timeLimit: 15,
-      },
-    ],
-  },
-  {
-    id: "comp-2",
-    title: "Backend Brain Battle",
-    description:
-      "API and server-side quiz covering Node.js, Express, and databases",
-    status: "scheduled",
-    scheduledDate: "Mar 15, 2026 — 7:00 PM",
-    timePerQuestion: 20,
-    prize: "750 pts + Silver Badge",
-    participants: 0,
-    questions: [
-      {
-        id: 1,
-        question: "Which HTTP method is idempotent?",
-        options: ["POST", "PATCH", "PUT", "DELETE"],
-        correctIndex: 2,
-        timeLimit: 20,
-      },
-    ],
-  },
-  {
-    id: "comp-3",
-    title: "JS Fundamentals Sprint",
-    description: "Core JavaScript knowledge including ES6+ features",
-    status: "ended",
-    scheduledDate: "Mar 1, 2026 — 6:00 PM",
-    timePerQuestion: 10,
-    prize: "300 pts",
-    participants: 95,
-    questions: [],
-  },
-  {
-    id: "comp-4",
-    title: "Python Data Science Quiz",
-    description: "Test your Python and data analysis skills",
-    status: "live",
-    scheduledDate: "Mar 12, 2026 — 9:00 PM",
-    timePerQuestion: 25,
-    prize: "600 pts + Bronze Badge",
-    participants: 67,
-    questions: [
-      {
-        id: 1,
-        question: "Which library is used for data manipulation in Python?",
-        options: ["NumPy", "Pandas", "Matplotlib", "Scikit-learn"],
-        correctIndex: 1,
-        timeLimit: 25,
-      },
-    ],
-  },
-  {
-    id: "comp-5",
-    title: "DevOps Challenge",
-    description: "Docker, Kubernetes, and CI/CD pipeline questions",
-    status: "draft",
-    scheduledDate: "TBD",
-    timePerQuestion: 30,
-    prize: "800 pts + Special Badge",
-    participants: 0,
-    questions: [],
-  },
-  {
-    id: "comp-6",
-    title: "Cybersecurity CTF",
-    description: "Capture the flag security challenges",
-    status: "scheduled",
-    scheduledDate: "Apr 10, 2026 — 8:00 PM",
-    timePerQuestion: 45,
-    prize: "1000 pts + Platinum Badge",
-    participants: 0,
-    questions: [],
-  },
-];
+// Helper to map DB competition to UI CompetitionData
+const mapDBCompToCompData = (c: Tables<'competitions'>): CompetitionData => ({
+  id: c.id,
+  title: c.title,
+  description: c.description || "",
+  status: (c.status as any) || "draft",
+  scheduledDate: c.scheduled_date ? new Date(c.scheduled_date).toLocaleString() : "TBD",
+  timePerQuestion: c.time_per_question || 20,
+  prize: c.prize || "N/A",
+  questions: (c.questions as any) || [],
+  participants: 0, // In a real app, you'd join with room_participants
+});
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -177,41 +81,77 @@ const PrimaryBtn = ({
 
 export default function Competitions() {
   const { t } = useLanguage();
-  const [competitions, setCompetitions] =
-    useState<CompetitionData[]>(MOCK_COMPETITIONS);
+  const [competitions, setCompetitions] = useState<CompetitionData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [compFormMode, setCompFormMode] = useState<"none" | "create" | "edit">(
     "none",
   );
   const [editingComp, setEditingComp] = useState<CompetitionData | undefined>();
 
-  const saveCompetition = (comp: CompetitionData) => {
+  useEffect(() => {
+    fetchCompetitions();
+  }, []);
+
+  const fetchCompetitions = async () => {
+    setLoading(true);
+    const { data, error } = await getCompetitions();
+    if (!error && data) {
+      setCompetitions(data.map(mapDBCompToCompData));
+    }
+    setLoading(false);
+  };
+
+  const saveCompetition = async (comp: CompetitionData) => {
+    const dbPayload = {
+      title: comp.title,
+      description: comp.description,
+      status: comp.status,
+      scheduled_date: comp.scheduledDate === "TBD" ? null : new Date(comp.scheduledDate).toISOString(),
+      time_per_question: comp.timePerQuestion,
+      prize: comp.prize,
+      questions: comp.questions as any,
+    };
+
     if (compFormMode === "edit") {
-      setCompetitions((prev) => prev.map((c) => (c.id === comp.id ? comp : c)));
+      const { data, error } = await updateCompetition(comp.id, dbPayload);
+      if (!error && data) {
+        setCompetitions((prev) => prev.map((c) => (c.id === comp.id ? mapDBCompToCompData(data) : c)));
+      }
     } else {
-      setCompetitions((prev) => [comp, ...prev]);
+      const { data, error } = await createCompetition(dbPayload as any);
+      if (!error && data) {
+        setCompetitions((prev) => [mapDBCompToCompData(data), ...prev]);
+      }
     }
     setCompFormMode("none");
     setEditingComp(undefined);
   };
 
-  const toggleCompStatus = (
+  const toggleCompStatus = async (
     id: string,
     newStatus: CompetitionData["status"],
   ) => {
-    setCompetitions((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status: newStatus } : c)),
-    );
+    const { data, error } = await updateCompetition(id, { status: newStatus });
+    if (!error && data) {
+      setCompetitions((prev) =>
+        prev.map((c) => (c.id === id ? mapDBCompToCompData(data) : c)),
+      );
+    }
   };
 
-  const duplicateCompetition = (comp: CompetitionData) => {
-    const dup: CompetitionData = {
-      ...comp,
-      id: `comp-${Date.now()}`,
+  const duplicateCompetition = async (comp: CompetitionData) => {
+    const { data, error } = await createCompetition({
       title: `${comp.title} (Copy)`,
+      description: comp.description,
       status: "draft",
-      participants: 0,
-    };
-    setCompetitions((prev) => [dup, ...prev]);
+      scheduled_date: null,
+      time_per_question: comp.timePerQuestion,
+      prize: comp.prize,
+      questions: comp.questions as any,
+    });
+    if (!error && data) {
+      setCompetitions((prev) => [mapDBCompToCompData(data), ...prev]);
+    }
   };
 
   return (

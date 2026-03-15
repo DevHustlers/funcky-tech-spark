@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { TrendingUp, Users, Trophy, Zap, Calendar, Star, Target, LucideIcon } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface StatItem {
   label: string;
@@ -10,67 +12,107 @@ interface StatItem {
   border: string;
 }
 
-const MOCK_STATS: StatItem[] = [
-  {
-    label: "Total Users",
-    value: "2,847",
-    change: "+12%",
-    icon: Users,
-    color: "text-blue-500",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/20",
-  },
-  {
-    label: "Active Challenges",
-    value: "14",
-    change: "+3",
-    icon: Trophy,
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/20",
-  },
-  {
-    label: "Points Awarded",
-    value: "184K",
-    change: "+8.2%",
-    icon: Zap,
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/20",
-  },
-  {
-    label: "Upcoming Events",
-    value: "6",
-    change: "+2",
-    icon: Calendar,
-    color: "text-purple-500",
-    bg: "bg-purple-500/10",
-    border: "border-purple-500/20",
-  },
-  {
-    label: "Active Members",
-    value: "1,234",
-    change: "+18%",
-    icon: Star,
-    color: "text-rose-500",
-    bg: "bg-rose-500/10",
-    border: "border-rose-500/20",
-  },
-  {
-    label: "Avg. Score",
-    value: "847",
-    change: "+5%",
-    icon: Target,
-    color: "text-cyan-500",
-    bg: "bg-cyan-500/10",
-    border: "border-cyan-500/20",
-  },
-];
-
 export const StatGrid = () => {
+  const [stats, setStats] = useState<StatItem[]>([
+    {
+      label: "Total Users",
+      value: "...",
+      change: "+0%",
+      icon: Users,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+      border: "border-blue-500/20",
+    },
+    {
+      label: "Active Challenges",
+      value: "...",
+      change: "+0",
+      icon: Trophy,
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
+      border: "border-amber-500/20",
+    },
+    {
+      label: "Points Awarded",
+      value: "...",
+      change: "+0%",
+      icon: Zap,
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/20",
+    },
+    {
+      label: "Upcoming Events",
+      value: "...",
+      change: "+0",
+      icon: Calendar,
+      color: "text-purple-500",
+      bg: "bg-purple-500/10",
+      border: "border-purple-500/20",
+    },
+    {
+      label: "Total Competitions",
+      value: "...",
+      change: "+0",
+      icon: Star,
+      color: "text-rose-500",
+      bg: "bg-rose-500/10",
+      border: "border-rose-500/20",
+    },
+    {
+      label: "Badge Tiers",
+      value: "...",
+      change: "+0",
+      icon: Target,
+      color: "text-cyan-500",
+      bg: "bg-cyan-500/10",
+      border: "border-cyan-500/20",
+    },
+  ]);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    const [
+      { count: userCount },
+      { count: challengeCount },
+      { count: eventCount },
+      { count: compCount },
+      { count: badgeCount },
+      { data: pointsData }
+    ] = await Promise.all([
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('challenges').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+      supabase.from('events').select('*', { count: 'exact', head: true }).eq('status', 'upcoming'),
+      supabase.from('competitions').select('*', { count: 'exact', head: true }),
+      supabase.from('badges').select('*', { count: 'exact', head: true }),
+      supabase.rpc('get_total_points_awarded') // Fallback to simple sum if RPC doesn't exist
+    ]);
+
+    // Fallback if RPC fails
+    let totalPoints = 0;
+    if (pointsData) {
+      totalPoints = (pointsData as any);
+    } else {
+      const { data } = await supabase.from('profiles').select('points');
+      totalPoints = data?.reduce((acc, curr) => acc + (curr.points || 0), 0) || 0;
+    }
+
+    setStats(prev => [
+      { ...prev[0], value: (userCount || 0).toLocaleString() },
+      { ...prev[1], value: (challengeCount || 0).toLocaleString() },
+      { ...prev[2], value: totalPoints > 1000 ? `${(totalPoints / 1000).toFixed(1)}K` : totalPoints.toString() },
+      { ...prev[3], value: (eventCount || 0).toLocaleString() },
+      { ...prev[4], value: (compCount || 0).toLocaleString() },
+      { ...prev[5], value: (badgeCount || 0).toLocaleString() },
+    ]);
+  };
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-4">
-      {MOCK_STATS.map((stat) => (
+      {stats.map((stat) => (
         <div
           key={stat.label}
           className="group bg-background/80 backdrop-blur-sm border border-border rounded-2xl p-3 sm:p-5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
@@ -83,10 +125,12 @@ export const StatGrid = () => {
                 className={`w-4 h-4 sm:w-5 sm:h-5 ${stat.color}`}
               />
             </div>
-            <span className="text-[10px] sm:text-[11px] font-mono text-emerald-500 flex items-center gap-0.5">
-              <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3" />{" "}
-              {stat.change}
-            </span>
+            {stat.change !== "+0" && stat.change !== "+0%" && (
+              <span className="text-[10px] sm:text-[11px] font-mono text-emerald-500 flex items-center gap-0.5">
+                <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3" />{" "}
+                {stat.change}
+              </span>
+            )}
           </div>
           <p className="text-lg sm:text-2xl font-bold text-foreground font-mono group-hover:text-primary transition-colors">
             {stat.value}
