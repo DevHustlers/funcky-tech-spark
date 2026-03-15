@@ -233,6 +233,28 @@ export const translations: Record<Locale, Record<string, string>> = {
     "signup.has_account": "Already have an account?",
     "signup.signin_link": "Sign in",
 
+    // Forgot Password
+    "forgot.label": "recovery",
+    "forgot.title.step1": "Forgot Password",
+    "forgot.desc.step1": "Enter your email address to receive a verification code.",
+    "forgot.title.step2": "Verify Code",
+    "forgot.desc.step2": "Enter the 6-digit code we sent to your email.",
+    "forgot.email": "Email Address",
+    "forgot.send_code": "Send Code",
+    "forgot.code": "Verification Code",
+    "forgot.verify": "Verify & Reset",
+    "forgot.back": "Back to login",
+
+    // Reset Password
+    "reset.label": "security",
+    "reset.title": "New Password",
+    "reset.desc": "Create a new secure password for your account.",
+    "reset.password": "New Password",
+    "reset.confirm_password": "Confirm New Password",
+    "reset.submit": "Reset Password",
+    "reset.success_title": "Success!",
+    "reset.success_desc": "Your password has been successfully updated.",
+
     // Dashboard
     "dash.overview": "Overview",
     "dash.users": "Users",
@@ -254,8 +276,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dash.recent_activity": "Recent Points Activity",
     "dash.timeline": "Upcoming Timeline",
     "dash.showing_users": "Showing",
-    "dash.users_label": "users",
-    "dash.add_user": "Add User",
     "dash.user": "User",
     "dash.email": "Email",
     "dash.points_col": "Points",
@@ -264,11 +284,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dash.joined": "Joined",
     "dash.managing": "Managing",
     "dash.active_label": "active challenges",
-    "dash.new_challenge": "New Challenge",
     "dash.participants": "participants",
     "dash.events_planned": "events planned",
-    "dash.new_event": "New Event",
-    "dash.event_timeline": "Event Timeline",
     "dash.point_mgmt": "Point system management",
     "dash.award_points": "Award Points",
     "dash.auto_rules": "Auto Point Rules",
@@ -305,7 +322,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dash.full_name": "Full Name",
     "dash.bio": "Bio",
     "dash.role": "Role",
-    "dash.points": "Points",
     "dash.view": "View",
     "dash.edit": "Edit",
     "dash.delete": "Delete",
@@ -315,7 +331,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dash.challenges_label": "challenges",
     "dash.new_challenge": "New Challenge",
     "dash.edit_challenge": "Edit Challenge",
-    "dash.participants": "participants",
     "dash.pts": "pts",
     // Competitions page
     "dash.competitions_label": "competitions",
@@ -584,6 +599,28 @@ export const translations: Record<Locale, Record<string, string>> = {
     "signup.or": "أو",
     "signup.has_account": "لديك حساب بالفعل؟",
     "signup.signin_link": "سجّل الدخول",
+
+    // Forgot Password
+    "forgot.label": "استعادة الحساب",
+    "forgot.title.step1": "نسيت كلمة المرور",
+    "forgot.desc.step1": "أدخل بريدك الإلكتروني لتلقي رمز التحقق.",
+    "forgot.title.step2": "تحقق من الرمز",
+    "forgot.desc.step2": "أدخل الرمز المكون من 6 أرقام المرسل إلى بريدك.",
+    "forgot.email": "البريد الإلكتروني",
+    "forgot.send_code": "إرسال الرمز",
+    "forgot.code": "رمز التحقق",
+    "forgot.verify": "تحقق واستعادة",
+    "forgot.back": "العودة لتسجيل الدخول",
+
+    // Reset Password
+    "reset.label": "الأمان",
+    "reset.title": "كلمة مرور جديدة",
+    "reset.desc": "أنشئ كلمة مرور قوية وجديدة لحسابك.",
+    "reset.password": "كلمة المرور الجديدة",
+    "reset.confirm_password": "تأكيد كلمة المرور",
+    "reset.submit": "تغيير كلمة المرور",
+    "reset.success_title": "تم بنجاح!",
+    "reset.success_desc": "تم تحديث كلمة المرور الخاصة بك بنجاح.",
 
     // Dashboard
     "dash.overview": "نظرة عامة",
