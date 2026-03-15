@@ -23,7 +23,7 @@ import Competition from "./pages/Competition";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
-
+import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
 const queryClient = new QueryClient();
 
 const AnimatedRoutes = () => {
@@ -45,7 +45,14 @@ const AnimatedRoutes = () => {
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/planets" element={<Planets />} />
         <Route path="/planets/:slug" element={<TrackDetail />} />
-        <Route path="/dashboard/*" element={<DashboardLayout />} />
+        <Route
+          path="/dashboard/*"
+          element={
+            <AdminProtectedRoute>
+              <DashboardLayout />
+            </AdminProtectedRoute>
+          }
+        />
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
