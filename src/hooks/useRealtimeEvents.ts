@@ -1,26 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { getEvents } from '@/services/events.service';
 import type { Tables } from '@/types/database';
 
 export const useRealtimeEvents = () => {
-  const [events, setEvents] = useState<Tables<'events'>[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchEvents = async () => {
-    const { data, error } = await getEvents();
-    if (error) {
-      setError(error);
-    } else if (data) {
-      setEvents(data);
-    }
-    setLoading(false);
-  };
+  const { data: events = [], isLoading: loading, error } = useQuery({
+    queryKey: ['events'],
+    queryFn: async () => {
+      const { data, error } = await getEvents();
+      if (error) throw new Error(error);
+      return data || [];
+    },
+    staleTime: 60000,
+  });
 
   useEffect(() => {
-    fetchEvents();
-
     const channel = supabase
       .channel('events-realtime')
       .on(
@@ -31,7 +28,7 @@ export const useRealtimeEvents = () => {
           table: 'events',
         },
         () => {
-          fetchEvents();
+          queryClient.invalidateQueries({ queryKey: ['events'] });
         }
       )
       .subscribe();
@@ -39,7 +36,12 @@ export const useRealtimeEvents = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [queryClient]);
 
-  return { events, loading, error, refresh: fetchEvents };
+  return { 
+    events, 
+    loading, 
+    error: error instanceof Error ? error.message : null,
+    refresh: () => queryClient.invalidateQueries({ queryKey: ['events'] })
+  };
 };

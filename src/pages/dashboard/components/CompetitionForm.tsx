@@ -29,17 +29,22 @@ interface CompetitionData {
   participants: number;
 }
 
+import { competitionSchema } from "@/lib/validation/competition.schema";
+import { toast } from "sonner";
+
 // ─── Competition Form (create/edit) ───
 export const CompetitionForm = ({
   initial,
   onSave,
   onCancel,
   isEdit = false,
+  loading = false,
 }: {
   initial?: CompetitionData;
   onSave: (data: CompetitionData) => void;
   onCancel: () => void;
   isEdit?: boolean;
+  loading?: boolean;
 }) => {
   const [title, setTitle] = useState(initial?.title || "");
   const [description, setDescription] = useState(initial?.description || "");
@@ -51,18 +56,32 @@ export const CompetitionForm = ({
   const [showAddQ, setShowAddQ] = useState(false);
 
   const handleSave = () => {
-    if (!title.trim()) return;
+    const dataToValidate = {
+      title: title.trim(),
+      description: description.trim(),
+      status: status === "scheduled" ? "upcoming" : (status === "ended" ? "completed" : status), // Map to DB types
+      scheduled_date: scheduledDate.trim(),
+      time_per_question: timePerQuestion,
+      prize: prize.trim(),
+      questions,
+    };
+
+    const validation = competitionSchema.safeParse(dataToValidate);
+    
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+
     onSave({
       id: initial?.id || `comp-${Date.now()}`,
-      title,
-      description,
-      status,
-      scheduledDate: scheduledDate || "Not scheduled",
-      timePerQuestion,
-      prize: prize || "TBD",
+      ...dataToValidate,
+      status, // Pass original status back for UI
+      scheduledDate: dataToValidate.scheduled_date,
+      timePerQuestion: dataToValidate.time_per_question,
       participants: initial?.participants || 0,
       questions,
-    });
+    } as CompetitionData);
   };
 
   const removeQuestion = (idx: number) => setQuestions(prev => prev.filter((_, i) => i !== idx));
@@ -143,8 +162,12 @@ export const CompetitionForm = ({
         </div>
 
         <div className="flex items-center gap-2 pt-2">
-          <PrimaryBtn onClick={handleSave} disabled={!title.trim()}>
-            <Check className="w-3.5 h-3.5" /> {isEdit ? "Save Changes" : "Create Competition"}
+          <PrimaryBtn 
+            onClick={handleSave} 
+            disabled={!title.trim() || loading}
+          >
+            {loading ? <div className="w-3.5 h-3.5 border-2 border-background/20 border-t-background rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+            {isEdit ? "Save Changes" : "Create Competition"}
           </PrimaryBtn>
           <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
         </div>

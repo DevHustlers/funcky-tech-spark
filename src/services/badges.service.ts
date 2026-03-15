@@ -16,13 +16,39 @@ export const getBadges = async (): Promise<ServiceResponse<Tables<'badges'>[]>> 
   }
 };
 
+import { badgeSchema } from '@/lib/validation/badge.schema';
+import type { TablesUpdate } from '@/types/database';
+
 export const createBadge = async (
   data: TablesInsert<'badges'>
 ): Promise<ServiceResponse<Tables<'badges'>>> => {
   try {
+    // 1. Sanitize input
+    const sanitizedData = {
+      ...data,
+      name: data.name?.trim(),
+    };
+
+    // 2. Validate with schema
+    const validation = badgeSchema.safeParse(sanitizedData);
+    if (!validation.success) {
+      return { data: null, error: validation.error.errors[0].message };
+    }
+
+    // 3. Prevent duplicate name
+    const { data: existing } = await supabase
+      .from('badges')
+      .select('id')
+      .eq('name', sanitizedData.name)
+      .maybeSingle();
+
+    if (existing) {
+      return { data: null, error: 'A badge with this name already exists' };
+    }
+
     const { data: result, error } = await supabase
       .from('badges')
-      .insert(data)
+      .insert(sanitizedData)
       .select()
       .single();
 
@@ -36,12 +62,24 @@ export const createBadge = async (
 
 export const updateBadge = async (
   id: string,
-  data: any
+  data: TablesUpdate<'badges'>
 ): Promise<ServiceResponse<Tables<'badges'>>> => {
   try {
+    // 1. Sanitize
+    const sanitizedData = {
+      ...data,
+      name: data.name?.trim(),
+    };
+
+    // 2. Validate
+    const validation = badgeSchema.partial().safeParse(sanitizedData);
+    if (!validation.success) {
+      return { data: null, error: validation.error.errors[0].message };
+    }
+
     const { data: result, error } = await supabase
       .from('badges')
-      .update(data)
+      .update(sanitizedData)
       .eq('id', id)
       .select()
       .single();

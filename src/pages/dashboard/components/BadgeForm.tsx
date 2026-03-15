@@ -28,16 +28,22 @@ const AVAILABLE_ICONS = [
   { name: "Zap", icon: Zap },
 ];
 
+import { badgeSchema } from "@/lib/validation/badge.schema";
+import { toast } from "sonner";
+
 export const BadgeForm = ({
   onSave,
   onCancel,
+  loading = false,
 }: {
   onSave: (badge: { id: string; nameKey: string; minPoints: number; icon: React.ElementType; iconName: string; colorClass: string; borderClass: string; bgClass: string }) => void;
   onCancel: () => void;
+  loading?: boolean;
 }) => {
   const [name, setName] = useState("");
   const [minPoints, setMinPoints] = useState(0);
   const [selectedIcon, setSelectedIcon] = useState(AVAILABLE_ICONS[0]);
+  
   const COLOR_PRESETS = [
     { label: "Zinc", colorClass: "text-zinc-400", borderClass: "border-zinc-400/30", bgClass: "bg-zinc-400/10" },
     { label: "Emerald", colorClass: "text-emerald-500", borderClass: "border-emerald-500/30", bgClass: "bg-emerald-500/10" },
@@ -49,6 +55,30 @@ export const BadgeForm = ({
     { label: "Cyan", colorClass: "text-cyan-500", borderClass: "border-cyan-500/30", bgClass: "bg-cyan-500/10" },
   ];
   const [selectedColor, setSelectedColor] = useState(COLOR_PRESETS[0]);
+
+  const handleSave = () => {
+    const dataToValidate = {
+      name: name.trim(),
+      min_points: minPoints,
+      icon_key: selectedIcon.name,
+    };
+
+    const validation = badgeSchema.safeParse(dataToValidate);
+
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+
+    onSave({
+      id: `badge-${Date.now()}`,
+      nameKey: name.trim(),
+      minPoints,
+      icon: selectedIcon.icon,
+      iconName: selectedIcon.name,
+      ...selectedColor,
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -108,17 +138,12 @@ export const BadgeForm = ({
         </div>
       </div>
       <div className="flex items-center gap-2 pt-2">
-        <PrimaryBtn onClick={() => {
-          if (name.trim()) onSave({
-            id: `badge-${Date.now()}`,
-            nameKey: name.trim(),
-            minPoints,
-            icon: selectedIcon.icon,
-            iconName: selectedIcon.name,
-            ...selectedColor,
-          });
-        }} disabled={!name.trim()}>
-          <Check className="w-3.5 h-3.5" /> Create Badge
+        <PrimaryBtn 
+          onClick={handleSave} 
+          disabled={!name.trim() || loading}
+        >
+          {loading ? <div className="w-3.5 h-3.5 border-2 border-background/20 border-t-background rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+          Create Badge
         </PrimaryBtn>
         <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
       </div>

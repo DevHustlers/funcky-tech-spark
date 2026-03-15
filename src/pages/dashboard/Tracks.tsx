@@ -29,8 +29,8 @@ import PageTransition from "@/components/PageTransition";
 import { TrackForm } from "./components/TrackForm";
 import { BottomDrawer } from "./components/BottomDrawer";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { supabase } from "@/lib/supabase";
-import { getTracks, createTrack, updateTrack } from "@/services/tracks.service";
+import { getTracks, createTrack, updateTrack, deleteTrack as deleteTrackService } from "@/services/tracks.service";
+import { toast } from "sonner";
 import type { Tables } from "@/types/database";
 
 interface TrackData {
@@ -38,7 +38,9 @@ interface TrackData {
   name: string;
   slug: string;
   description: string;
+  long_description: string;
   iconName: string;
+  color: string;
 }
 
 // Helper to map DB track to UI TrackData
@@ -47,7 +49,9 @@ const mapDBTrackToTrackData = (track: Tables<'tracks'>): TrackData => ({
   name: track.name,
   slug: track.slug,
   description: track.description || "",
+  long_description: track.long_description || "",
   iconName: track.icon_key || "Sparkles",
+  color: track.color || "#3b82f6",
 });
 
 const AVAILABLE_ICONS = [
@@ -93,6 +97,7 @@ export default function Tracks() {
     "none" | "create" | "edit"
   >("none");
   const [editingTrack, setEditingTrack] = useState<TrackData | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchTracks();
@@ -108,36 +113,54 @@ export default function Tracks() {
   };
 
   const saveTrack = async (track: TrackData) => {
-    if (trackFormMode === "edit") {
-      const { data, error } = await updateTrack(track.id, {
-        name: track.name,
-        slug: track.slug,
-        description: track.description,
-        icon_key: track.iconName,
-      });
-      if (!error && data) {
-        setTracks((prev) => prev.map((t) => (t.id === track.id ? mapDBTrackToTrackData(data) : t)));
+    if (isSubmitting) return;
+
+    const payload = {
+      name: track.name,
+      slug: track.slug,
+      description: track.description,
+      long_description: track.long_description,
+      icon_key: track.iconName,
+      color: track.color,
+    };
+
+    setIsSubmitting(true);
+    try {
+      if (trackFormMode === "edit") {
+        const { data, error } = await updateTrack(track.id, payload);
+        if (!error && data) {
+          setTracks((prev) => prev.map((t) => (t.id === track.id ? mapDBTrackToTrackData(data) : t)));
+          setTrackFormMode("none");
+          setEditingTrack(undefined);
+          toast.success("Track updated successfully");
+        } else {
+          toast.error(error || "Failed to update track");
+        }
+      } else {
+        const { data, error } = await createTrack(payload);
+        if (!error && data) {
+          setTracks((prev) => [mapDBTrackToTrackData(data), ...prev]);
+          setTrackFormMode("none");
+          setEditingTrack(undefined);
+          toast.success("Track created successfully");
+        } else {
+          toast.error(error || "Failed to create track");
+        }
       }
-    } else {
-      const { data, error } = await createTrack({
-        name: track.name,
-        slug: track.slug,
-        description: track.description,
-        icon_key: track.iconName,
-      });
-      if (!error && data) {
-        setTracks((prev) => [mapDBTrackToTrackData(data), ...prev]);
-      }
+    } finally {
+      setIsSubmitting(false);
     }
-    setTrackFormMode("none");
-    setEditingTrack(undefined);
   };
 
-  const deleteTrack = async (id: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { error } = await supabase.from('tracks').delete().eq('id', id);
+  const handleDeleteTrack = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this track? This will affect all associated challenges.")) return;
+    
+    const { error } = await deleteTrackService(id);
     if (!error) {
       setTracks((prev) => prev.filter((t) => t.id !== id));
+      toast.success("Track deleted successfully");
+    } else {
+      toast.error(error || "Failed to delete track");
     }
   };
 
@@ -179,8 +202,11 @@ export default function Tracks() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="w-12 h-12 flex items-center justify-center border border-border bg-accent/30 rounded-xl group-hover:scale-110 group-hover:border-primary/30 transition-all duration-300 shrink-0">
-                      <TrackIcon className="w-6 h-6 text-foreground" />
+                    <div 
+                      className="w-12 h-12 flex items-center justify-center border border-border bg-accent/30 rounded-xl group-hover:scale-110 group-hover:border-primary/30 transition-all duration-300 shrink-0"
+                      style={{ borderColor: `${track.color}40`, backgroundColor: `${track.color}10` }}
+                    >
+                      <TrackIcon className="w-6 h-6" style={{ color: track.color }} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-3 mb-1">
@@ -202,14 +228,16 @@ export default function Tracks() {
                         setTrackFormMode("edit");
                         setEditingTrack(track);
                       }}
-                      className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors rounded-lg"
+                      disabled={isSubmitting}
+                      className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors rounded-lg disabled:opacity-50"
                       title="Edit"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => deleteTrack(track.id)}
-                      className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors rounded-lg"
+                      onClick={() => handleDeleteTrack(track.id)}
+                      disabled={isSubmitting}
+                      className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors rounded-lg disabled:opacity-50"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -240,6 +268,7 @@ export default function Tracks() {
         <TrackForm
           initial={editingTrack}
           isEdit={trackFormMode === "edit"}
+          loading={isSubmitting}
           onSave={saveTrack}
           onCancel={() => {
             setTrackFormMode("none");

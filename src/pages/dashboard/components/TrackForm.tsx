@@ -34,8 +34,13 @@ interface TrackData {
   name: string;
   slug: string;
   description: string;
+  long_description: string;
   iconName: string;
+  color?: string;
 }
+
+import { trackSchema } from "@/lib/validation/track.schema";
+import { toast } from "sonner";
 
 // ─── Track Form ───
 export const TrackForm = ({
@@ -43,18 +48,22 @@ export const TrackForm = ({
   onSave,
   onCancel,
   isEdit = false,
+  loading = false,
 }: {
   initial?: TrackData;
   onSave: (data: TrackData) => void;
   onCancel: () => void;
   isEdit?: boolean;
+  loading?: boolean;
 }) => {
   const [name, setName] = useState(initial?.name || "");
   const [slug, setSlug] = useState(initial?.slug || "");
   const [description, setDescription] = useState(initial?.description || "");
+  const [longDescription, setLongDescription] = useState(initial?.long_description || "");
   const [selectedIcon, setSelectedIcon] = useState(
     AVAILABLE_ICONS.find(i => i.name === initial?.iconName) || AVAILABLE_ICONS[0]
   );
+  const [color, setColor] = useState(initial?.color || "#3b82f6");
 
   const autoSlug = (val: string) => val.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
@@ -64,14 +73,27 @@ export const TrackForm = ({
   };
 
   const handleSave = () => {
-    if (!name.trim()) return;
-    onSave({
-      id: initial?.id || `tr-${Date.now()}`,
+    const dataToValidate = {
       name: name.trim(),
       slug: slug.trim() || autoSlug(name),
-      description,
+      description: description.trim(),
+      long_description: longDescription.trim(),
+      icon_key: selectedIcon.name,
+      color: color.trim(),
+    };
+
+    const validation = trackSchema.safeParse(dataToValidate);
+
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+
+    onSave({
+      id: initial?.id || `tr-${Date.now()}`,
+      ...dataToValidate,
       iconName: selectedIcon.name,
-    });
+    } as any);
   };
 
   return (
@@ -88,7 +110,11 @@ export const TrackForm = ({
         </div>
         <div>
           <FieldLabel>Description</FieldLabel>
-          <FieldTextarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Short description of the track..." />
+          <FieldTextarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Short description..." />
+        </div>
+        <div>
+          <FieldLabel>Long Description</FieldLabel>
+          <FieldTextarea value={longDescription} onChange={e => setLongDescription(e.target.value)} placeholder="Full track details..." className="h-32" />
         </div>
         <div>
           <FieldLabel>Icon</FieldLabel>
@@ -110,9 +136,30 @@ export const TrackForm = ({
             })}
           </div>
         </div>
+        <div>
+          <FieldLabel>Color</FieldLabel>
+          <div className="flex items-center gap-4">
+            <input 
+              type="color" 
+              value={color} 
+              onChange={e => setColor(e.target.value)} 
+              className="w-10 h-10 border-none bg-transparent cursor-pointer p-0"
+            />
+            <FieldInput 
+              value={color} 
+              onChange={e => setColor(e.target.value)} 
+              placeholder="#3b82f6" 
+              className="font-mono text-[12px]"
+            />
+          </div>
+        </div>
         <div className="flex items-center gap-2 pt-2">
-          <PrimaryBtn onClick={handleSave} disabled={!name.trim()}>
-            <Check className="w-3.5 h-3.5" /> {isEdit ? "Save Changes" : "Add Track"}
+          <PrimaryBtn 
+            onClick={handleSave} 
+            disabled={!name.trim() || loading}
+          >
+            {loading ? <div className="w-3.5 h-3.5 border-2 border-background/20 border-t-background rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+            {isEdit ? "Save Changes" : "Add Track"}
           </PrimaryBtn>
           <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
         </div>

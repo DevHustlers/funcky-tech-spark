@@ -17,6 +17,7 @@ import SectionDivider from "@/components/SectionDivider";
 import ScrollReveal from "@/components/ScrollReveal";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useRealtimeChallenges } from "@/hooks/useRealtimeChallenges";
+import { useRealtimeCompetitions } from "@/hooks/useRealtimeCompetitions";
 import { getTracks } from "@/services/tracks.service";
 import type { Tables } from "@/types/database";
 
@@ -54,8 +55,11 @@ const Challenges = () => {
     "live",
   );
   const { t } = useLanguage();
-  const { challenges, loading } = useRealtimeChallenges();
+  const { challenges, loading: challengesLoading } = useRealtimeChallenges();
+  const { competitions, loading: compsLoading } = useRealtimeCompetitions();
   const [tracks, setTracks] = useState<string[]>(["All"]);
+
+  const loading = challengesLoading || compsLoading;
 
   useEffect(() => {
     const fetchTracks = async () => {
@@ -66,6 +70,8 @@ const Challenges = () => {
     };
     fetchTracks();
   }, []);
+
+  const liveComp = competitions.find(c => c.status === "live");
 
   const filtered = challenges.filter((c) => {
     const trackMatch = activeTrack === "All" || c.track === activeTrack;
@@ -111,39 +117,41 @@ const Challenges = () => {
             </div>
 
             {/* Live Competition Banner - right side of header */}
-            <Link
-              to="/competition/comp-1"
-              className="hidden sm:block group shrink-0 w-[320px]"
-            >
-              <div className="border border-emerald-500/30 bg-emerald-500/5 p-5 hover:border-emerald-500/50 transition-colors h-full">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                  </span>
-                  <span className="text-[11px] font-mono text-emerald-500 uppercase tracking-widest">
-                    {t("challenges.live_now")}
-                  </span>
+            {liveComp && (
+              <Link
+                to={`/competition/${liveComp.id}`}
+                className="hidden sm:block group shrink-0 w-[320px]"
+              >
+                <div className="border border-emerald-500/30 bg-emerald-500/5 p-5 hover:border-emerald-500/50 transition-colors h-full">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                    </span>
+                    <span className="text-[11px] font-mono text-emerald-500 uppercase tracking-widest">
+                      {t("challenges.live_now")}
+                    </span>
+                  </div>
+                  <h3 className="text-[15px] font-bold text-foreground mb-2">
+                    {liveComp.title}
+                  </h3>
+                  <div className="flex flex-col gap-1 text-[11px] text-muted-foreground font-mono">
+                    <span className="flex items-center gap-1">
+                      <Timer className="w-3 h-3" /> {liveComp.time_per_question}s per question
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Users className="w-3 h-3" /> Multiple Players
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Trophy className="w-3 h-3" /> {liveComp.prize || "Recognition & Points"}
+                    </span>
+                  </div>
+                  <div className="mt-3 inline-flex items-center gap-2 text-[12px] font-medium text-emerald-500 group-hover:text-emerald-400 transition-colors">
+                    Join Now <ArrowRight className="w-3 h-3 rtl:rotate-180" />
+                  </div>
                 </div>
-                <h3 className="text-[15px] font-bold text-foreground mb-2">
-                  Frontend Mastery Showdown
-                </h3>
-                <div className="flex flex-col gap-1 text-[11px] text-muted-foreground font-mono">
-                  <span className="flex items-center gap-1">
-                    <Timer className="w-3 h-3" /> 15s per question
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Users className="w-3 h-3" /> 128 joined
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Trophy className="w-3 h-3" /> 500 pts + Gold Badge
-                  </span>
-                </div>
-                <div className="mt-3 inline-flex items-center gap-2 text-[12px] font-medium text-emerald-500 group-hover:text-emerald-400 transition-colors">
-                  Join Now <ArrowRight className="w-3 h-3 rtl:rotate-180" />
-                </div>
-              </div>
-            </Link>
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -210,7 +218,7 @@ const Challenges = () => {
             ) : (
               <div>
                 {filtered.map((challenge) => (
-                  <div key={challenge.id}>
+                  <Link key={challenge.id} to={`/challenges/${challenge.id}`}>
                     <div className="bg-background p-6 sm:p-8 hover:bg-accent/30 transition-colors group cursor-pointer">
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                         <div className="flex-1">
@@ -263,15 +271,14 @@ const Challenges = () => {
                               {t("challenges.live_now")}
                             </span>
                           </div>
-                          <button className="inline-flex items-center gap-2 text-[13px] font-medium text-foreground hover:underline">
+                          <div className="inline-flex items-center gap-2 text-[13px] font-medium text-foreground hover:underline">
                             {t("challenges.enter")}{" "}
                             <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
-                          </button>
+                          </div>
                         </div>
                       )}
                     </div>
-                    <SectionDivider />
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}

@@ -17,80 +17,37 @@ import {
   Star,
   ChevronRight,
 } from "lucide-react";
+import { Navigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageLayout from "@/components/PageLayout";
 import SectionDivider from "@/components/SectionDivider";
 import ScrollReveal from "@/components/ScrollReveal";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { getActiveCompetitions } from "@/services/competitions.service";
+import { getCompetitionById } from "@/services/competitions.service";
+import { useParams } from "react-router-dom";
 import type { Tables } from "@/types/database";
 
 type CompetitionType = Tables<"competitions">;
 
-// Mock competition data
-const MOCK_COMPETITION = {
-  id: "comp-1",
-  title: "Frontend Mastery Showdown",
-  description: "Test your frontend knowledge in this live quiz competition. Answer quickly and accurately to climb the leaderboard!",
-  totalQuestions: 5,
-  timePerQuestion: 15,
-  participants: 128,
-  prize: "500 pts + Gold Badge",
-};
-
-const MOCK_QUESTIONS = [
+// Fallback structures if DB is empty
+const DEFAULT_QUESTIONS = [
   {
     id: 1,
-    question: "Which CSS property is used to create a flexible box layout?",
-    options: ["display: grid", "display: flex", "display: block", "display: inline"],
-    correctIndex: 1,
-  },
-  {
-    id: 2,
-    question: "What does the 'useEffect' hook do in React?",
-    options: [
-      "Manages component state",
-      "Creates a new component",
-      "Performs side effects after render",
-      "Optimizes re-renders",
-    ],
-    correctIndex: 2,
-  },
-  {
-    id: 3,
-    question: "Which HTTP method is idempotent?",
-    options: ["POST", "PATCH", "PUT", "All of the above"],
-    correctIndex: 2,
-  },
-  {
-    id: 4,
-    question: "What is the output of typeof null in JavaScript?",
-    options: ['"null"', '"undefined"', '"object"', '"boolean"'],
-    correctIndex: 2,
-  },
-  {
-    id: 5,
-    question: "Which of these is NOT a valid React hook?",
-    options: ["useReducer", "useContext", "useForceUpdate", "useCallback"],
-    correctIndex: 2,
+    question: "Select a competition from the dashboard to see questions.",
+    options: ["Option A", "Option B", "Option C", "Option D"],
+    correctIndex: 0,
   },
 ];
 
-const MOCK_PARTICIPANTS = [
+const DEFAULT_PARTICIPANTS = [
   { name: "You", avatar: "YO", score: 0, isYou: true },
-  { name: "Sarah Chen", avatar: "SC", score: 0, isYou: false },
-  { name: "Ahmed Hassan", avatar: "AH", score: 0, isYou: false },
-  { name: "Maria Rodriguez", avatar: "MR", score: 0, isYou: false },
-  { name: "James Park", avatar: "JP", score: 0, isYou: false },
-  { name: "Fatima Al-Sayed", avatar: "FA", score: 0, isYou: false },
-  { name: "Liam O'Brien", avatar: "LO", score: 0, isYou: false },
-  { name: "Yuki Tanaka", avatar: "YT", score: 0, isYou: false },
 ];
 
 type Phase = "lobby" | "countdown" | "question" | "reveal" | "results";
 
 const Competition = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [competition, setCompetition] = useState<CompetitionType | null>(null);
@@ -98,33 +55,38 @@ const Competition = () => {
 
   useEffect(() => {
     const fetchCompetition = async () => {
-      const { data } = await getActiveCompetitions();
-      if (data && data.length > 0) {
-        setCompetition(data[0]);
+      if (!id) return;
+      const { data } = await getCompetitionById(id);
+      if (data) {
+        setCompetition(data);
       }
       setLoading(false);
     };
     fetchCompetition();
-  }, []);
+  }, [id]);
+
+  const questions = (competition?.questions as any[]) || DEFAULT_QUESTIONS;
+  const timePerQuestion = competition?.time_per_question || 15;
+  const maxParticipants = 100; // Default if not in schema
 
   const [phase, setPhase] = useState<Phase>("lobby");
   const [currentQ, setCurrentQ] = useState(0);
-  const [timer, setTimer] = useState(MOCK_COMPETITION.timePerQuestion);
+  const [timer, setTimer] = useState(timePerQuestion);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [countdownVal, setCountdownVal] = useState(3);
-  const [participants, setParticipants] = useState(MOCK_PARTICIPANTS);
-  const [lobbyCount, setLobbyCount] = useState(87);
+  const [participants, setParticipants] = useState(DEFAULT_PARTICIPANTS);
+  const [lobbyCount, setLobbyCount] = useState(1);
 
   // Simulate lobby participants joining
   useEffect(() => {
     if (phase !== "lobby") return;
     const interval = setInterval(() => {
-      setLobbyCount((prev) => Math.min(prev + Math.floor(Math.random() * 3) + 1, MOCK_COMPETITION.participants));
+      setLobbyCount((prev) => Math.min(prev + Math.floor(Math.random() * 3) + 1, maxParticipants));
     }, 1500);
     return () => clearInterval(interval);
-  }, [phase]);
+  }, [phase, maxParticipants]);
 
   // Countdown phase
   useEffect(() => {
@@ -143,23 +105,7 @@ const Competition = () => {
     return () => clearInterval(interval);
   }, [phase]);
 
-  // Question timer
-  useEffect(() => {
-    if (phase !== "question") return;
-    setTimer(MOCK_COMPETITION.timePerQuestion);
-    const interval = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          handleTimeUp();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [phase, currentQ]);
-
+  // Question timer - handleTimeUp must be defined first
   const handleTimeUp = useCallback(() => {
     if (selectedAnswer === null) {
       setAnswers((prev) => [...prev, null]);
@@ -176,10 +122,27 @@ const Competition = () => {
     setPhase("reveal");
   }, [selectedAnswer]);
 
+  useEffect(() => {
+    if (phase !== "question") return;
+    setTimer(timePerQuestion);
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          handleTimeUp();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [phase, currentQ, timePerQuestion, handleTimeUp]);
+
+
   const handleAnswer = (index: number) => {
     if (selectedAnswer !== null || phase !== "question") return;
     setSelectedAnswer(index);
-    const isCorrect = index === MOCK_QUESTIONS[currentQ].correctIndex;
+    const isCorrect = index === questions[currentQ].correctIndex;
     const timeBonus = Math.floor(timer * 7);
     const points = isCorrect ? 100 + timeBonus : 0;
     setScore((prev) => prev + points);
@@ -197,7 +160,7 @@ const Competition = () => {
   };
 
   const nextQuestion = () => {
-    if (currentQ + 1 >= MOCK_QUESTIONS.length) {
+    if (currentQ + 1 >= questions.length) {
       setPhase("results");
     } else {
       setCurrentQ((prev) => prev + 1);
@@ -212,8 +175,8 @@ const Competition = () => {
 
   const sortedParticipants = [...participants].sort((a, b) => b.score - a.score);
   const yourRank = sortedParticipants.findIndex((p) => p.isYou) + 1;
-  const question = MOCK_QUESTIONS[currentQ];
-  const timerPercent = (timer / MOCK_COMPETITION.timePerQuestion) * 100;
+  const question = questions[currentQ];
+  const timerPercent = (timer / timePerQuestion) * 100;
 
   if (loading) {
     return (
@@ -227,8 +190,10 @@ const Competition = () => {
     );
   }
 
-  const currentComp = competition || MOCK_COMPETITION;
-  const currentQuestions = (currentComp as any).questions || MOCK_QUESTIONS;
+  const currentComp = competition;
+  const currentQuestions = questions;
+
+  if (!currentComp) return <Navigate to="/challenges" replace />;
 
   return (
     <PageLayout>
@@ -247,23 +212,23 @@ const Competition = () => {
                 Live Competition
               </div>
               <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-4">
-                {MOCK_COMPETITION.title}
+                {currentComp.title}
               </h1>
               <p className="text-muted-foreground text-[15px] max-w-lg mx-auto mb-8">
-                {MOCK_COMPETITION.description}
+                {currentComp.description}
               </p>
 
               <div className="grid grid-cols-3 gap-px bg-border border border-border max-w-md mx-auto mb-10">
                 <div className="bg-background p-4 text-center">
-                  <p className="font-mono font-bold text-foreground text-lg">{MOCK_COMPETITION.totalQuestions}</p>
+                  <p className="font-mono font-bold text-foreground text-lg">{currentQuestions.length}</p>
                   <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Questions</p>
                 </div>
                 <div className="bg-background p-4 text-center">
-                  <p className="font-mono font-bold text-foreground text-lg">{MOCK_COMPETITION.timePerQuestion}s</p>
+                  <p className="font-mono font-bold text-foreground text-lg">{timePerQuestion}s</p>
                   <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Per Question</p>
                 </div>
                 <div className="bg-background p-4 text-center">
-                  <p className="font-mono font-bold text-foreground text-lg">{MOCK_COMPETITION.prize}</p>
+                  <p className="font-mono font-bold text-foreground text-lg">{currentComp.prize || "pts"}</p>
                   <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Prize</p>
                 </div>
               </div>
@@ -275,12 +240,12 @@ const Competition = () => {
                 <h3 className="text-[14px] font-bold text-foreground">Waiting Room</h3>
                 <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
                   <Users className="w-4 h-4" />
-                  <span className="font-mono font-bold text-foreground">{lobbyCount}</span> / {MOCK_COMPETITION.participants}
+                  <span className="font-mono font-bold text-foreground">{lobbyCount}</span> / {maxParticipants}
                 </div>
               </div>
               <div className="p-5">
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {MOCK_PARTICIPANTS.slice(0, 8).map((p, i) => (
+                  {participants.slice(0, 8).map((p, i) => (
                     <div
                       key={i}
                       className={`w-10 h-10 flex items-center justify-center border text-[11px] font-bold font-mono ${
@@ -325,7 +290,7 @@ const Competition = () => {
                 <span className="text-6xl font-bold text-foreground font-mono animate-pulse">{countdownVal}</span>
               </div>
               <p className="text-[14px] text-muted-foreground">
-                Question {currentQ + 1} of {MOCK_QUESTIONS.length}
+                Question {currentQ + 1} of {currentQuestions.length}
               </p>
             </div>
           </div>
@@ -338,7 +303,7 @@ const Competition = () => {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest">
-                  Q{currentQ + 1}/{MOCK_QUESTIONS.length}
+                  Q{currentQ + 1}/{currentQuestions.length}
                 </span>
                 <div className="flex items-center gap-1.5 text-[13px] font-mono">
                   <Zap className="w-3.5 h-3.5 text-amber-500" />
@@ -417,7 +382,7 @@ const Competition = () => {
           <div className="max-w-3xl mx-auto px-4 sm:px-8 py-8">
             <div className="flex items-center justify-between mb-6">
               <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest">
-                Q{currentQ + 1}/{MOCK_QUESTIONS.length} — Results
+                Q{currentQ + 1}/{currentQuestions.length} — Results
               </span>
               <div className="flex items-center gap-1.5 text-[13px] font-mono">
                 <Zap className="w-3.5 h-3.5 text-amber-500" />
@@ -520,7 +485,7 @@ const Competition = () => {
                 onClick={nextQuestion}
                 className="inline-flex items-center gap-3 px-8 py-3 bg-foreground text-background text-[14px] font-medium hover:bg-foreground/90 transition-colors"
               >
-                {currentQ + 1 >= MOCK_QUESTIONS.length ? (
+                {currentQ + 1 >= currentQuestions.length ? (
                   <>
                     <Trophy className="w-4 h-4" /> See Final Results
                   </>

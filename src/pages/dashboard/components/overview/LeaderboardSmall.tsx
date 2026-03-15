@@ -1,13 +1,30 @@
+import { useEffect, useState } from "react";
 import { Flame, ArrowRight } from "lucide-react";
-
-const MOCK_LEADERBOARD = [
-  { name: "Sarah Chen", points: 12450, streak: 12 },
-  { name: "Ahmed Hassan", points: 11200, streak: 8 },
-  { name: "Maria Rodriguez", points: 10800, streak: 5 },
-  { name: "James Park", points: 9650, streak: 3 },
-];
+import { supabase } from "@/lib/supabase";
 
 export const LeaderboardSmall = () => {
+  const [users, setUsers] = useState<{ name: string; points: number; streak: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTopUsers = async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('full_name, points')
+        .order('points', { ascending: false })
+        .limit(4);
+
+      if (!error && data) {
+        setUsers(data.map(u => ({
+          name: u.full_name || "Anonymous",
+          points: u.points || 0,
+          streak: 0 // Placeholder
+        })));
+      }
+      setLoading(false);
+    };
+    fetchTopUsers();
+  }, []);
   return (
     <div className="group bg-background/80 backdrop-blur-sm border border-border rounded-2xl hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
       <div className="px-3 sm:px-5 py-3 sm:py-4 border-b border-border flex items-center justify-between">
@@ -19,29 +36,39 @@ export const LeaderboardSmall = () => {
         </div>
       </div>
       <div className="divide-y divide-border last:rounded-b-2xl">
-        {MOCK_LEADERBOARD.map((user, idx) => (
-          <div
-            key={idx}
-            className="px-3 sm:px-5 py-2.5 sm:py-3.5 flex items-center justify-between hover:bg-accent/50 hover:ps-6 sm:hover:ps-6 transition-all duration-200 group/user cursor-pointer"
-          >
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-accent border border-border flex items-center justify-center text-[10px] sm:text-[11px] font-bold font-mono text-foreground shrink-0 rounded-lg group-hover/user:scale-110 group-hover/user:border-primary/30 transition-all duration-200">
-                {user.name.split(" ").map((n) => n[0]).join("")}
-              </div>
-              <div className="min-w-0">
-                <p className="text-[12px] sm:text-[13px] font-medium text-foreground line-clamp-1 group-hover/user:text-primary transition-colors">
-                  {user.name}
-                </p>
-                <p className="text-[10px] sm:text-[11px] text-muted-foreground flex items-center gap-1 group-hover/user:text-foreground/70 transition-colors">
-                  <Flame className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-orange-500" /> {user.streak} day streak
-                </p>
-              </div>
-            </div>
-            <p className="font-mono font-bold text-foreground text-[12px] sm:text-[14px] shrink-0 group-hover/user:text-primary transition-colors">
-              {user.points.toLocaleString()}
-            </p>
+        {loading ? (
+          <div className="px-3 sm:px-5 py-4 text-[12px] text-muted-foreground animate-pulse">
+            Loading rankings...
           </div>
-        ))}
+        ) : users.length === 0 ? (
+          <div className="px-3 sm:px-5 py-4 text-[12px] text-muted-foreground">
+            No rankings found
+          </div>
+        ) : (
+          users.map((user, idx) => (
+            <div
+              key={idx}
+              className="px-3 sm:px-5 py-2.5 sm:py-3.5 flex items-center justify-between hover:bg-accent/50 hover:ps-6 sm:hover:ps-6 transition-all duration-200 group/user cursor-pointer"
+            >
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-accent border border-border flex items-center justify-center text-[10px] sm:text-[11px] font-bold font-mono text-foreground shrink-0 rounded-lg group-hover/user:scale-110 group-hover/user:border-primary/30 transition-all duration-200">
+                  {user.name.split(" ").map((n) => n[0]).join("")}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[12px] sm:text-[13px] font-medium text-foreground line-clamp-1 group-hover/user:text-primary transition-colors">
+                    {user.name}
+                  </p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground flex items-center gap-1 group-hover/user:text-foreground/70 transition-colors">
+                    <Flame className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-orange-500" /> {user.streak} day streak
+                  </p>
+                </div>
+              </div>
+              <p className="font-mono font-bold text-foreground text-[12px] sm:text-[14px] shrink-0 group-hover/user:text-primary transition-colors">
+                {user.points.toLocaleString()}
+              </p>
+            </div>
+          ))
+        )}
       </div>
       <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-border">
         <button className="text-[11px] sm:text-[12px] text-muted-foreground hover:text-primary flex items-center gap-1 transition-all duration-200 hover:gap-2 group/btn">

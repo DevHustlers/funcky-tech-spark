@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Calendar, ArrowRight } from "lucide-react";
+import { getUpcomingEvents } from "@/services/events.service";
 
 interface EventData {
   id: string;
@@ -6,13 +8,6 @@ interface EventData {
   date: string;
   status: "draft" | "upcoming" | "live" | "ended" | "scheduled";
 }
-
-const MOCK_EVENTS: EventData[] = [
-  { id: "ev-1", title: "Frontend Hackathon 2026", date: "Mar 15, 2026", status: "upcoming" },
-  { id: "ev-2", title: "AI Workshop: Building LLMs", date: "Mar 22, 2026", status: "upcoming" },
-  { id: "ev-3", title: "Monthly Challenge Reset", date: "Apr 1, 2026", status: "scheduled" },
-  { id: "ev-4", title: "Cybersecurity CTF Tournament", date: "Apr 10, 2026", status: "draft" },
-];
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -29,6 +24,24 @@ const statusBadge = (status: string) => {
 };
 
 export const UpcomingTimeline = () => {
+  const [events, setEvents] = useState<EventData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data, error } = await getUpcomingEvents(5);
+      if (!error && data) {
+        setEvents(data.map(e => ({
+          id: e.id,
+          title: e.title,
+          date: e.date || "",
+          status: (e.status as any) || "upcoming"
+        })));
+      }
+      setLoading(false);
+    };
+    fetch();
+  }, []);
   return (
     <div className="group bg-background/80 backdrop-blur-sm border border-border rounded-2xl hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
       <div className="px-3 sm:px-5 py-3 sm:py-4 border-b border-border flex items-center justify-between">
@@ -42,39 +55,49 @@ export const UpcomingTimeline = () => {
       <div className="p-3 sm:p-4">
         <div className="relative">
           <div className="absolute start-3 top-0 bottom-0 w-px bg-border rtl:start-auto rtl:end-3 group-hover:bg-primary/20 transition-colors duration-300" />
-          {MOCK_EVENTS.map((event) => (
-            <div
-              key={event.id}
-              className="relative ps-6 sm:ps-8 pb-3 sm:pb-4 last:pb-0 group/event hover:ps-7 sm:hover:ps-9 transition-all duration-200"
-            >
-              <div
-                className={`absolute start-[9px] sm:start-[11px] top-2 w-2 h-2 rounded-full border-2 border-background rtl:start-auto group-hover/event:scale-150 group-hover/event:shadow-lg group-hover/event:shadow-current transition-all duration-300 ${
-                  event.status === "live"
-                    ? "bg-emerald-500"
-                    : event.status === "upcoming"
-                      ? "bg-amber-500"
-                      : event.status === "scheduled"
-                        ? "bg-blue-500"
-                        : "bg-muted-foreground"
-                }`}
-              />
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="text-[12px] sm:text-[13px] font-medium text-foreground line-clamp-1 group-hover/event:text-primary transition-colors">
-                    {event.title}
-                  </p>
-                  <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono group-hover/event:text-foreground/70 transition-colors">
-                    {event.date}
-                  </p>
-                </div>
-                <span
-                  className={`text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 border uppercase tracking-wider shrink-0 group-hover/event:border-primary/50 transition-colors ${statusBadge(event.status)}`}
-                >
-                  {event.status}
-                </span>
-              </div>
+          {loading ? (
+            <div className="ps-6 sm:ps-8 py-4 text-[12px] text-muted-foreground animate-pulse">
+              Loading events...
             </div>
-          ))}
+          ) : events.length === 0 ? (
+            <div className="ps-6 sm:ps-8 py-4 text-[12px] text-muted-foreground">
+              No upcoming events
+            </div>
+          ) : (
+            events.map((event) => (
+              <div
+                key={event.id}
+                className="relative ps-6 sm:ps-8 pb-3 sm:pb-4 last:pb-0 group/event hover:ps-7 sm:hover:ps-9 transition-all duration-200"
+              >
+                <div
+                  className={`absolute start-[9px] sm:start-[11px] top-2 w-2 h-2 rounded-full border-2 border-background rtl:start-auto group-hover/event:scale-150 group-hover/event:shadow-lg group-hover/event:shadow-current transition-all duration-300 ${
+                    event.status === "live"
+                      ? "bg-emerald-500"
+                      : event.status === "upcoming"
+                        ? "bg-amber-500"
+                        : event.status === "scheduled"
+                          ? "bg-blue-500"
+                          : "bg-muted-foreground"
+                  }`}
+                />
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-[12px] sm:text-[13px] font-medium text-foreground line-clamp-1 group-hover/event:text-primary transition-colors">
+                      {event.title}
+                    </p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground font-mono group-hover/event:text-foreground/70 transition-colors">
+                      {event.date}
+                    </p>
+                  </div>
+                  <span
+                    className={`text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 border uppercase tracking-wider shrink-0 group-hover/event:border-primary/50 transition-colors ${statusBadge(event.status)}`}
+                  >
+                    {event.status}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
       <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-border">

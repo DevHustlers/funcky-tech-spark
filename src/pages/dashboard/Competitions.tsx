@@ -17,7 +17,8 @@ import PageTransition from "@/components/PageTransition";
 import { CompetitionForm } from "./components/CompetitionForm";
 import { BottomDrawer } from "./components/BottomDrawer";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { getCompetitions, createCompetition, updateCompetition } from "@/services/competitions.service";
+import { getCompetitions, createCompetition, updateCompetition, deleteCompetition } from "@/services/competitions.service";
+import { toast } from "sonner";
 import type { Tables } from "@/types/database";
 
 interface CompetitionQuestion {
@@ -87,6 +88,7 @@ export default function Competitions() {
     "none",
   );
   const [editingComp, setEditingComp] = useState<CompetitionData | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchCompetitions();
@@ -101,7 +103,21 @@ export default function Competitions() {
     setLoading(false);
   };
 
+  const deleteComp = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this competition?")) return;
+    
+    const { error } = await deleteCompetition(id);
+    if (!error) {
+      setCompetitions((prev) => prev.filter((c) => c.id !== id));
+      toast.success("Competition deleted");
+    } else {
+      toast.error(error);
+    }
+  };
+
   const saveCompetition = async (comp: CompetitionData) => {
+    if (isSubmitting) return;
+
     const dbPayload = {
       title: comp.title,
       description: comp.description,
@@ -112,45 +128,78 @@ export default function Competitions() {
       questions: comp.questions as any,
     };
 
-    if (compFormMode === "edit") {
-      const { data, error } = await updateCompetition(comp.id, dbPayload);
-      if (!error && data) {
-        setCompetitions((prev) => prev.map((c) => (c.id === comp.id ? mapDBCompToCompData(data) : c)));
+    setIsSubmitting(true);
+    try {
+      if (compFormMode === "edit") {
+        const { data, error } = await updateCompetition(comp.id, dbPayload);
+        if (!error && data) {
+          setCompetitions((prev) => prev.map((c) => (c.id === comp.id ? mapDBCompToCompData(data) : c)));
+          toast.success("Competition updated");
+          setCompFormMode("none");
+          setEditingComp(undefined);
+        } else {
+          toast.error(error || "Failed to update competition");
+        }
+      } else {
+        const { data, error } = await createCompetition(dbPayload as any);
+        if (!error && data) {
+          setCompetitions((prev) => [mapDBCompToCompData(data), ...prev]);
+          toast.success("Competition created");
+          setCompFormMode("none");
+          setEditingComp(undefined);
+        } else {
+          toast.error(error || "Failed to create competition");
+        }
       }
-    } else {
-      const { data, error } = await createCompetition(dbPayload as any);
-      if (!error && data) {
-        setCompetitions((prev) => [mapDBCompToCompData(data), ...prev]);
-      }
+    } finally {
+      setIsSubmitting(false);
     }
-    setCompFormMode("none");
-    setEditingComp(undefined);
   };
 
   const toggleCompStatus = async (
     id: string,
     newStatus: CompetitionData["status"],
   ) => {
-    const { data, error } = await updateCompetition(id, { status: newStatus });
-    if (!error && data) {
-      setCompetitions((prev) =>
-        prev.map((c) => (c.id === id ? mapDBCompToCompData(data) : c)),
-      );
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await updateCompetition(id, { status: newStatus });
+      if (!error && data) {
+        setCompetitions((prev) =>
+          prev.map((c) => (c.id === id ? mapDBCompToCompData(data) : c)),
+        );
+        toast.success(`Competition status changed to ${newStatus}`);
+      } else {
+        toast.error(error || "Failed to change status");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const duplicateCompetition = async (comp: CompetitionData) => {
-    const { data, error } = await createCompetition({
-      title: `${comp.title} (Copy)`,
-      description: comp.description,
-      status: "draft",
-      scheduled_date: null,
-      time_per_question: comp.timePerQuestion,
-      prize: comp.prize,
-      questions: comp.questions as any,
-    });
-    if (!error && data) {
-      setCompetitions((prev) => [mapDBCompToCompData(data), ...prev]);
+  const duplicateComp = async (comp: CompetitionData) => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await createCompetition({
+        title: `${comp.title} (Copy)`,
+        description: comp.description,
+        status: "draft",
+        scheduled_date: null,
+        time_per_question: comp.timePerQuestion,
+        prize: comp.prize,
+        questions: comp.questions as any,
+      });
+      if (!error && data) {
+        setCompetitions((prev) => [mapDBCompToCompData(data), ...prev]);
+        toast.success("Competition duplicated as draft");
+      } else {
+        toast.error(error || "Failed to duplicate");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -172,7 +221,7 @@ export default function Competitions() {
               setEditingComp(undefined);
             }}
           >
-            <Plus className="w-3.5 h-3.5" /> <span className="hidden sm:inline">{t("dash.add_competition")}</span><span className="sm:hidden">New</span>
+            <Plus className="w-3.5 h-3.5" /> <span className="hidden sm:inline">{t("add new competition ")}</span><span className="sm:hidden">New</span>
           </PrimaryBtn>
         </div>
         </div>
@@ -218,11 +267,12 @@ export default function Competitions() {
                     {comp.participants}
                   </p>
                 </div>
-                <div className="flex items-center gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1 mt-auto pt-3 border-t border-border group-hover:border-primary/20 transition-colors">
                   {comp.status === "draft" && (
                     <button
                       onClick={() => toggleCompStatus(comp.id, "scheduled")}
-                      className="p-1.5 sm:p-2 text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all duration-200 group/btn"
+                      disabled={isSubmitting}
+                      className="p-1.5 sm:p-2 text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all duration-200 group/btn disabled:opacity-50"
                       title="Schedule"
                     >
                       <Calendar className="w-3.5 h-4 group-hover/btn:scale-110 transition-transform" />
@@ -231,7 +281,8 @@ export default function Competitions() {
                   {comp.status === "scheduled" && (
                     <button
                       onClick={() => toggleCompStatus(comp.id, "live")}
-                      className="p-1.5 sm:p-2 text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all duration-200 group/btn"
+                      disabled={isSubmitting}
+                      className="p-1.5 sm:p-2 text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all duration-200 group/btn disabled:opacity-50"
                       title="Go Live"
                     >
                       <Play className="w-3.5 h-4 group-hover/btn:scale-110 transition-transform" />
@@ -240,15 +291,17 @@ export default function Competitions() {
                   {comp.status === "live" && (
                     <button
                       onClick={() => toggleCompStatus(comp.id, "ended")}
-                      className="p-1.5 sm:p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all duration-200 group/btn"
+                      disabled={isSubmitting}
+                      className="p-1.5 sm:p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all duration-200 group/btn disabled:opacity-50"
                       title="End"
                     >
                       <StopCircle className="w-3.5 h-4 group-hover/btn:scale-110 transition-transform" />
                     </button>
                   )}
                   <button
-                    onClick={() => duplicateCompetition(comp)}
-                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200 group/btn"
+                    onClick={() => duplicateComp(comp)}
+                    disabled={isSubmitting}
+                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200 group/btn disabled:opacity-50"
                     title="Duplicate"
                   >
                     <Copy className="w-3.5 h-4 group-hover/btn:scale-110 transition-transform" />
@@ -258,20 +311,21 @@ export default function Competitions() {
                       setCompFormMode("edit");
                       setEditingComp(comp);
                     }}
-                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-all duration-200 group/btn"
+                    disabled={isSubmitting}
+                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-all duration-200 group/btn disabled:opacity-50"
                   >
                     <Pencil className="w-3.5 h-4 group-hover/btn:scale-110 transition-transform" />
                   </button>
-                  <button className="p-1.5 sm:p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200 group/btn">
+                  <button 
+                    disabled={isSubmitting}
+                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200 group/btn disabled:opacity-50"
+                  >
                     <Eye className="w-3.5 h-4 group-hover/btn:scale-110 transition-transform" />
                   </button>
                   <button
-                    onClick={() =>
-                      setCompetitions((prev) =>
-                        prev.filter((c) => c.id !== comp.id),
-                      )
-                    }
-                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all duration-200 group/btn"
+                    onClick={() => deleteComp(comp.id)}
+                    disabled={isSubmitting}
+                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all duration-200 group/btn disabled:opacity-50"
                   >
                     <Trash2 className="w-3.5 h-4 group-hover/btn:scale-110 transition-transform" />
                   </button>
@@ -288,12 +342,13 @@ export default function Competitions() {
             setEditingComp(undefined);
           }}
           title={
-            compFormMode === "edit" ? t("dash.edit_competition") : t("dash.add_competition")
+            compFormMode === "edit" ? t("dash.edit_competition") : t("add new competition")
           }
         >
           <CompetitionForm
             initial={editingComp}
             isEdit={compFormMode === "edit"}
+            loading={isSubmitting}
             onSave={saveCompetition}
             onCancel={() => {
               setCompFormMode("none");

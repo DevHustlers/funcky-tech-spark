@@ -6,6 +6,7 @@ import { BadgeForm } from "./components/BadgeForm";
 import { BottomDrawer } from "./components/BottomDrawer";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { getBadges, createBadge, updateBadge, deleteBadge as removeBadge } from "@/services/badges.service";
+import { toast } from "sonner";
 import type { Tables } from "@/types/database";
 
 const AVAILABLE_ICONS = [
@@ -87,6 +88,7 @@ export default function Badges() {
   const [editMinPoints, setEditMinPoints] = useState(0);
   const [showIconPicker, setShowIconPicker] = useState<string | null>(null);
   const [showBadgeForm, setShowBadgeForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchBadges();
@@ -104,29 +106,38 @@ export default function Badges() {
   };
 
   const saveBadge = async (badgeToSave: Omit<BadgeWithIcon, 'id' | 'icon' | 'borderClass' | 'bgClass' | 'colorClass'> & { dbId?: string }) => {
+    if (isSubmitting) return;
+
     const dbPayload = {
       name: badgeToSave.nameKey,
       min_points: badgeToSave.minPoints,
       icon_key: badgeToSave.iconName,
     };
 
-    if (badgeToSave.dbId) { // If dbId exists, it's an update
-      const { data, error } = await updateBadge(badgeToSave.dbId, dbPayload);
-      if (!error && data) {
-        setBadges(prev => prev.map(b => b.dbId === badgeToSave.dbId ? mapDBBadgeToBadge(data) : b));
-      } else {
-        console.error("Error updating badge:", error);
+    setIsSubmitting(true);
+    try {
+      if (badgeToSave.dbId) { // If dbId exists, it's an update
+        const { data, error } = await updateBadge(badgeToSave.dbId, dbPayload);
+        if (!error && data) {
+          setBadges(prev => prev.map(b => b.dbId === badgeToSave.dbId ? mapDBBadgeToBadge(data) : b));
+          setShowBadgeForm(false);
+          setEditingBadgeId(null);
+        } else {
+          console.error("Error updating badge:", error);
+        }
+      } else { // Otherwise, it's a new badge
+        const { data, error } = await createBadge(dbPayload as any); // Type assertion needed as 'id' is not in payload
+        if (!error && data) {
+          setBadges(prev => [...prev, mapDBBadgeToBadge(data)]);
+          setShowBadgeForm(false);
+          setEditingBadgeId(null);
+        } else {
+          console.error("Error creating badge:", error);
+        }
       }
-    } else { // Otherwise, it's a new badge
-      const { data, error } = await createBadge(dbPayload as any); // Type assertion needed as 'id' is not in payload
-      if (!error && data) {
-        setBadges(prev => [...prev, mapDBBadgeToBadge(data)]);
-      } else {
-        console.error("Error creating badge:", error);
-      }
+    } finally {
+      setIsSubmitting(false);
     }
-    setShowBadgeForm(false);
-    setEditingBadgeId(null);
   };
 
   const deleteBadge = async (dbId: string) => {
@@ -164,6 +175,7 @@ export default function Badges() {
           title={t("dash.add_badge")}
         >
           <BadgeForm
+            loading={isSubmitting}
             onSave={(newBadge) => {
               saveBadge(newBadge);
             }}
@@ -236,15 +248,19 @@ export default function Badges() {
                     )}
 
                     <div className="flex items-center gap-2">
-                      <PrimaryBtn onClick={() => {
-                        saveBadge({
-                          dbId: badge.dbId,
-                          nameKey: editName,
-                          minPoints: editMinPoints,
-                          iconName: badge.iconName
-                        });
-                      }}>
-                        <Check className="w-3.5 h-3.5" /> Save
+                      <PrimaryBtn 
+                        disabled={isSubmitting}
+                        onClick={() => {
+                          saveBadge({
+                            dbId: badge.dbId,
+                            nameKey: editName,
+                            minPoints: editMinPoints,
+                            iconName: badge.iconName
+                          });
+                        }}
+                      >
+                        {isSubmitting ? <div className="w-3.5 h-3.5 border-2 border-background/20 border-t-background rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                        Save
                       </PrimaryBtn>
                       <SecondaryBtn onClick={() => { setEditingBadgeId(null); setShowIconPicker(null); }}>
                         <X className="w-3.5 h-3.5" /> Cancel

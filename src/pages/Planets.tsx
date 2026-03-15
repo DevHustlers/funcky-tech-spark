@@ -128,8 +128,14 @@ const Planets = () => {
                     className="group bg-background p-8 hover:bg-accent/30 transition-all duration-500 flex flex-col h-full"
                   >
                     <div className="flex items-start justify-between mb-8">
-                      <div className="w-14 h-14 flex items-center justify-center border border-border group-hover:border-foreground/20 bg-accent transition-colors">
-                        <Icon className="w-7 h-7 text-foreground group-hover:scale-110 transition-transform duration-500" />
+                      <div 
+                        className="w-14 h-14 flex items-center justify-center border border-border group-hover:border-foreground/20 bg-accent transition-colors"
+                        style={{ borderColor: track.color ? `${track.color}40` : undefined, backgroundColor: track.color ? `${track.color}10` : undefined }}
+                      >
+                        <Icon 
+                          className="w-7 h-7 text-foreground group-hover:scale-110 transition-transform duration-500" 
+                          style={{ color: track.color || undefined }}
+                        />
                       </div>
                       <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all" />
                     </div>

@@ -23,17 +23,22 @@ interface ChallengeData {
 const TRACK_OPTIONS = ["Frontend", "Backend", "AI / ML", "Cybersecurity", "Data Science", "DevOps", "Mobile", "Full Stack"];
 const DIFFICULTY_OPTIONS: ChallengeData["difficulty"][] = ["Easy", "Medium", "Hard", "Expert"];
 
+import { challengeSchema } from "@/lib/validation/challenge.schema";
+import { toast } from "sonner";
+
 // ─── Challenge Form (create/edit) ───
 export const ChallengeForm = ({
   initial,
   onSave,
   onCancel,
   isEdit = false,
+  loading = false,
 }: {
   initial?: ChallengeData;
   onSave: (data: ChallengeData) => void;
   onCancel: () => void;
   isEdit?: boolean;
+  loading?: boolean;
 }) => {
   const [title, setTitle] = useState(initial?.title || "");
   const [description, setDescription] = useState(initial?.description || "");
@@ -45,19 +50,30 @@ export const ChallengeForm = ({
   const [requirements, setRequirements] = useState(initial?.requirements || "");
 
   const handleSave = () => {
-    if (!title.trim()) return;
-    onSave({
-      id: initial?.id || `ch-${Date.now()}`,
-      title,
-      description,
+    const dataToValidate = {
+      title: title.trim(),
+      description: description.trim(),
       track,
-      difficulty,
+      difficulty: difficulty === "Expert" ? "Hard" : difficulty, // Expert is not in DB enum, fallback to Hard
       status,
-      participants: initial?.participants || 0,
       points,
       duration,
       requirements,
-    });
+    };
+
+    const validation = challengeSchema.safeParse(dataToValidate);
+    
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+
+    onSave({
+      id: initial?.id || `ch-${Date.now()}`,
+      ...dataToValidate,
+      difficulty, // Keep original for UI if needed, but service will use validation result
+      participants: initial?.participants || 0,
+    } as ChallengeData);
   };
 
   return (
@@ -108,8 +124,12 @@ export const ChallengeForm = ({
           <FieldTextarea value={requirements} onChange={e => setRequirements(e.target.value)} placeholder="List submission requirements..." />
         </div>
         <div className="flex items-center gap-2 pt-2">
-          <PrimaryBtn onClick={handleSave} disabled={!title.trim()}>
-            <Check className="w-3.5 h-3.5" /> {isEdit ? "Save Changes" : "Create Challenge"}
+          <PrimaryBtn 
+            onClick={handleSave} 
+            disabled={!title.trim() || loading}
+          >
+            {loading ? <div className="w-3.5 h-3.5 border-2 border-background/20 border-t-background rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+            {isEdit ? "Save Changes" : "Create Challenge"}
           </PrimaryBtn>
           <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
         </div>

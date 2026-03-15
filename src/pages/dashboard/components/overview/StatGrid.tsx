@@ -75,34 +75,42 @@ export const StatGrid = () => {
   }, []);
 
   const fetchStats = async () => {
+    const today = new Date();
+    const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    
     const [
       { count: userCount },
+      { count: newUserCount },
       { count: challengeCount },
+      { count: newChallengeCount },
       { count: eventCount },
       { count: compCount },
       { count: badgeCount },
-      { data: pointsData }
+      { data: profilesData }
     ] = await Promise.all([
       supabase.from('profiles').select('*', { count: 'exact', head: true }),
-      supabase.from('challenges').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-      supabase.from('events').select('*', { count: 'exact', head: true }).eq('status', 'upcoming'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', lastWeek),
+      supabase.from('challenges').select('*', { count: 'exact', head: true }).eq('status', 'live'),
+      supabase.from('challenges').select('*', { count: 'exact', head: true }).gte('created_at', lastWeek),
+      supabase.from('events').select('*', { count: 'exact', head: true }).in('status', ['upcoming', 'scheduled']),
       supabase.from('competitions').select('*', { count: 'exact', head: true }),
       supabase.from('badges').select('*', { count: 'exact', head: true }),
-      supabase.rpc('get_total_points_awarded') // Fallback to simple sum if RPC doesn't exist
+      supabase.from('profiles').select('points')
     ]);
 
-    // Fallback if RPC fails
-    let totalPoints = 0;
-    if (pointsData) {
-      totalPoints = (pointsData as any);
-    } else {
-      const { data } = await supabase.from('profiles').select('points');
-      totalPoints = data?.reduce((acc, curr) => acc + (curr.points || 0), 0) || 0;
-    }
+    const totalPoints = profilesData?.reduce((acc, curr) => acc + (curr.points || 0), 0) || 0;
 
     setStats(prev => [
-      { ...prev[0], value: (userCount || 0).toLocaleString() },
-      { ...prev[1], value: (challengeCount || 0).toLocaleString() },
+      { 
+        ...prev[0], 
+        value: (userCount || 0).toLocaleString(),
+        change: newUserCount ? `+${newUserCount}` : "+0"
+      },
+      { 
+        ...prev[1], 
+        value: (challengeCount || 0).toLocaleString(),
+        change: newChallengeCount ? `+${newChallengeCount}` : "+0"
+      },
       { ...prev[2], value: totalPoints > 1000 ? `${(totalPoints / 1000).toFixed(1)}K` : totalPoints.toString() },
       { ...prev[3], value: (eventCount || 0).toLocaleString() },
       { ...prev[4], value: (compCount || 0).toLocaleString() },

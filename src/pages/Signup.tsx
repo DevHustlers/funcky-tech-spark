@@ -30,6 +30,7 @@ const Signup = () => {
   const navigate = useNavigate();
 
   const handleSignup = async () => {
+    if (loading) return;
     if (!email || !password || !confirmPassword || !firstName || !lastName || !username) {
       setError("Please fill in all fields before continuing.");
       return;

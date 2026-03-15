@@ -15,7 +15,8 @@ import PageTransition from "@/components/PageTransition";
 import { EventForm } from "./components/EventForm";
 import { BottomDrawer } from "./components/BottomDrawer";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { getEvents, createEvent, updateEvent } from "@/services/events.service";
+import { getEvents, createEvent, updateEvent, deleteEvent } from "@/services/events.service";
+import { toast } from "sonner";
 import type { Tables } from "@/types/database";
 
 interface EventData {
@@ -87,6 +88,7 @@ export default function Events() {
     "none" | "create" | "edit"
   >("none");
   const [editingEvent, setEditingEvent] = useState<EventData | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchEvents();
@@ -101,7 +103,21 @@ export default function Events() {
     setLoading(false);
   };
 
+  const handleDeleteEvent = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this event?")) return;
+    
+    const { error } = await deleteEvent(id);
+    if (!error) {
+      setEvents((prev) => prev.filter((e) => e.id !== id));
+      toast.success("Event deleted successfully");
+    } else {
+      toast.error(error || "Failed to delete event");
+    }
+  };
+
   const saveEvent = async (event: EventData) => {
+    if (isSubmitting) return;
+
     const dbPayload = {
       title: event.title,
       description: event.description,
@@ -114,25 +130,54 @@ export default function Events() {
       event_link: event.link,
     };
 
-    if (eventFormMode === "edit") {
-      const { data, error } = await updateEvent(event.id, dbPayload);
-      if (!error && data) {
-        setEvents((prev) => prev.map((e) => (e.id === event.id ? mapDBEventToEventData(data) : e)));
+    setIsSubmitting(true);
+    try {
+      if (eventFormMode === "edit") {
+        const { data, error } = await updateEvent(event.id, dbPayload);
+        if (!error && data) {
+          setEvents((prev) => prev.map((e) => (e.id === event.id ? mapDBEventToEventData(data) : e)));
+          toast.success("Event updated successfully");
+          setEventFormMode("none");
+          setEditingEvent(undefined);
+        } else {
+          toast.error(error || "Failed to update event");
+        }
+      } else {
+        const { data, error } = await createEvent(dbPayload as any);
+        if (!error && data) {
+          setEvents((prev) => [mapDBEventToEventData(data), ...prev]);
+          toast.success("Event created successfully");
+          setEventFormMode("none");
+          setEditingEvent(undefined);
+        } else {
+          toast.error(error || "Failed to create event");
+        }
       }
-    } else {
-      const { data, error } = await createEvent(dbPayload as any);
-      if (!error && data) {
-        setEvents((prev) => [mapDBEventToEventData(data), ...prev]);
-      }
+    } finally {
+      setIsSubmitting(false);
     }
-    setEventFormMode("none");
-    setEditingEvent(undefined);
   };
 
-  const deleteEvent = async (id: string) => {
-    // In a real app, you'd add a deleteEvent to events.service.ts
-    // For now, removing from state as per previous pattern
-    setEvents((prev) => prev.filter((e) => e.id !== id));
+  const toggleEventStatus = async (
+    id: string,
+    newStatus: EventData["status"],
+  ) => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await updateEvent(id, { status: newStatus });
+      if (!error && data) {
+        setEvents((prev) =>
+          prev.map((e) => (e.id === id ? mapDBEventToEventData(data) : e)),
+        );
+        toast.success(`Event status marked as ${newStatus}`);
+      } else {
+        toast.error(error || "Failed to toggle status");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -167,6 +212,7 @@ export default function Events() {
           <EventForm
             initial={editingEvent}
             isEdit={eventFormMode === "edit"}
+            loading={isSubmitting}
             onSave={saveEvent}
             onCancel={() => {
               setEventFormMode("none");
@@ -192,7 +238,7 @@ export default function Events() {
                   {event.status === "upcoming" ? (
                     <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
                   ) : event.status === "live" ? (
-                    <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500" />
+                    <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500 animate-pulse" />
                   ) : event.status === "scheduled" ? (
                     <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500" />
                   ) : (
@@ -240,19 +286,51 @@ export default function Events() {
                   </div>
                 </div>
                 <div className="flex items-start gap-1 shrink-0">
+                  {event.status === "draft" && (
+                    <button
+                      onClick={() => toggleEventStatus(event.id, "scheduled")}
+                      disabled={isSubmitting}
+                      className="p-1.5 sm:p-2 text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
+                      title="Schedule"
+                    >
+                      <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </button>
+                  )}
+                  {(event.status === "scheduled" || event.status === "upcoming") && (
+                    <button
+                      onClick={() => toggleEventStatus(event.id, "live")}
+                      disabled={isSubmitting}
+                      className="p-1.5 sm:p-2 text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
+                      title="Go Live"
+                    >
+                      <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </button>
+                  )}
+                  {event.status === "live" && (
+                    <button
+                      onClick={() => toggleEventStatus(event.id, "ended")}
+                      disabled={isSubmitting}
+                      className="p-1.5 sm:p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
+                      title="End Event"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setEventFormMode("edit");
                       setEditingEvent(event);
                     }}
-                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors rounded-lg"
+                    disabled={isSubmitting}
+                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors rounded-lg disabled:opacity-50"
                     title={t("dash.edit")}
                   >
                     <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
                   <button
-                    onClick={() => deleteEvent(event.id)}
-                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors rounded-lg"
+                    onClick={() => handleDeleteEvent(event.id)}
+                    disabled={isSubmitting}
+                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors rounded-lg disabled:opacity-50"
                     title={t("dash.delete")}
                   >
                     <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

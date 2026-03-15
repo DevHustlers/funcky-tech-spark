@@ -9,11 +9,19 @@ import { useLanguage } from "@/i18n/LanguageContext";
 
 const Contact = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useLanguage();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    // Simulate API call
+    setTimeout(() => {
+      setSubmitted(true);
+      setIsSubmitting(false);
+    }, 1000);
   };
 
   if (submitted) {
@@ -102,8 +110,13 @@ const Contact = () => {
                 <label className="block text-[12px] font-medium text-muted-foreground mb-2 uppercase tracking-wider">{t("contact.message")}</label>
                 <textarea id="contact-message" required rows={5} className="w-full px-4 py-3 border border-border bg-background text-foreground text-[14px] focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/40 resize-none transition-colors" placeholder={t("contact.message.placeholder")} />
                 <div className="mt-5">
-                  <button type="button" onClick={handleSubmit} className="inline-flex items-center justify-center gap-2 px-7 py-3 bg-foreground text-background font-medium text-[14px] hover:bg-foreground/90 transition-colors">
-                    {t("contact.send")} <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                  <button 
+                    type="button" 
+                    onClick={handleSubmit} 
+                    disabled={isSubmitting}
+                    className="inline-flex items-center justify-center gap-2 px-7 py-3 bg-foreground text-background font-medium text-[14px] hover:bg-foreground/90 transition-colors disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Sending..." : t("contact.send")} <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                   </button>
                 </div>
                 <div className="mt-6 pt-5 border-t border-border">

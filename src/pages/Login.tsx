@@ -19,7 +19,7 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
+    if (loading || !email || !password) return;
 
     setLoading(true);
     setError(null);

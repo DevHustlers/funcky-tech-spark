@@ -284,13 +284,29 @@ const TrackDetail = () => {
   // Merge dynamic and static data
   const name = track?.name || staticData?.name;
   const description = track?.description || staticData?.description;
-  const longDescription = (track as any)?.long_description || staticData?.longDescription || description;
+  const longDescription = track?.long_description || staticData?.longDescription || description;
   const members = (track as any)?.members || staticData?.members || 0;
   const challenges = (track as any)?.challenges || staticData?.challenges || 0;
   const Icon = staticData?.icon || Terminal;
-  const color = staticData?.color || "text-foreground";
-  const borderColor = staticData?.borderColor || "border-border";
-  const bgAccent = staticData?.bgAccent || "bg-accent";
+  
+  // Dynamic color handling
+  const trackColor = track?.color || (staticData?.color?.includes("-") ? undefined : staticData?.color) || "#3b82f6";
+  const isHex = trackColor.startsWith("#");
+  
+  const color = isHex ? "" : (staticData?.color || "text-foreground");
+  const borderColor = isHex ? "" : (staticData?.borderColor || "border-border");
+  const bgAccent = isHex ? "" : (staticData?.bgAccent || "bg-accent");
+  
+  const dynamicStyles = isHex ? {
+    color: trackColor,
+    borderColor: `${trackColor}40`,
+    bgAccent: `${trackColor}10`,
+  } : {
+    color: undefined,
+    borderColor: undefined,
+    bgAccent: undefined,
+  };
+
   const skills = staticData?.skills || [];
   const roadmap = staticData?.roadmap || [];
   const topChallenges = staticData?.topChallenges || [];
@@ -300,7 +316,10 @@ const TrackDetail = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className={`pt-28 sm:pt-40 pb-16 ${bgAccent}`}>
+      <section 
+        className={`pt-28 sm:pt-40 pb-16 ${bgAccent}`}
+        style={isHex ? { backgroundColor: dynamicStyles.bgAccent } : {}}
+      >
         <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
           <Link 
             to="/planets" 
@@ -310,8 +329,15 @@ const TrackDetail = () => {
           </Link>
 
           <div className="flex items-start gap-6 mb-8">
-            <div className={`w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center border-2 ${borderColor} bg-background shrink-0`}>
-              <Icon className={`w-8 h-8 sm:w-10 sm:h-10 ${color}`} strokeWidth={1.5} />
+            <div 
+              className={`w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center border-2 ${borderColor} bg-background shrink-0`}
+              style={isHex ? { borderColor: dynamicStyles.borderColor } : {}}
+            >
+              <Icon 
+                className={`w-8 h-8 sm:w-10 sm:h-10 ${color}`} 
+                style={isHex ? { color: dynamicStyles.color } : {}}
+                strokeWidth={1.5} 
+              />
             </div>
             <div className="flex-1">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3">
@@ -325,22 +351,34 @@ const TrackDetail = () => {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border border border-border">
             <div className="bg-background p-4 sm:p-6 text-center">
-              <Users className={`w-5 h-5 ${color} mx-auto mb-2`} />
+              <Users 
+                className={`w-5 h-5 ${color} mx-auto mb-2`} 
+                style={isHex ? { color: dynamicStyles.color } : {}}
+              />
               <p className="text-xl sm:text-2xl font-bold font-mono text-foreground">{members}</p>
               <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-wider">Members</p>
             </div>
             <div className="bg-background p-4 sm:p-6 text-center">
-              <Target className={`w-5 h-5 ${color} mx-auto mb-2`} />
+              <Target 
+                className={`w-5 h-5 ${color} mx-auto mb-2`} 
+                style={isHex ? { color: dynamicStyles.color } : {}}
+              />
               <p className="text-xl sm:text-2xl font-bold font-mono text-foreground">{challenges}</p>
               <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-wider">Challenges</p>
             </div>
             <div className="bg-background p-4 sm:p-6 text-center">
-              <Trophy className={`w-5 h-5 ${color} mx-auto mb-2`} />
+              <Trophy 
+                className={`w-5 h-5 ${color} mx-auto mb-2`} 
+                style={isHex ? { color: dynamicStyles.color } : {}}
+              />
               <p className="text-xl sm:text-2xl font-bold font-mono text-foreground">12</p>
               <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-wider">Completed</p>
             </div>
             <div className="bg-background p-4 sm:p-6 text-center">
-              <BookOpen className={`w-5 h-5 ${color} mx-auto mb-2`} />
+              <BookOpen 
+                className={`w-5 h-5 ${color} mx-auto mb-2`} 
+                style={isHex ? { color: dynamicStyles.color } : {}}
+              />
               <p className="text-xl sm:text-2xl font-bold font-mono text-foreground">6</p>
               <p className="text-[11px] text-muted-foreground font-mono uppercase tracking-wider">Resources</p>
             </div>
@@ -373,7 +411,10 @@ const TrackDetail = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {skills.map((skill, i) => (
                     <div key={i} className="flex items-center gap-2 text-[14px] text-muted-foreground">
-                      <div className={`w-1.5 h-1.5 ${bgAccent} border ${borderColor}`} />
+                      <div 
+                        className={`w-1.5 h-1.5 ${bgAccent} border ${borderColor}`} 
+                        style={isHex ? { backgroundColor: dynamicStyles.bgAccent, borderColor: dynamicStyles.borderColor } : {}}
+                      />
                       {skill}
                     </div>
                   ))}
@@ -395,7 +436,10 @@ const TrackDetail = () => {
               {roadmap.map((phase, i) => (
                 <ScrollReveal key={i} delay={i * 100}>
                   <div className="bg-background p-6 sm:p-8">
-                    <div className={`inline-block px-3 py-1 border ${borderColor} ${bgAccent} text-[11px] font-mono font-bold uppercase tracking-wider mb-4 ${color}`}>
+                    <div 
+                      className={`inline-block px-3 py-1 border ${borderColor} ${bgAccent} text-[11px] font-mono font-bold uppercase tracking-wider mb-4 ${color}`}
+                      style={isHex ? { color: dynamicStyles.color, borderColor: dynamicStyles.borderColor, backgroundColor: dynamicStyles.bgAccent } : {}}
+                    >
                       {phase.phase}
                     </div>
                     <h3 className="text-lg font-bold text-foreground mb-2">{phase.title}</h3>

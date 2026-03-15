@@ -29,7 +29,7 @@ const Settings = () => {
   }, [navigate]);
 
   const handleUpdate = async () => {
-    if (!user) return;
+    if (!user || loading) return;
     setLoading(true);
     try {
       const { error } = await supabase.auth.updateUser({

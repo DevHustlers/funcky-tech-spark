@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Trophy, Users, ArrowRight } from "lucide-react";
+import { getChallenges } from "@/services/challenges.service";
 
 interface ChallengeData {
   id: string;
@@ -6,13 +8,6 @@ interface ChallengeData {
   participants: number;
   status: "draft" | "upcoming" | "live" | "ended";
 }
-
-const MOCK_CHALLENGES: ChallengeData[] = [
-  { id: "ch-1", title: "Build a Real-Time Chat UI", participants: 128, status: "live" },
-  { id: "ch-2", title: "REST API Rate Limiter", participants: 89, status: "live" },
-  { id: "ch-3", title: "Neural Network from Scratch", participants: 45, status: "live" },
-  { id: "ch-4", title: "XSS Detection Scanner", participants: 67, status: "ended" },
-];
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
@@ -25,6 +20,24 @@ const statusBadge = (status: string) => {
 };
 
 export const TopChallenges = () => {
+  const [challenges, setChallenges] = useState<ChallengeData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data, error } = await getChallenges(4);
+      if (!error && data) {
+        setChallenges(data.map(c => ({
+          id: c.id,
+          title: c.title,
+          participants: 0, // Placeholder until joins are implemented
+          status: (c.status as any) || "live"
+        })));
+      }
+      setLoading(false);
+    };
+    fetch();
+  }, []);
   return (
     <div className="group bg-background/80 backdrop-blur-sm border border-border rounded-2xl hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
       <div className="px-3 sm:px-5 py-3 sm:py-4 border-b border-border flex items-center justify-between">
@@ -36,38 +49,48 @@ export const TopChallenges = () => {
         </div>
       </div>
       <div className="divide-y divide-border last:rounded-b-2xl">
-        {MOCK_CHALLENGES.map((challenge, idx) => (
-          <div
-            key={challenge.id}
-            className="px-3 sm:px-5 py-2.5 sm:py-3.5 flex items-center justify-between hover:bg-accent/50 hover:ps-6 sm:hover:ps-6 transition-all duration-200 group/challenge cursor-pointer"
-          >
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <div
-                className={`w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-[10px] sm:text-[11px] font-bold font-mono shrink-0 rounded-lg group-hover/challenge:scale-110 transition-transform duration-200 ${
-                  idx === 0 ? "bg-amber-500/20 text-amber-500" :
-                  idx === 1 ? "bg-slate-400/20 text-slate-400" :
-                  idx === 2 ? "bg-orange-600/20 text-orange-600" :
-                  "bg-muted text-muted-foreground"
-                }`}
-              >
-                {idx + 1}
-              </div>
-              <div className="min-w-0">
-                <p className="text-[12px] sm:text-[13px] font-medium text-foreground line-clamp-1 group-hover/challenge:text-primary transition-colors">
-                  {challenge.title}
-                </p>
-                <p className="text-[10px] sm:text-[11px] text-muted-foreground flex items-center gap-1 group-hover/challenge:text-foreground/70 transition-colors">
-                  <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {challenge.participants} participants
-                </p>
-              </div>
-            </div>
-            <span
-              className={`text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 border uppercase tracking-wider shrink-0 ${statusBadge(challenge.status)}`}
-            >
-              {challenge.status}
-            </span>
+        {loading ? (
+          <div className="px-3 sm:px-5 py-4 text-[12px] text-muted-foreground animate-pulse">
+            Loading challenges...
           </div>
-        ))}
+        ) : challenges.length === 0 ? (
+          <div className="px-3 sm:px-5 py-4 text-[12px] text-muted-foreground">
+            No challenges found
+          </div>
+        ) : (
+          challenges.map((challenge, idx) => (
+            <div
+              key={challenge.id}
+              className="px-3 sm:px-5 py-2.5 sm:py-3.5 flex items-center justify-between hover:bg-accent/50 hover:ps-6 sm:hover:ps-6 transition-all duration-200 group/challenge cursor-pointer"
+            >
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div
+                  className={`w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-[10px] sm:text-[11px] font-bold font-mono shrink-0 rounded-lg group-hover/challenge:scale-110 transition-transform duration-200 ${
+                    idx === 0 ? "bg-amber-500/20 text-amber-500" :
+                    idx === 1 ? "bg-slate-400/20 text-slate-400" :
+                    idx === 2 ? "bg-orange-600/20 text-orange-600" :
+                    "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {idx + 1}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[12px] sm:text-[13px] font-medium text-foreground line-clamp-1 group-hover/challenge:text-primary transition-colors">
+                    {challenge.title}
+                  </p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground flex items-center gap-1 group-hover/challenge:text-foreground/70 transition-colors">
+                    <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> {challenge.participants} participants
+                  </p>
+                </div>
+              </div>
+              <span
+                className={`text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 border uppercase tracking-wider shrink-0 ${statusBadge(challenge.status)}`}
+              >
+                {challenge.status}
+              </span>
+            </div>
+          ))
+        )}
       </div>
       <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-t border-border">
         <button className="text-[11px] sm:text-[12px] text-muted-foreground hover:text-primary flex items-center gap-1 transition-all duration-200 hover:gap-2 group/btn">

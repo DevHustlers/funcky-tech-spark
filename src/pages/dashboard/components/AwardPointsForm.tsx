@@ -30,10 +30,12 @@ export const AwardPointsForm = ({
   users,
   onAward,
   onCancel,
+  loading = false,
 }: {
   users: UserData[];
   onAward: (userId: string, userName: string, points: number, reason: string) => void;
   onCancel: () => void;
+  loading?: boolean;
 }) => {
   const [selectedUser, setSelectedUser] = useState(users[0]?.id || "");
   const [points, setPoints] = useState(100);
@@ -58,11 +60,15 @@ export const AwardPointsForm = ({
           <FieldInput value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Manual award for outstanding contribution" />
         </div>
         <div className="flex items-center gap-2 pt-2">
-          <PrimaryBtn onClick={() => {
-            const user = users.find(u => u.id === selectedUser);
-            if (user && reason.trim()) onAward(user.id, user.name, points, reason.trim());
-          }} disabled={!reason.trim() || !points}>
-            <Zap className="w-3.5 h-3.5" /> Award Points
+          <PrimaryBtn 
+            onClick={() => {
+              const user = users.find(u => u.id === selectedUser);
+              if (user && reason.trim()) onAward(user.id, user.name, points, reason.trim());
+            }} 
+            disabled={!reason.trim() || !points || loading}
+          >
+            {loading ? <div className="w-3.5 h-3.5 border-2 border-background/20 border-t-background rounded-full animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+            Award Points
           </PrimaryBtn>
           <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
         </div>

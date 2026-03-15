@@ -23,17 +23,22 @@ interface EventData {
 
 const EVENT_TYPE_OPTIONS: EventData["type"][] = ["hackathon", "workshop", "competition", "meetup", "webinar", "system"];
 
+import { eventSchema } from "@/lib/validation/event.schema";
+import { toast } from "sonner";
+
 // ─── Event Form ───
 export const EventForm = ({
   initial,
   onSave,
   onCancel,
   isEdit = false,
+  loading = false,
 }: {
   initial?: EventData;
   onSave: (data: EventData) => void;
   onCancel: () => void;
   isEdit?: boolean;
+  loading?: boolean;
 }) => {
   const [title, setTitle] = useState(initial?.title || "");
   const [description, setDescription] = useState(initial?.description || "");
@@ -46,20 +51,32 @@ export const EventForm = ({
   const [link, setLink] = useState(initial?.link || "");
 
   const handleSave = () => {
-    if (!title.trim()) return;
-    onSave({
-      id: initial?.id || `ev-${Date.now()}`,
+    const dataToValidate = {
       title: title.trim(),
-      description,
-      date: date || "TBD",
-      time: time || "TBD",
-      location: location || "Online",
-      type,
+      description: description.trim(),
+      date,
+      time,
+      location: location.trim(),
+      type: type === "webinar" || type === "system" ? "online" : type, // Map to standard types
       status,
       capacity,
+      event_link: link.trim(),
+    };
+
+    const validation = eventSchema.safeParse(dataToValidate);
+    
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+
+    onSave({
+      id: initial?.id || `ev-${Date.now()}`,
+      ...dataToValidate,
+      type, // Pass original type for UI
       registered: initial?.registered || 0,
-      link,
-    });
+      link: dataToValidate.event_link,
+    } as EventData);
   };
 
   return (
@@ -113,8 +130,12 @@ export const EventForm = ({
           <FieldInput value={link} onChange={e => setLink(e.target.value)} placeholder="https://..." />
         </div>
         <div className="flex items-center gap-2 pt-2">
-          <PrimaryBtn onClick={handleSave} disabled={!title.trim()}>
-            <Check className="w-3.5 h-3.5" /> {isEdit ? "Save Changes" : "Create Event"}
+          <PrimaryBtn 
+            onClick={handleSave} 
+            disabled={!title.trim() || loading}
+          >
+            {loading ? <div className="w-3.5 h-3.5 border-2 border-background/20 border-t-background rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+            {isEdit ? "Save Changes" : "Create Event"}
           </PrimaryBtn>
           <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
         </div>

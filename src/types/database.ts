@@ -444,26 +444,32 @@ export type Database = {
       }
       tracks: {
         Row: {
+          color: string | null
           created_at: string | null
           description: string | null
           icon_key: string | null
           id: string
+          long_description: string | null
           name: string
           slug: string
         }
         Insert: {
+          color?: string | null
           created_at?: string | null
           description?: string | null
           icon_key?: string | null
           id?: string
+          long_description?: string | null
           name: string
           slug: string
         }
         Update: {
+          color?: string | null
           created_at?: string | null
           description?: string | null
           icon_key?: string | null
           id?: string
+          long_description?: string | null
           name?: string
           slug?: string
         }

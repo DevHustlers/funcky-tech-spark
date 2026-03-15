@@ -5,6 +5,7 @@ import { PointRuleForm } from "./components/PointRuleForm";
 import { AwardPointsForm } from "./components/AwardPointsForm";
 import { BottomDrawer } from "./components/BottomDrawer";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { toast } from "sonner";
 import { 
   getPointRules, 
   createPointRule, 
@@ -93,6 +94,7 @@ export default function Points() {
   );
   const [editingRule, setEditingRule] = useState<PointRule | undefined>();
   const [showAwardForm, setShowAwardForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -124,31 +126,51 @@ export default function Points() {
   };
 
   const savePointRule = async (rule: PointRule) => {
+    if (isSubmitting) return;
+
     const dbPayload = {
       action: rule.action,
       points: rule.points,
       active: rule.active,
     };
 
-    if (ruleFormMode === "edit") {
-      const { data, error } = await updatePointRule(rule.id, dbPayload);
-      if (!error && data) {
-        setPointRules((prev) => prev.map((r) => (r.id === rule.id ? mapDBRuleToRule(data) : r)));
+    setIsSubmitting(true);
+    try {
+      if (ruleFormMode === "edit") {
+        const { data, error } = await updatePointRule(rule.id, dbPayload);
+        if (!error && data) {
+          setPointRules((prev) => prev.map((r) => (r.id === rule.id ? mapDBRuleToRule(data) : r)));
+          toast.success("Rule updated successfully");
+          setRuleFormMode("none");
+          setEditingRule(undefined);
+        } else {
+          toast.error(error || "Failed to update rule");
+        }
+      } else {
+        const { data, error } = await createPointRule(dbPayload as any);
+        if (!error && data) {
+          setPointRules((prev) => [...prev, mapDBRuleToRule(data)]);
+          toast.success("Rule created successfully");
+          setRuleFormMode("none");
+          setEditingRule(undefined);
+        } else {
+          toast.error(error || "Failed to create rule");
+        }
       }
-    } else {
-      const { data, error } = await createPointRule(dbPayload as any);
-      if (!error && data) {
-        setPointRules((prev) => [...prev, mapDBRuleToRule(data)]);
-      }
+    } finally {
+      setIsSubmitting(false);
     }
-    setRuleFormMode("none");
-    setEditingRule(undefined);
   };
 
   const deletePointRule = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this rule?")) return;
+    
     const { error } = await removePointRule(id);
     if (!error) {
       setPointRules((prev) => prev.filter((r) => r.id !== id));
+      toast.success("Rule deleted successfully");
+    } else {
+      toast.error(error || "Failed to delete rule");
     }
   };
 
@@ -160,6 +182,9 @@ export default function Points() {
       setPointRules((prev) =>
         prev.map((r) => (r.id === id ? mapDBRuleToRule(data) : r)),
       );
+      toast.success(`Rule ${!rule.active ? 'activated' : 'deactivated'}`);
+    } else {
+      toast.error(error || "Failed to update rule status");
     }
   };
 
@@ -169,17 +194,33 @@ export default function Points() {
     points: number,
     reason: string,
   ) => {
-    const { error } = await awardPointsDb(userId, points, reason);
-    if (!error) {
-      const newAward: PointAward = {
-        id: `pl-${Date.now()}`,
-        user: userName,
-        action: reason,
-        points: `+${points}`,
-        time: "Just now",
-      };
-      setPointLog((prev) => [newAward, ...prev]);
-      setShowAwardForm(false);
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      const { error } = await awardPointsDb(userId, points, reason);
+      if (!error) {
+        const newAward: PointAward = {
+          id: `pl-${Date.now()}`,
+          user: userName,
+          action: reason,
+          points: `+${points}`,
+          time: "Just now",
+        };
+        setPointLog((prev) => [newAward, ...prev]);
+        // Update points in user list locally
+        setUsers(prev => prev.map(u => u.id === userId ? { ...u, points: u.points + points } : u));
+        setShowAwardForm(false);
+        toast.success(`Awarded ${points} points to ${userName}`);
+      } else {
+        // Log suspicious duplicate attempts if backend rejected it
+        if (error.includes("Duplicate")) {
+          console.warn("Suspicious duplicate point award blocked:", { userId, points, reason });
+        }
+        toast.error(error || "Failed to award points");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -214,6 +255,7 @@ export default function Points() {
         >
           <AwardPointsForm
             users={users}
+            loading={isSubmitting}
             onAward={awardPoints}
             onCancel={() => setShowAwardForm(false)}
           />
@@ -230,6 +272,7 @@ export default function Points() {
           <PointRuleForm
             initial={editingRule}
             isEdit={ruleFormMode === "edit"}
+            loading={isSubmitting}
             onSave={savePointRule}
             onCancel={() => {
               setRuleFormMode("none");
@@ -280,13 +323,15 @@ export default function Points() {
                           setRuleFormMode("edit");
                           setEditingRule(rule);
                         }}
-                        className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                        disabled={isSubmitting}
+                        className="p-1 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
                       >
                         <Pencil className="w-3 h-3" />
                       </button>
                       <button
                         onClick={() => deletePointRule(rule.id)}
-                        className="p-1 text-muted-foreground hover:text-red-500 transition-colors"
+                        disabled={isSubmitting}
+                        className="p-1 text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-50"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>

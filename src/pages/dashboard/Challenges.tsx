@@ -5,6 +5,7 @@ import { ChallengeForm } from "./components/ChallengeForm";
 import { BottomDrawer } from "./components/BottomDrawer";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { getChallenges, createChallenge, updateChallenge } from "@/services/challenges.service";
+import { toast } from "sonner";
 import type { Tables } from "@/types/database";
 
 interface ChallengeData {
@@ -95,6 +96,7 @@ export default function Challenges() {
     "none",
   );
   const [editingChal, setEditingChal] = useState<ChallengeData | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchChallenges();
@@ -109,7 +111,29 @@ export default function Challenges() {
     setLoading(false);
   };
 
+  const toggleChallengeStatus = async (
+    id: string,
+    newStatus: ChallengeData["status"],
+  ) => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await updateChallenge(id, { status: newStatus });
+      if (!error && data) {
+        setChallenges((prev) =>
+          prev.map((c) => (c.id === id ? mapDBChallengeToChallengeData(data) : c)),
+        );
+        toast.success(`Challenge marked as ${newStatus}`);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const saveChallenge = async (chal: ChallengeData) => {
+    if (isSubmitting) return;
+
     const dbPayload = {
       title: chal.title,
       description: chal.description,
@@ -121,19 +145,28 @@ export default function Challenges() {
       requirements: chal.requirements,
     };
 
-    if (chalFormMode === "edit") {
-      const { data, error } = await updateChallenge(chal.id, dbPayload);
-      if (!error && data) {
-        setChallenges((prev) => prev.map((c) => (c.id === chal.id ? mapDBChallengeToChallengeData(data) : c)));
+    setIsSubmitting(true);
+    try {
+      if (chalFormMode === "edit") {
+        const { data, error } = await updateChallenge(chal.id, dbPayload);
+        if (!error && data) {
+          setChallenges((prev) => prev.map((c) => (c.id === chal.id ? mapDBChallengeToChallengeData(data) : c)));
+          setChalFormMode("none");
+          setEditingChal(undefined);
+          toast.success("Challenge updated");
+        }
+      } else {
+        const { data, error } = await createChallenge(dbPayload as any);
+        if (!error && data) {
+          setChallenges((prev) => [mapDBChallengeToChallengeData(data), ...prev]);
+          setChalFormMode("none");
+          setEditingChal(undefined);
+          toast.success("Challenge created");
+        }
       }
-    } else {
-      const { data, error } = await createChallenge(dbPayload as any);
-      if (!error && data) {
-        setChallenges((prev) => [mapDBChallengeToChallengeData(data), ...prev]);
-      }
+    } finally {
+      setIsSubmitting(false);
     }
-    setChalFormMode("none");
-    setEditingChal(undefined);
   };
 
   return (
@@ -162,6 +195,7 @@ export default function Challenges() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {challenges.map((c) => (
             <div
+              key={c.id}
               className="bg-background/80 backdrop-blur-sm border border-border rounded-2xl p-3 sm:p-5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
             >
               <div className="flex items-start justify-between mb-2 sm:mb-3">
@@ -202,23 +236,48 @@ export default function Challenges() {
                   </p>
                 </div>
                 <div className="flex items-center gap-0.5 sm:gap-1">
+                  {c.status !== "live" && (
+                    <button
+                      onClick={() => toggleChallengeStatus(c.id, "live")}
+                      disabled={isSubmitting}
+                      className="p-1.5 sm:p-2 text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all duration-200 group/btn disabled:opacity-50"
+                      title="Go Live"
+                    >
+                      <Plus className="w-3.5 h-4 group-hover/btn:scale-110 transition-transform" />
+                    </button>
+                  )}
+                  {c.status === "live" && (
+                    <button
+                      onClick={() => toggleChallengeStatus(c.id, "ended")}
+                      disabled={isSubmitting}
+                      className="p-1.5 sm:p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all duration-200 group/btn disabled:opacity-50"
+                      title="End Challenge"
+                    >
+                      <Trash2 className="w-3.5 h-4 group-hover/btn:scale-110 transition-transform" />
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setChalFormMode("edit");
                       setEditingChal(c);
                     }}
-                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-all duration-200 group/btn"
+                    disabled={isSubmitting}
+                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-all duration-200 group/btn disabled:opacity-50"
                   >
                     <Pencil className="w-3.5 h-4 group-hover/btn:scale-110 transition-transform" />
                   </button>
-                  <button className="p-1.5 sm:p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200 group/btn">
+                  <button 
+                    disabled={isSubmitting}
+                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200 group/btn disabled:opacity-50"
+                  >
                     <Eye className="w-3.5 h-4 group-hover/btn:scale-110 transition-transform" />
                   </button>
                   <button
                     onClick={() =>
                       setChallenges((prev) => prev.filter((x) => x.id !== c.id))
                     }
-                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-red-500 transition-colors"
+                    disabled={isSubmitting}
+                    className="p-1.5 sm:p-2 text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-50"
                   >
                     <Trash2 className="w-3.5 h-4" />
                   </button>
@@ -239,6 +298,7 @@ export default function Challenges() {
           <ChallengeForm
             initial={editingChal}
             isEdit={chalFormMode === "edit"}
+            loading={isSubmitting}
             onSave={saveChallenge}
             onCancel={() => {
               setChalFormMode("none");
@@ -250,3 +310,4 @@ export default function Challenges() {
     </PageTransition>
   );
 }
+

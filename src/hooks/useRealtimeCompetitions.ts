@@ -1,34 +1,34 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { getChallenges } from '@/services/challenges.service';
+import { getCompetitions } from '@/services/competitions.service';
 import type { Tables } from '@/types/database';
 
-export const useRealtimeChallenges = () => {
+export const useRealtimeCompetitions = () => {
   const queryClient = useQueryClient();
 
-  const { data: challenges = [], isLoading: loading, error } = useQuery({
-    queryKey: ['challenges'],
+  const { data: competitions = [], isLoading: loading, error } = useQuery({
+    queryKey: ['competitions'],
     queryFn: async () => {
-      const { data, error } = await getChallenges();
+      const { data, error } = await getCompetitions();
       if (error) throw new Error(error);
       return data || [];
     },
-    staleTime: 60000,
+    staleTime: 60000, // Cache for 60 seconds as requested
   });
 
   useEffect(() => {
     const channel = supabase
-      .channel('challenges-realtime')
+      .channel('competitions-realtime')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'challenges',
+          table: 'competitions',
         },
         () => {
-          queryClient.invalidateQueries({ queryKey: ['challenges'] });
+          queryClient.invalidateQueries({ queryKey: ['competitions'] });
         }
       )
       .subscribe();
@@ -39,9 +39,9 @@ export const useRealtimeChallenges = () => {
   }, [queryClient]);
 
   return { 
-    challenges, 
+    competitions, 
     loading, 
     error: error instanceof Error ? error.message : null,
-    refresh: () => queryClient.invalidateQueries({ queryKey: ['challenges'] })
+    refresh: () => queryClient.invalidateQueries({ queryKey: ['competitions'] })
   };
 };

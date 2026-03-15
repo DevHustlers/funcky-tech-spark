@@ -18,11 +18,13 @@ export const PointRuleForm = ({
   onSave,
   onCancel,
   isEdit = false,
+  loading = false,
 }: {
   initial?: PointRule;
   onSave: (data: PointRule) => void;
   onCancel: () => void;
   isEdit?: boolean;
+  loading?: boolean;
 }) => {
   const [action, setAction] = useState(initial?.action || "");
   const [points, setPoints] = useState(initial?.points || 100);
@@ -50,8 +52,12 @@ export const PointRuleForm = ({
           <span className="text-[13px] text-foreground">{active ? "Active" : "Inactive"}</span>
         </div>
         <div className="flex items-center gap-2 pt-2">
-          <PrimaryBtn onClick={() => { if (action.trim()) onSave({ id: initial?.id || `pr-${Date.now()}`, action: action.trim(), points, active }); }} disabled={!action.trim()}>
-            <Check className="w-3.5 h-3.5" /> {isEdit ? "Save" : "Add Rule"}
+          <PrimaryBtn 
+            onClick={() => { if (action.trim()) onSave({ id: initial?.id || `pr-${Date.now()}`, action: action.trim(), points, active }); }} 
+            disabled={!action.trim() || loading}
+          >
+            {loading ? <div className="w-3.5 h-3.5 border-2 border-background/20 border-t-background rounded-full animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+            {isEdit ? "Save" : "Add Rule"}
           </PrimaryBtn>
           <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
         </div>
