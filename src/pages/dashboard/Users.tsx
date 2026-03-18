@@ -10,6 +10,18 @@ import { UserDetail } from "./components/UserDetail";
 import { updateUserRoleAndPoints, deleteUser as deleteUserService } from "@/services/users.service";
 import { useRealtimeUsers } from "@/hooks/useRealtimeUsers";
 import type { Tables } from "@/types/database";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 interface UserData {
   id: string;
@@ -20,6 +32,7 @@ interface UserData {
   status: "active" | "inactive" | "banned";
   role: "member" | "moderator" | "admin";
   bio: string;
+  isDeleted: boolean;
 }
 
 // Helper to map DB profile to UI UserData
@@ -32,6 +45,7 @@ const mapProfileToUserData = (profile: Tables<'profiles'>): UserData => ({
   status: (profile.status as any) || "active",
   role: profile.role === "admin" ? "admin" : profile.role === "mod" ? "moderator" : "member",
   bio: profile.bio || "",
+  isDeleted: profile.is_deleted || false,
 });
 
 // Helper to map UI UserData to DB profile update
@@ -45,28 +59,51 @@ const mapUserDataToProfileUpdate = (user: UserData) => ({
 
 export default function Users() {
   const { t } = useLanguage();
-  const { users: dbUsers, loading } = useRealtimeUsers();
+  const [showDeleted, setShowDeleted] = useState(false);
+  const { users: dbUsers, loading } = useRealtimeUsers(showDeleted);
   const [userFormMode, setUserFormMode] = useState<"none" | "create" | "edit">("none");
   const [editingUser, setEditingUser] = useState<UserData | undefined>();
   const [viewingUser, setViewingUser] = useState<UserData | null>(null);
+  const [userToDelete, setUserToDelete] = useState<UserData | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const users = dbUsers.map(mapProfileToUserData);
 
   const saveUser = async (user: UserData) => {
-    if (userFormMode === "edit") {
-      const { error } = await updateUserRoleAndPoints(user.id, mapUserDataToProfileUpdate(user));
-      // Realtime hook will handle the UI update
-    } else {
-      // In a real app, you'd call a createUserService here. 
-      // Profiles are usually created via Auth signup.
+    setIsSaving(true);
+    try {
+      if (userFormMode === "edit") {
+        const { error } = await updateUserRoleAndPoints(user.id, mapUserDataToProfileUpdate(user));
+        if (error) throw new Error(error);
+        toast.success(t("dash.user_updated") || "User updated successfully");
+      } else {
+        // Warning: Creating auth users requires admin privileges/Edge functions
+        // Here we just toast a placeholder if they try to "Add"
+        toast.error("User creation is handled via Auth Signup. You can only edit profiles here.");
+      }
+      setUserFormMode("none");
+      setEditingUser(undefined);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save user");
+    } finally {
+      setIsSaving(false);
     }
-    setUserFormMode("none");
-    setEditingUser(undefined);
   };
 
-  const deleteUser = async (id: string) => {
-    await deleteUserService(id);
-    // Realtime hook will handle the UI update
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
+    setIsDeleting(true);
+    try {
+      const { error } = await deleteUserService(userToDelete.id);
+      if (error) throw new Error(error);
+      toast.success("User profile deleted successfully");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete user");
+    } finally {
+      setIsDeleting(false);
+      setUserToDelete(null);
+    }
   };
 
   return (
@@ -81,15 +118,28 @@ export default function Users() {
                 {t("dash.users_label")}
               </p>
             </div>
-            <PrimaryBtn
-              onClick={() => {
-                setUserFormMode("create");
-                setEditingUser(undefined);
-                setViewingUser(null);
-              }}
-            >
-              <Plus className="w-3.5 h-3.5" /> <span className="hidden sm:inline">{t("dash.add_user")}</span><span className="sm:hidden">Add</span>
-            </PrimaryBtn>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input 
+                  type="checkbox" 
+                  checked={showDeleted} 
+                  onChange={(e) => setShowDeleted(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 cursor-pointer"
+                />
+                <span className="text-[11px] sm:text-[12px] font-mono uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
+                  Show Deleted
+                </span>
+              </label>
+              <PrimaryBtn
+                onClick={() => {
+                  setUserFormMode("create");
+                  setEditingUser(undefined);
+                  setViewingUser(null);
+                }}
+              >
+                <Plus className="w-3.5 h-3.5" /> <span className="hidden sm:inline">{t("dash.add_user")}</span><span className="sm:hidden">Add</span>
+              </PrimaryBtn>
+            </div>
           </div>
         </div>
 
@@ -104,7 +154,7 @@ export default function Users() {
                 setEditingUser(u);
                 setViewingUser(null);
               }}
-              onDelete={deleteUser}
+              onDelete={() => setUserToDelete(user)}
             />
           ))}
         </div>
@@ -121,17 +171,43 @@ export default function Users() {
         <UserForm
           initial={editingUser}
           isEdit={userFormMode === "edit"}
-          onSave={saveUser as any} // Using any temporarily for fast merge
+          onSave={saveUser as any} 
           onCancel={() => {
             setUserFormMode("none");
             setEditingUser(undefined);
           }}
+          loading={isSaving}
         />
       </BottomDrawer>
 
       <BottomDrawer open={!!viewingUser} onClose={() => setViewingUser(null)} title="User Details">
         {viewingUser && <UserDetail user={viewingUser} />}
       </BottomDrawer>
+
+      <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+        <AlertDialogContent className="rounded-2xl border-2 border-foreground">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-bold">Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the profile for <span className="text-foreground font-semibold">{userToDelete?.name}</span>. 
+              Note: This only deletes the profile record, not the user's authentication account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 gap-2">
+            <AlertDialogCancel className="rounded-xl border-2 border-foreground hover:bg-accent transition-colors">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDelete();
+              }}
+              disabled={isDeleting}
+              className="rounded-xl bg-red-500 hover:bg-red-600 border-2 border-foreground text-white font-bold transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+            >
+              {isDeleting ? "Deleting..." : "Yes, Delete User"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageTransition>
   );
 }

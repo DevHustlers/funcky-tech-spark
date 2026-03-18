@@ -10,6 +10,7 @@ export const getLeaderboard = async (limit: number = 20): Promise<ServiceRespons
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
+      .eq('is_deleted', false)
       .order('points', { ascending: false })
       .limit(limit);
 

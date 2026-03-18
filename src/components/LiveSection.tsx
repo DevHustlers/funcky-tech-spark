@@ -8,14 +8,7 @@ import { useRealtimeCompetitions } from "@/hooks/useRealtimeCompetitions";
 import { useRealtimeEvents } from "@/hooks/useRealtimeEvents";
 import type { Tables } from "@/types/database";
 
-const NEWS_FEED = [
-  { id: 1, text: "Frontend Mastery Showdown is LIVE now!", time: "Just now", icon: Play, hoverColor: "hsl(var(--live))" },
-  { id: 2, text: "Sarah Chen earned the Titan badge 🏆", time: "5m ago", icon: Trophy, hoverColor: "hsl(var(--upcoming))" },
-  { id: 3, text: "New challenge: Build a Real-Time Chat UI", time: "1h ago", icon: Flame, hoverColor: "hsl(var(--destructive))" },
-  { id: 4, text: "Ahmed Hassan reached 11,000 points", time: "2h ago", icon: Zap, hoverColor: "hsl(var(--feed))" },
-  { id: 5, text: "Frontend Hackathon registrations open", time: "3h ago", icon: Calendar, hoverColor: "hsl(var(--upcoming))" },
-  { id: 6, text: "Leaderboard updated — new #1 this week", time: "4h ago", icon: Star, hoverColor: "hsl(var(--feed))" },
-];
+const NEWS_FEED: any[] = [];
 
 const useCountdown = (targetDate: Date | null) => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: true });
@@ -173,27 +166,34 @@ const LiveSection = () => {
                 <Sparkles className="w-4 h-4" /> Live Feed
               </h3>
             </div>
-            <div className="divide-y divide-border">
-              {NEWS_FEED.map(item => (
-                <div
-                  key={item.id}
-                  className="group/feeditem px-6 sm:px-7 py-4 flex items-start gap-3 hover:bg-accent/40 transition-colors duration-300"
-                  onMouseEnter={(e) => {
-                    const icon = e.currentTarget.querySelector('svg');
-                    if (icon) icon.style.color = item.hoverColor;
-                  }}
-                  onMouseLeave={(e) => {
-                    const icon = e.currentTarget.querySelector('svg');
-                    if (icon) icon.style.color = '';
-                  }}
-                >
-                  <item.icon className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground transition-colors duration-300" strokeWidth={1.5} />
-                  <div className="min-w-0">
-                    <p className="text-[15px] text-foreground leading-snug">{item.text}</p>
-                    <p className="text-[13px] text-muted-foreground font-mono mt-0.5">{item.time}</p>
+            <div className="divide-y divide-border min-h-[220px] flex flex-col justify-center">
+              {NEWS_FEED.length > 0 ? (
+                NEWS_FEED.map(item => (
+                  <div
+                    key={item.id}
+                    className="group/feeditem px-6 sm:px-7 py-4 flex items-start gap-3 hover:bg-accent/40 transition-all duration-300"
+                    onMouseEnter={(e) => {
+                      const icon = e.currentTarget.querySelector('svg');
+                      if (icon) icon.style.color = item.hoverColor;
+                    }}
+                    onMouseLeave={(e) => {
+                      const icon = e.currentTarget.querySelector('svg');
+                      if (icon) icon.style.color = '';
+                    }}
+                  >
+                    <item.icon className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground transition-colors duration-300" strokeWidth={1.5} />
+                    <div className="min-w-0">
+                      <p className="text-[15px] text-foreground leading-snug">{item.text}</p>
+                      <p className="text-[13px] text-muted-foreground font-mono mt-0.5">{item.time}</p>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="py-20 text-center">
+                  <Sparkles className="w-12 h-12 text-muted-foreground/10 mx-auto mb-4" />
+                  <p className="text-muted-foreground font-mono text-[12px] uppercase">NO_RECENT_ACTIVITY</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>

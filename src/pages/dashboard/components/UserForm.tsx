@@ -27,11 +27,13 @@ export const UserForm = ({
   onSave,
   onCancel,
   isEdit = false,
+  loading = false,
 }: {
   initial?: UserData;
   onSave: (data: UserData) => void;
   onCancel: () => void;
   isEdit?: boolean;
+  loading?: boolean;
 }) => {
   const [name, setName] = useState(initial?.name || "");
   const [email, setEmail] = useState(initial?.email || "");
@@ -94,10 +96,10 @@ export const UserForm = ({
           <FieldTextarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Short user bio..." />
         </div>
         <div className="flex items-center gap-2 pt-2">
-          <PrimaryBtn onClick={handleSave} disabled={!name.trim() || !email.trim()}>
-            <Check className="w-3.5 h-3.5" /> {isEdit ? "Save Changes" : "Add User"}
+          <PrimaryBtn onClick={handleSave} disabled={loading || !name.trim() || !email.trim()}>
+            <Check className="w-3.5 h-3.5" /> {loading ? "Saving..." : isEdit ? "Save Changes" : "Add User"}
           </PrimaryBtn>
-          <SecondaryBtn onClick={onCancel}>Cancel</SecondaryBtn>
+          <SecondaryBtn onClick={onCancel} disabled={loading}>Cancel</SecondaryBtn>
         </div>
       </div>
     </div>

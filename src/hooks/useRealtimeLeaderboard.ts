@@ -32,6 +32,8 @@ export const useRealtimeLeaderboard = (limit: number = 20) => {
           
           if (payload.eventType === 'INSERT') {
             const newUser = payload.new as Tables<'profiles'>;
+            if (newUser.is_deleted) return; // Ignore if soft-deleted
+            
             queryClient.setQueryData(['leaderboard', limit], (old: LeaderboardUser[] | undefined) => {
               const list = old || [];
               if (list.some(u => u.id === newUser.id)) return list;
@@ -45,6 +47,16 @@ export const useRealtimeLeaderboard = (limit: number = 20) => {
             });
           } else if (payload.eventType === 'UPDATE') {
             const updatedUser = payload.new as Tables<'profiles'>;
+            
+            // Handle soft delete: if updated to is_deleted: true, remove from leaderboard list
+            if (updatedUser.is_deleted) {
+              queryClient.setQueryData(['leaderboard', limit], (old: LeaderboardUser[] | undefined) => {
+                const list = (old || []).filter(u => u.id !== updatedUser.id);
+                return list.map((u, i) => ({ ...u, rank: i + 1 }));
+              });
+              return;
+            }
+
             queryClient.setQueryData(['leaderboard', limit], (old: LeaderboardUser[] | undefined) => {
               const list = old || [];
               const updatedList = list.map(u => u.id === updatedUser.id ? { ...u, ...updatedUser } : u)
