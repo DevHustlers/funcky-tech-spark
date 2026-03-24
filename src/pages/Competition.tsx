@@ -107,7 +107,6 @@ const Competition = () => {
       const { data } = await getCompetitionById(id);
       if (data) {
           setCompetition(data);
-          // Check if current user is host OR creator
           const { data: { user: currentUser } } = await supabase.auth.getUser();
           setUser(currentUser);
           if (currentUser && (data.host_id === currentUser.id || data.created_by === currentUser.id)) {
@@ -134,8 +133,7 @@ const Competition = () => {
           setCompetition((prev) => (prev ? { ...prev, status: newStatus } : null));
 
           if (newStatus === 'live' && phase === 'lobby') {
-            toast.info("Session initialized!");
-            startSession();
+            toast.info("Host has started the session!");
           } else if (newStatus === 'ended') {
             setPhase('results');
           }
@@ -151,7 +149,6 @@ const Competition = () => {
   useEffect(() => {
     if (!id) return;
     
-    // Initial Host State retrieval
     supabase.from('competition_states').select('*').eq('competition_id', id).maybeSingle().then(res => {
         if (res.data) setHostState(res.data);
     });
@@ -177,17 +174,63 @@ const Competition = () => {
     };
   }, [id]);
 
-  // Phase Transition Management
+  // Synchronize dynamic participant list
+  useEffect(() => {
+    if (!id || !user) return;
+
+    const fetchParticipants = async () => {
+        // Fetch real participation from submissions table
+        const { data: subs, error } = await supabase
+            .from('submissions')
+            .select(`
+                user_id,
+                profiles:user_id (id, full_name, username)
+            `)
+            .eq('competition_id', id);
+
+        if (subs) {
+            const mapped = subs.map(s => {
+                const profile: any = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles;
+                const displayName = profile?.full_name || profile?.username || 'Pilot';
+                return {
+                    name: displayName,
+                    avatar: displayName.substring(0, 2).toUpperCase(),
+                    score: 0, 
+                    isYou: s.user_id === user?.id
+                };
+            });
+            setParticipants(mapped);
+            setLobbyCount(mapped.length);
+        }
+    };
+
+    fetchParticipants();
+
+    const lobbyChan = supabase
+        .channel(`lobby_joins_${id}`)
+        .on('postgres_changes', { 
+            event: 'INSERT', 
+            schema: 'public', 
+            table: 'submissions', 
+            filter: `competition_id=eq.${id}` 
+        }, () => {
+            fetchParticipants();
+        })
+        .subscribe();
+
+    return () => {
+        supabase.removeChannel(lobbyChan);
+    };
+  }, [id, user]);
+
   useEffect(() => {
     if (!hostState || loading || !isJoined) return;
 
-    // Index synchronization
     if (dbIndex !== hostState.current_question_index) {
         setCurrentIndex(hostState.current_question_index);
         setSelectedAnswer(null); 
     }
 
-    // Role-based state machine
     if (hostState.status === 'countdown') {
         if (phase !== 'countdown') setPhase('countdown');
     } else if (hostState.status === 'question_live') {
@@ -201,7 +244,6 @@ const Competition = () => {
     }
   }, [hostState, phase, loading, isJoined, dbIndex, setCurrentIndex]);
 
-  // Countdown Logic (3-2-1)
   useEffect(() => {
     if (phase !== "countdown") return;
     setCountdownVal(3);
@@ -209,7 +251,6 @@ const Competition = () => {
       setCountdownVal((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          // If current user is host, push session to question_live state automatically
           if (isAdmin) {
              hostTriggerQuestion(id!);
           }
@@ -223,7 +264,6 @@ const Competition = () => {
 
   useEffect(() => {
     if (loading || !competition) return;
-
     if (competition.status === 'live' && phase === 'lobby' && !isSessionCompleted && isJoined) {
         startSession();
     }
@@ -232,15 +272,6 @@ const Competition = () => {
   useEffect(() => {
     if (isSessionCompleted) setPhase("results");
   }, [isSessionCompleted]);
-
-  useEffect(() => {
-    if (phase === "lobby") {
-      const interval = setInterval(() => {
-        setLobbyCount((prev) => Math.min(prev + Math.floor(Math.random() * 3) + 1, 100));
-      }, 1500);
-      return () => clearInterval(interval);
-    }
-  }, [phase]);
 
   const handleAnswer = (index: number) => {
     if (selectedAnswer !== null || phase !== "question") return;
@@ -254,12 +285,6 @@ const Competition = () => {
     handleNext(index.toString());
   };
 
-  const handleTextSubmit = () => {
-    if (!textAnswer.trim() || phase !== "question") return;
-    handleNext(textAnswer);
-    setTextAnswer("");
-  };
-
   const currentHostIndex = hostState?.current_question_index || 0;
   const questions = dbQuestions.length > 0 ? dbQuestions : DEFAULT_QUESTIONS;
   const hostQuest = questions[currentHostIndex] || questions[0];
@@ -268,6 +293,11 @@ const Competition = () => {
   const sortedParticipants = [...participants].sort((a, b) => b.score - a.score);
   const yourRank = sortedParticipants.findIndex((p) => p.isYou) + 1;
   const question = hostQuest;
+
+  // Sync isJoined with actual database submission status
+  useEffect(() => {
+    if (submission) setIsJoined(true);
+  }, [submission]);
 
   if (loading || sessionLoading) {
     return (
@@ -308,26 +338,47 @@ const Competition = () => {
                          <ClockIcon className="w-8 h-8 text-primary/60" />
                        </div>
                        <div className="text-center">
-                         <p className="text-[16px] font-bold text-foreground">Waiting for the protocol to begin...</p>
+                         <p className="text-[16px] font-bold text-foreground">
+                            {isAdmin ? "Lobby Operations Hub" : "Waiting for Host Signal..."}
+                         </p>
                          {timeToStart && (
                            <p className="text-[24px] font-mono font-bold text-primary mt-2 tabular-nums">
-                             Starts in: {timeToStart}
+                             Estimated Start: {timeToStart}
                            </p>
                          )}
-                         <p className="text-[13px] text-muted-foreground mt-1">The host will start the competition shortly.</p>
+                         <p className="text-[13px] text-muted-foreground mt-1">The protocol will initialize upon host authorization.</p>
                        </div>
                        
-                       {isAdmin && (
-                         <button 
-                           onClick={async () => {
-                             const { error } = await startCompetitionSession(id!);
-                             if (error) toast.error(error);
-                             else toast.success("Session activated.");
-                           }}
-                           className="px-8 py-3 bg-foreground text-background font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-foreground/20 uppercase tracking-widest text-[12px] flex items-center gap-2"
-                         >
-                           <ZapIcon className="w-4 h-4" /> Start Competition Session
-                         </button>
+                       {isAdmin ? (
+                         <div className="flex flex-col gap-4 items-center">
+                            <button 
+                                onClick={async () => {
+                                    const { error } = await startCompetitionSession(id!);
+                                    if (error) toast.error(error);
+                                    else toast.success("Session Broadcast Started.");
+                                }}
+                                className="px-8 py-3 bg-foreground text-background font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-foreground/20 uppercase tracking-widest text-[12px] flex items-center gap-2"
+                            >
+                                <ZapIcon className="w-4 h-4" /> Initialize session broadcast
+                            </button>
+                            {!isJoined && (
+                                <button 
+                                    onClick={() => startSession()}
+                                    className="text-[10px] font-mono uppercase text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+                                >
+                                    Join lobby to see yourself in competitors list
+                                </button>
+                            )}
+                         </div>
+                       ) : (
+                         !isJoined && (
+                            <button 
+                                onClick={() => startSession()}
+                                className="px-8 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20 uppercase tracking-widest text-[12px]"
+                            >
+                                Join Lobby NOW
+                            </button>
+                         )
                        )}
                      </>
                   ) : (
@@ -335,13 +386,13 @@ const Competition = () => {
                       <div className="flex flex-col items-center gap-6">
                         <ZapIcon className="w-16 h-16 text-emerald-500 animate-pulse" />
                         <div className="text-center">
-                          <p className="text-xl font-bold text-foreground">Competition is LIVE!</p>
-                          <p className="text-sm text-muted-foreground mt-2 mb-6">Initialize your session to synchronize with the host.</p>
+                          <p className="text-xl font-bold text-foreground">Session is ACTIVE!</p>
+                          <p className="text-sm text-muted-foreground mt-2 mb-6">Initialize your session to synchronize with the host stream.</p>
                           <button 
-                            onClick={() => setIsJoined(true)}
+                            onClick={() => startSession()}
                             className="px-10 py-4 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20 uppercase tracking-widest text-[13px]"
                           >
-                            Join Session NOW
+                            Join Active Session
                           </button>
                         </div>
                       </div>
@@ -349,9 +400,9 @@ const Competition = () => {
                       <div className="flex flex-col items-center gap-4 py-8">
                          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary animate-spin rounded-full" />
                          <div className="text-center">
-                           <p className="text-lg font-bold text-foreground mb-1">{isAdmin ? "Session Host Terminal" : "Connected to Host"}</p>
+                           <p className="text-lg font-bold text-foreground mb-1">{isAdmin ? "Session Host Terminal" : "Connected to Transmission"}</p>
                            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground animate-pulse">
-                              {isAdmin ? "Use the command bar below to transmit question #1" : `Waiting for Host to transmit question ${(currentHostIndex || 0) + 1}...`}
+                              {isAdmin ? "Use host controls below to transmit question #1" : `Waiting for Data Stream ${(currentHostIndex || 0) + 1}...`}
                            </p>
                          </div>
                       </div>
@@ -362,19 +413,25 @@ const Competition = () => {
 
               <div className="grid grid-cols-3 gap-px bg-border border border-border max-w-md mx-auto mb-10 text-center">
                 <div className="bg-background p-4"><p className="font-bold text-lg">{questions.length}</p><p className="text-[10px] uppercase font-mono text-muted-foreground">Questions</p></div>
-                <div className="bg-background p-4"><p className="font-bold text-lg">{timePerQuestion}s</p><p className="text-[10px] uppercase font-mono text-muted-foreground">Time Limit</p></div>
-                <div className="bg-background p-4"><p className="font-bold text-lg">{competition.prize || "pts"}</p><p className="text-[10px] uppercase font-mono text-muted-foreground">Prize</p></div>
+                <div className="bg-background p-4"><p className="font-bold text-lg">{timePerQuestion}s</p><p className="text-[10px] uppercase font-mono text-muted-foreground">Limit</p></div>
+                <div className="bg-background p-4"><p className="font-bold text-lg">{competition.prize || "pts"}</p><p className="text-[10px] uppercase font-mono text-muted-foreground">Reward</p></div>
               </div>
             </div>
             
             <div className="border border-border p-5">
               <h3 className="text-[14px] font-bold mb-4 flex items-center gap-2">
-                <UsersIcon className="w-4 h-4" /> Participants Pool ({lobbyCount}/100)
+                <UsersIcon className="w-4 h-4" /> Authenticated Competitors ({lobbyCount})
               </h3>
               <div className="flex flex-wrap gap-2">
-                {participants.map((p, i) => (
-                  <div key={i} className={`w-10 h-10 flex items-center justify-center border text-[11px] font-bold font-mono transition-all duration-500 ${p.isYou ? "bg-foreground text-background scale-110 shadow-lg" : "bg-accent text-muted-foreground opacity-50"}`}>{p.avatar}</div>
-                ))}
+                {participants.length > 0 ? participants.map((p, i) => (
+                  <div key={i} title={p.name} className={`w-10 h-10 flex items-center justify-center border text-[11px] font-bold font-mono transition-all duration-500 hover:scale-110 cursor-help ${p.isYou ? "bg-foreground text-background scale-110 shadow-lg border-foreground" : "bg-accent text-muted-foreground opacity-90 border-border"}`}>
+                    {p.avatar}
+                  </div>
+                )) : (
+                  <div className="w-full text-center py-4 border border-dashed border-border rounded">
+                     <p className="text-[10px] font-mono text-muted-foreground uppercase">No competitors in lobby yet...</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -385,7 +442,7 @@ const Competition = () => {
               <div className="text-[120px] font-black text-primary font-mono tabular-nums animate-pulse drop-shadow-[0_0_30px_rgba(var(--primary),0.3)]">
                 {countdownVal}
               </div>
-              <p className="text-muted-foreground font-mono uppercase tracking-[0.3em] font-bold">Synchronizing Question Stream...</p>
+              <p className="text-muted-foreground font-mono uppercase tracking-[0.3em] font-bold">Synchronizing Stream...</p>
            </div>
         )}
 
@@ -394,12 +451,12 @@ const Competition = () => {
              {!hostState || hostState.status !== 'question_live' ? (
                 <div className="bg-accent/40 rounded-2xl p-20 border border-border/50 text-center backdrop-blur-sm animate-pulse">
                     <ClockIcon className="w-12 h-12 text-primary/30 mx-auto mb-6" />
-                    <p className="text-muted-foreground font-mono uppercase tracking-widest text-xs">Waiting for host to release question...</p>
+                    <p className="text-muted-foreground font-mono uppercase tracking-widest text-xs">Waiting for host to transmit data...</p>
                 </div>
              ) : (
                 <>
                 <div className="flex items-center justify-between mb-6 font-mono">
-                  <span className="text-[11px] text-muted-foreground uppercase tracking-widest">Q{currentHostIndex + 1}/{questions.length}</span>
+                  <span className="text-[11px] text-muted-foreground uppercase tracking-widest">SEQ_{currentHostIndex + 1}/{questions.length}</span>
                   <div className="flex items-center gap-4">
                     <span className="text-[13px] font-bold"><ZapIcon className="inline w-3.5 h-3.5 text-amber-500 mr-1" />{score} pts</span>
                     <span className={`text-lg font-bold ${(timeLeft || 0) <= 5 ? "text-red-500 animate-pulse" : ""}`}><TimerIcon className="inline w-4 h-4 mr-1" />{timeLeft}s</span>
@@ -411,8 +468,8 @@ const Competition = () => {
                 {selectedAnswer === null ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {(question.options || []).map((opt: string, i: number) => (
-                        <button key={i} onClick={() => handleAnswer(i)} className={`p-5 border text-left flex gap-4 transition-all border-border hover:bg-accent/50 hover:border-primary/50`}>
-                            <span className="w-8 h-8 flex items-center justify-center border font-bold text-[13px]">{String.fromCharCode(65 + i)}</span>
+                        <button key={i} onClick={() => handleAnswer(i)} className={`p-5 border text-left flex gap-4 transition-all border-border hover:bg-accent/50 hover:border-primary/50 group`}>
+                            <span className="w-8 h-8 flex items-center justify-center border font-bold text-[13px] group-hover:bg-primary group-hover:text-primary-foreground transition-colors">{String.fromCharCode(65 + i)}</span>
                             <span className="font-medium pt-1">{opt}</span>
                         </button>
                         ))}
@@ -422,8 +479,8 @@ const Competition = () => {
                         <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                             <ClockIcon className="w-6 h-6 text-primary animate-pulse" />
                         </div>
-                        <h3 className="text-xl font-bold text-foreground mb-1">Answer Locked</h3>
-                        <p className="text-muted-foreground text-sm uppercase tracking-widest font-mono">Waiting for correct answer reveal...</p>
+                        <h3 className="text-xl font-bold text-foreground mb-1">Answer Transmitted</h3>
+                        <p className="text-muted-foreground text-sm uppercase tracking-widest font-mono">Waiting for validation signal...</p>
                     </div>
                 )}
                 </>
@@ -450,10 +507,10 @@ const Competition = () => {
             {isAdmin ? (
                 <div className="flex flex-col items-center gap-2 py-4">
                    <div className="animate-bounce"><ArrowIcon className="w-5 h-5 text-primary rotate-90" /></div>
-                   <p className="font-mono text-[10px] text-primary/60 uppercase">Use host terminal below to proceed</p>
+                   <p className="font-mono text-[10px] text-primary/60 uppercase">Use host terminal to continue protocol</p>
                 </div>
             ) : (
-                <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest animate-pulse">Waiting for host to continue protocol...</p>
+                <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest animate-pulse">Waiting for host command...</p>
             )}
           </div>
         )}
@@ -552,7 +609,7 @@ const Competition = () => {
 
            <div className="flex items-center gap-2 pl-6 border-l border-border/50 font-mono text-[10px] text-muted-foreground hidden lg:flex">
              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-             ACTIVE_TRANSMISSION
+             ACTIVE_STREAM
            </div>
         </div>
       )}
