@@ -15,28 +15,55 @@ export const useCompetitionSession = (competitionId: string) => {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [completed, setCompleted] = useState(false);
 
+  useEffect(() => {
+    const initSession = async () => {
+      if (!competitionId) return;
+      setLoading(true);
+      try {
+        // Just check if questions exist
+        const { data: qData } = await getCompetitionQuestions(competitionId);
+        if (qData) setQuestions(qData);
+
+        // Check if user already joined
+        const { data: sub } = await joinCompetition(competitionId);
+        // We don't toast error here because they might not have joined yet (which is fine)
+        if (sub) {
+            setSubmission(sub);
+            setCompleted(sub.score !== null);
+        }
+      } catch (err) {
+        console.error("Session init error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    initSession();
+  }, [competitionId]);
+
   const startSession = useCallback(async () => {
+    // If already have submission, just set loading false and return
+    if (submission) {
+        setLoading(false);
+        return;
+    }
+
     setLoading(true);
     try {
-      // 1. Join competition (create submission)
       const { data: sub, error: subErr } = await joinCompetition(competitionId);
       if (subErr) {
         toast.error(subErr);
         if (sub) {
             setSubmission(sub);
-            setCompleted(!!sub.completed_at);
+            setCompleted(sub.score !== null);
         }
-        setLoading(false);
         return;
       }
       setSubmission(sub);
 
-      // 2. Fetch questions
       const { data: qData, error: qErr } = await getCompetitionQuestions(competitionId);
       if (qErr) throw new Error(qErr);
       setQuestions(qData || []);
 
-      // 3. Set timer if question has one
       if (qData?.[0]?.time_limit) {
         setTimeLeft(qData[0].time_limit);
       }
@@ -45,7 +72,7 @@ export const useCompetitionSession = (competitionId: string) => {
     } finally {
       setLoading(false);
     }
-  }, [competitionId]);
+  }, [competitionId, submission]);
 
   const handleNext = useCallback(async (answer: string) => {
     if (!submission || completed) return;

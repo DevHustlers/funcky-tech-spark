@@ -5,15 +5,7 @@ import { FieldInput } from "./ui/FieldInput";
 import { PrimaryBtn } from "./ui/PrimaryBtn";
 import { SecondaryBtn } from "./ui/SecondaryBtn";
 
-interface CompetitionQuestion {
-  id: number;
-  question: string;
-  options?: string[];
-  correctIndex?: number;
-  timeLimit: number;
-  type: "mcq" | "text" | "code";
-  points?: number;
-}
+import { CompetitionQuestion } from "@/types/competition";
 
 // ─── Question Form Component ───
 export const QuestionForm = ({

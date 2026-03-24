@@ -249,7 +249,8 @@ export const joinCompetition = async (competitionId: string): Promise<ServiceRes
       .insert({
         competition_id: competitionId,
         user_id: user.id,
-        started_at: new Date().toISOString()
+        submission_url: 'competition_session',
+        submitted_at: new Date().toISOString()
       })
       .select()
       .single();
@@ -292,7 +293,7 @@ export const completeSubmission = async (submissionId: string, finalScore: numbe
     const { data, error } = await supabase
       .from('submissions')
       .update({
-        completed_at: new Date().toISOString(),
+        submitted_at: new Date().toISOString(),
         score: finalScore
       })
       .eq('id', submissionId)
@@ -311,7 +312,7 @@ export const getReviewableAnswers = async (): Promise<ServiceResponse<any[]>> =>
   try {
     const { data, error } = await supabase
       .from('answers')
-      .select('*, questions(*), submissions(profiles(full_name, username))')
+      .select('*, questions(*), submissions(users(full_name))')
       .eq('is_reviewed', false)
       .order('created_at', { ascending: true });
 

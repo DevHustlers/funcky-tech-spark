@@ -23,25 +23,7 @@ import { getCompetitions, createCompetition, updateCompetition, deleteCompetitio
 import { toast } from "sonner";
 import type { Tables } from "@/types/database";
 
-interface CompetitionQuestion {
-  id: number;
-  question: string;
-  options: string[];
-  correctIndex: number;
-  timeLimit: number;
-}
-
-interface CompetitionData {
-  id: string;
-  title: string;
-  description: string;
-  status: "draft" | "scheduled" | "live" | "ended";
-  scheduledDate: string;
-  timePerQuestion: number;
-  prize: string;
-  questions: CompetitionQuestion[];
-  participants: number;
-}
+import { CompetitionData, CompetitionQuestion } from "@/types/competition";
 
 // Helper to map DB competition to UI CompetitionData
 const mapDBCompToCompData = (c: Tables<'competitions'>): CompetitionData => ({

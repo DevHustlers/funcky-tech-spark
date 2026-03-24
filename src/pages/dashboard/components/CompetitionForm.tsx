@@ -9,25 +9,7 @@ import { SecondaryBtn } from "./ui/SecondaryBtn";
 import { QuestionForm } from "./QuestionForm";
 import { QuestionList } from "./QuestionList";
 
-interface CompetitionQuestion {
-  id: number;
-  question: string;
-  options: string[];
-  correctIndex: number;
-  timeLimit: number;
-}
-
-interface CompetitionData {
-  id: string;
-  title: string;
-  description: string;
-  status: "draft" | "scheduled" | "live" | "ended";
-  scheduledDate: string;
-  timePerQuestion: number;
-  prize: string;
-  questions: CompetitionQuestion[];
-  participants: number;
-}
+import { CompetitionData, CompetitionQuestion } from "@/types/competition";
 
 import { competitionSchema } from "@/lib/validation/competition.schema";
 import { toast } from "sonner";

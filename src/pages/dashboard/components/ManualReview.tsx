@@ -42,7 +42,7 @@ export const ManualReview = () => {
               </div>
               <div>
                 <p className="text-[13px] font-bold text-foreground">
-                  {answer.submissions?.profiles?.full_name || answer.submissions?.profiles?.username || "Unknown"}
+                  {answer.submissions?.users?.full_name || "Guest User"}
                 </p>
                 <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">
                   Submission ID: {answer.submission_id.slice(0, 8)}

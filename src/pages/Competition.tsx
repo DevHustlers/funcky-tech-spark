@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams, Navigate } from "react-router-dom";
 import {
-  Trophy,
-  Users,
-  Timer,
-  ArrowRight,
-  Zap,
-  CheckCircle2,
-  XCircle,
-  Award,
-  Clock,
-  Crown,
-  Medal,
-  Star,
+  Trophy as TrophyIcon,
+  Users as UsersIcon,
+  Timer as TimerIcon,
+  ArrowRight as ArrowIcon,
+  Zap as ZapIcon,
+  CheckCircle2 as CheckIcon,
+  XCircle as XIcon,
+  Award as AwardIcon,
+  Clock as ClockIcon,
+  Crown as CrownIcon,
+  Medal as MedalIcon,
+  Star as StarIcon,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -21,6 +21,8 @@ import SectionDivider from "@/components/SectionDivider";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { getCompetitionById } from "@/services/competitions.service";
 import { useCompetitionSession } from "@/hooks/useCompetitionSession";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 import type { Tables } from "@/types/database";
 
 type CompetitionType = Tables<"competitions">;
@@ -41,14 +43,21 @@ const DEFAULT_PARTICIPANTS = [
 
 type Phase = "lobby" | "countdown" | "question" | "reveal" | "results";
 
-import { supabase } from "@/lib/supabase";
-
 const Competition = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useLanguage();
+
+  // 1. Declare all states first to avoid hoisting issues
   const [competition, setCompetition] = useState<CompetitionType | null>(null);
   const [loading, setLoading] = useState(true);
+  const [phase, setPhase] = useState<Phase>("lobby");
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [score, setScore] = useState(0);
+  const [countdownVal, setCountdownVal] = useState(3);
+  const [participants, setParticipants] = useState(DEFAULT_PARTICIPANTS);
+  const [lobbyCount, setLobbyCount] = useState(1);
+  const [textAnswer, setTextAnswer] = useState("");
 
   const {
     questions: dbQuestions,
@@ -62,14 +71,15 @@ const Competition = () => {
     handleNext,
   } = useCompetitionSession(id || "");
 
+  // 2. Fetch and Subscribe
   useEffect(() => {
     const fetchCompetition = async () => {
       if (!id) return;
       const { data } = await getCompetitionById(id);
       if (data) {
           setCompetition(data);
-          // If already live and session started, we might need to skip lobby
-          if (data.status === 'live' && submission) {
+          // If already live and session already started in background, we might want to jump
+          if (data.status === 'live' && submission && phase === 'lobby') {
               setPhase('question');
           }
       }
@@ -77,7 +87,6 @@ const Competition = () => {
     };
     fetchCompetition();
 
-    // ─── Real-time Status Sync ───
     if (!id) return;
     const channel = supabase
       .channel(`comp_status_${id}`)
@@ -108,6 +117,7 @@ const Competition = () => {
     };
   }, [id, phase, submission, startSession]);
 
+  // 3. Status Change Auto-start
   useEffect(() => {
     if (loading || !competition) return;
 
@@ -116,17 +126,6 @@ const Competition = () => {
     }
   }, [competition, loading, phase, isSessionCompleted, startSession]);
 
-  const [phase, setPhase] = useState<Phase>("lobby");
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [score, setScore] = useState(0);
-  const [countdownVal, setCountdownVal] = useState(3);
-  const [participants, setParticipants] = useState(DEFAULT_PARTICIPANTS);
-  const [lobbyCount, setLobbyCount] = useState(1);
-
-  const questions = dbQuestions.length > 0 ? dbQuestions : DEFAULT_QUESTIONS;
-  const timePerQuestion = dbQuestion?.time_limit || competition?.time_per_question || 15;
-  const maxParticipants = 100;
-
   useEffect(() => {
     if (isSessionCompleted) setPhase("results");
   }, [isSessionCompleted]);
@@ -134,11 +133,11 @@ const Competition = () => {
   useEffect(() => {
     if (phase === "lobby") {
       const interval = setInterval(() => {
-        setLobbyCount((prev) => Math.min(prev + Math.floor(Math.random() * 3) + 1, maxParticipants));
+        setLobbyCount((prev) => Math.min(prev + Math.floor(Math.random() * 3) + 1, 100));
       }, 1500);
       return () => clearInterval(interval);
     }
-  }, [phase, maxParticipants]);
+  }, [phase]);
 
   useEffect(() => {
     if (phase === "countdown") {
@@ -163,12 +162,12 @@ const Competition = () => {
     }
   }, [phase, timeLeft, isSessionCompleted]);
 
-  const [textAnswer, setTextAnswer] = useState("");
-
+  // Action Helpers
   const handleAnswer = (index: number) => {
     if (selectedAnswer !== null || phase !== "question") return;
     setSelectedAnswer(index);
     const q = questions[dbIndex];
+    if (!q) return;
     const isCorrect = index.toString() === q.correct_answer;
     const timeBonus = Math.floor((timeLeft || 0) * 7);
     const points = isCorrect ? (q.points || 100) + timeBonus : 0;
@@ -179,7 +178,6 @@ const Competition = () => {
 
   const handleTextSubmit = () => {
     if (!textAnswer.trim() || phase !== "question") return;
-    setScore((prev) => prev + 0); // No points yet for manual review
     handleNext(textAnswer);
     setTimeout(() => {
         setPhase("reveal");
@@ -196,15 +194,12 @@ const Competition = () => {
     }
   };
 
-  const startComp = async () => {
-    await startSession();
-    setPhase("countdown");
-  };
-
+  const questions = dbQuestions.length > 0 ? dbQuestions : DEFAULT_QUESTIONS;
+  const timePerQuestion = dbQuestion?.time_limit || competition?.time_per_question || 15;
+  const timerPercent = ((timeLeft || 0) / timePerQuestion) * 100;
   const sortedParticipants = [...participants].sort((a, b) => b.score - a.score);
   const yourRank = sortedParticipants.findIndex((p) => p.isYou) + 1;
   const question = questions[dbIndex] || DEFAULT_QUESTIONS[0];
-  const timerPercent = ((timeLeft || 0) / timePerQuestion) * 100;
 
   if (loading || sessionLoading) {
     return (
@@ -243,7 +238,7 @@ const Competition = () => {
               </div>
             </div>
             <div className="border border-border mb-8 p-5">
-              <h3 className="text-[14px] font-bold mb-4">Waiting Room ({lobbyCount}/{maxParticipants})</h3>
+              <h3 className="text-[14px] font-bold mb-4">Waiting Room ({lobbyCount}/100)</h3>
               <div className="flex flex-wrap gap-2">
                 {participants.map((p, i) => (
                   <div key={i} className={`w-10 h-10 flex items-center justify-center border text-[11px] font-bold font-mono ${p.isYou ? "bg-foreground text-background" : "bg-accent text-muted-foreground"}`}>{p.avatar}</div>
@@ -258,7 +253,6 @@ const Competition = () => {
                 </p>
               </div>
             </div>
-            {/* The Start button was here - now removed for participants as it's admin-controlled via dashboard */}
           </div>
         )}
 
@@ -277,13 +271,12 @@ const Competition = () => {
             <div className="flex items-center justify-between mb-6 font-mono">
               <span className="text-[11px] text-muted-foreground uppercase tracking-widest">Q{dbIndex + 1}/{questions.length}</span>
               <div className="flex items-center gap-4">
-                <span className="text-[13px] font-bold"><Zap className="inline w-3.5 h-3.5 text-amber-500 mr-1" />{score} pts</span>
-                <span className={`text-lg font-bold ${(timeLeft || 0) <= 5 ? "text-red-500 animate-pulse" : ""}`}><Timer className="inline w-4 h-4 mr-1" />{timeLeft}s</span>
+                <span className="text-[13px] font-bold"><ZapIcon className="inline w-3.5 h-3.5 text-amber-500 mr-1" />{score} pts</span>
+                <span className={`text-lg font-bold ${(timeLeft || 0) <= 5 ? "text-red-500 animate-pulse" : ""}`}><TimerIcon className="inline w-4 h-4 mr-1" />{timeLeft}s</span>
               </div>
             </div>
             <div className="w-full h-1 bg-border mb-10 overflow-hidden"><div className={`h-full transition-all duration-1000 linear ${ (timeLeft || 0) <= 5 ? "bg-red-500" : "bg-emerald-500"}`} style={{ width: `${timerPercent}%` }} /></div>
             <h2 className="text-xl sm:text-2xl font-bold text-center mb-10">{question.question}</h2>
-            {/* Options or Text Input */}
             {question.type === "text" ? (
               <div className="space-y-4 animate-in fade-in duration-500">
                 <textarea
@@ -297,7 +290,7 @@ const Competition = () => {
                   disabled={!textAnswer.trim()}
                   className="w-full py-4 bg-foreground text-background font-bold rounded-xl hover:bg-foreground/90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
                 >
-                  Submit Answer <ArrowRight className="w-4 h-4" />
+                  Submit Answer <ArrowIcon className="w-4 h-4" />
                 </button>
               </div>
             ) : (
@@ -316,11 +309,10 @@ const Competition = () => {
         {phase === "reveal" && (
           <div className="max-w-3xl mx-auto px-4 py-8">
             <h2 className="text-lg font-bold text-center mb-8">{question.question}</h2>
-            
             {question.type === "text" ? (
               <div className="bg-primary/5 border border-primary/20 rounded-2xl p-8 text-center mb-8 animate-in zoom-in-95 duration-500">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Clock className="w-8 h-8 text-primary animate-pulse" />
+                  <ClockIcon className="w-8 h-8 text-primary animate-pulse" />
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-2">Manual Review Pending</h3>
                 <p className="text-muted-foreground text-[14px] max-w-sm mx-auto">
@@ -335,7 +327,7 @@ const Competition = () => {
                   return (
                     <div key={i} className={`p-5 border flex gap-4 ${isCorrect ? "border-emerald-500 bg-emerald-500/5" : isSelected ? "border-red-500 bg-red-500/5 opacity-80" : "border-border opacity-50"}`}>
                       <span className={`w-8 h-8 flex items-center justify-center border font-bold ${isCorrect ? "bg-emerald-500 text-white" : isSelected ? "bg-red-500 text-white" : ""}`}>
-                        {isCorrect ? <CheckCircle2 className="w-4 h-4" /> : isSelected ? <XCircle className="w-4 h-4" /> : String.fromCharCode(65 + i)}
+                        {isCorrect ? <CheckIcon className="w-4 h-4" /> : isSelected ? <XIcon className="w-4 h-4" /> : String.fromCharCode(65 + i)}
                       </span>
                       <span className={isCorrect ? "text-emerald-500 font-bold" : isSelected ? "text-red-500" : ""}>{opt}</span>
                     </div>
@@ -345,7 +337,7 @@ const Competition = () => {
             )}
             <div className="text-center">
               <button onClick={nextPhase} className="px-8 py-3 bg-foreground text-background font-medium hover:bg-foreground/90 transition-all flex items-center gap-2 mx-auto uppercase tracking-wider text-[12px]">
-                {dbIndex + 1 >= questions.length ? "Finish Competition" : "Next Question"} <ArrowRight className="w-4 h-4" />
+                {dbIndex + 1 >= questions.length ? "Finish Competition" : "Next Question"} <ArrowIcon className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -353,7 +345,7 @@ const Competition = () => {
 
         {phase === "results" && (
           <div className="max-w-3xl mx-auto px-4 py-12 text-center">
-            <Trophy className="w-16 h-16 text-amber-500 mx-auto mb-6" />
+            <TrophyIcon className="w-16 h-16 text-amber-500 mx-auto mb-6" />
             <h1 className="text-3xl font-bold mb-2">Competition Complete!</h1>
             <p className="text-muted-foreground mb-8">Final Stats for {competition.title}</p>
             <div className="border-2 border-foreground p-8 mb-10 flex justify-around font-mono">
@@ -362,7 +354,7 @@ const Competition = () => {
             </div>
             <div className="flex justify-center gap-4">
               <button onClick={() => navigate("/challenges")} className="px-8 py-3 border border-border text-muted-foreground hover:text-foreground">Exit</button>
-              <button onClick={() => navigate("/leaderboard")} className="px-8 py-3 bg-foreground text-background flex items-center gap-2"><Trophy className="w-4 h-4" /> Leaderboard</button>
+              <button onClick={() => navigate("/leaderboard")} className="px-8 py-3 bg-foreground text-background flex items-center gap-2"><TrophyIcon className="w-4 h-4" /> Leaderboard</button>
             </div>
           </div>
         )}
