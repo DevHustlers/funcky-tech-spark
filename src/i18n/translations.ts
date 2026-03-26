@@ -14,7 +14,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.leaderboard": "Leaderboard",
 
     // Hero
-    "hero.badge": "50,000+ developers and growing",
+    "hero.badge": "1,000+ developers and growing",
     "hero.title.1": "Where developers",
     "hero.title.2": "come together",
     "hero.title.3": "to",

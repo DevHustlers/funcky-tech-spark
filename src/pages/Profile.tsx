@@ -5,16 +5,40 @@ import PageLayout from "@/components/PageLayout";
 import SectionDivider from "@/components/SectionDivider";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
-import { Calendar, Mail, Zap, Trophy, Link as LinkIcon } from "lucide-react";
+import { Calendar, Mail, Zap, Trophy, LogOut, Flame } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import type { Tables } from "@/types/database";
 
 const Profile = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Tables<'profiles'> | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      }
     });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) fetchProfile(session.user.id);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  const fetchProfile = async (id: string) => {
+    const { data } = await supabase.from('profiles').select('*').eq('id', id).single();
+    if (data) setProfile(data);
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
 
   if (!user) return (
     <PageLayout>
@@ -26,7 +50,7 @@ const Profile = () => {
     </PageLayout>
   );
 
-  const initial = user.user_metadata?.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U';
+  const initial = profile?.full_name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U';
 
   return (
     <PageLayout>
@@ -35,17 +59,33 @@ const Profile = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-8 lg:px-6 flex-1 w-full">
           <div className="border border-border bg-background p-8 md:p-12 mb-8 relative">
             <div className="absolute top-0 left-0 w-full h-1 bg-foreground"></div>
+            
+            <div className="absolute top-8 right-8">
+              <button 
+                onClick={handleSignOut}
+                className="flex items-center gap-2 text-[12px] font-mono text-muted-foreground hover:text-red-500 transition-colors bg-accent/30 px-3 py-1.5 border border-border"
+              >
+                <LogOut className="w-3.5 h-3.5" /> SIGN_OUT
+              </button>
+            </div>
+
             <div className="flex flex-col md:flex-row gap-8 items-start md:items-center">
-              <div className="w-24 h-24 md:w-32 md:h-32 bg-foreground text-background flex items-center justify-center text-4xl md:text-5xl font-bold rounded-none shrink-0 border-2 border-foreground">
+              <div className="w-24 h-24 md:w-32 md:h-32 bg-foreground text-background flex items-center justify-center text-4xl md:text-5xl font-bold rounded-none shrink-0 border-2 border-foreground relative">
                 {initial}
+                {profile?.streak_count && profile.streak_count > 0 && (
+                  <div className="absolute -top-3 -right-3 bg-orange-500 text-white rounded-full w-10 h-10 flex flex-col items-center justify-center text-[11px] font-bold shadow-lg animate-bounce duration-300">
+                    <Flame className="w-4 h-4" />
+                    {profile.streak_count}
+                  </div>
+                )}
               </div>
               <div className="flex-1 space-y-4">
                 <div>
                   <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                    {user.user_metadata?.full_name || user.user_metadata?.username || "Developer"}
+                    {profile?.full_name || "Developer"}
                   </h1>
                   <p className="text-muted-foreground text-[15px] font-mono mt-1">
-                    @{user.user_metadata?.username || user.email?.split('@')[0]}
+                    @{profile?.username || user.email?.split('@')[0]}
                   </p>
                 </div>
                 
@@ -56,7 +96,7 @@ const Profile = () => {
                   </div>
                   <div className="flex items-center gap-1.5 border border-border px-3 py-1.5 bg-accent/20">
                     <Calendar className="w-4 h-4" />
-                    <span>Joined {new Date(user.created_at || Date.now()).toLocaleDateString()}</span>
+                    <span>Joined {new Date(profile?.created_at || user.created_at || Date.now()).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -84,13 +124,17 @@ const Profile = () => {
                     <Zap className="w-4 h-4" /> Activity & Stats
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="border border-border p-5 bg-accent/10 flex flex-col items-center justify-center text-center">
-                      <div className="text-3xl font-bold font-mono text-foreground mb-1 mt-2">0</div>
+                    <div className="border border-border p-5 bg-accent/10 flex flex-col items-center justify-center text-center group hover:bg-emerald-500/5 transition-colors duration-300">
+                      <div className="text-3xl font-bold font-mono text-foreground mb-1 mt-2 text-emerald-500">
+                        {profile?.points?.toLocaleString() || 0}
+                      </div>
                       <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-2">Points</div>
                     </div>
-                    <div className="border border-border p-5 bg-accent/10 flex flex-col items-center justify-center text-center">
-                      <div className="text-3xl font-bold font-mono text-foreground mb-1 mt-2">0</div>
-                      <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-2">Challenges</div>
+                    <div className="border border-border p-5 bg-accent/10 flex flex-col items-center justify-center text-center group hover:bg-orange-500/5 transition-colors duration-300">
+                      <div className="text-3xl font-bold font-mono text-foreground mb-1 mt-2 text-orange-500">
+                        {profile?.streak_count || 0}
+                      </div>
+                      <div className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-2">Day Streak</div>
                     </div>
                   </div>
                 </div>

@@ -302,6 +302,8 @@ export type Database = {
           updated_at: string | null
           username: string | null
           is_deleted: boolean | null
+          streak_count: number | null
+          last_active_at: string | null
         }
         Insert: {
           bio?: string | null
@@ -317,6 +319,8 @@ export type Database = {
           updated_at?: string | null
           username?: string | null
           is_deleted?: boolean | null
+          streak_count?: number | null
+          last_active_at?: string | null
         }
         Update: {
           bio?: string | null
@@ -332,6 +336,8 @@ export type Database = {
           updated_at?: string | null
           username?: string | null
           is_deleted?: boolean | null
+          streak_count?: number | null
+          last_active_at?: string | null
         }
         Relationships: []
       }

@@ -130,7 +130,7 @@ const EventItem = ({ event }: { event: Tables<'events'> }) => {
               : "bg-foreground text-background hover:bg-foreground/90"
           }`}
         >
-          {attending ? "Going ✅" : "Join Network"}
+          {attending ? "Going ✅" : "Join!"}
         </button>
       </div>
       <div className="flex flex-wrap items-center gap-3 text-[13px] text-muted-foreground font-mono">

@@ -122,3 +122,14 @@ export const checkBadgeEligibility = async (
     return { data: null, error: error.message };
   }
 };
+
+export const updateUserStreak = async (userId: string): Promise<ServiceResponse<void>> => {
+  try {
+    const { error } = await supabase.rpc('update_user_streak', { user_id: userId });
+    if (error) throw error;
+    return { data: null, error: null };
+  } catch (error: any) {
+    console.error('Error in updateUserStreak:', error.message);
+    return { data: null, error: error.message };
+  }
+};

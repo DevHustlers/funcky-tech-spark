@@ -37,7 +37,7 @@ const EventCard = ({ event, isPast }: { event: Tables<'events'>; isPast?: boolea
                   : "bg-foreground text-background hover:bg-foreground/90"
               }`}
             >
-              {attending ? "Going ✅" : "Join Network"}
+              {attending ? "Going ✅" : "Join!"}
             </button>
           )}
         </div>

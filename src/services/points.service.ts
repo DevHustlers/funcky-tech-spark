@@ -71,12 +71,55 @@ export const getPointsLog = async (): Promise<ServiceResponse<any[]>> => {
       .from('points_log')
       .select('*, profiles(full_name)')
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(13);
 
     if (error) throw error;
     return { data, error: null };
   } catch (error: any) {
     console.error('Error in getPointsLog:', error.message);
+    return { data: null, error: error.message };
+  }
+};
+
+export const revokePoints = async (logId: string): Promise<ServiceResponse<null>> => {
+  try {
+    const { error } = await supabase.rpc('revoke_points', { p_log_id: logId });
+    if (error) throw error;
+    return { data: null, error: null };
+  } catch (error: any) {
+    console.error('Error in revokePoints:', error.message);
+    return { data: null, error: error.message };
+  }
+};
+
+export const getChannelStats = async (): Promise<ServiceResponse<any[]>> => {
+  try {
+    const { data, error } = await supabase
+      .from('channel_stats')
+      .select('*')
+      .order('follower_count', { ascending: false });
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error: any) {
+    console.error('Error in getChannelStats:', error.message);
+    return { data: null, error: error.message };
+  }
+};
+
+export const updateChannelStat = async (platform: string, count: number): Promise<ServiceResponse<any>> => {
+  try {
+    const { data, error } = await supabase
+      .from('channel_stats')
+      .update({ follower_count: count, updated_at: new Date().toISOString() })
+      .eq('platform', platform)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error: any) {
+    console.error('Error in updateChannelStat:', error.message);
     return { data: null, error: error.message };
   }
 };

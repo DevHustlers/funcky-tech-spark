@@ -8,6 +8,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { supabase } from "@/lib/supabase";
 import { SiGithub, SiGoogle } from "react-icons/si";
+import { updateUserStreak } from "@/services/gamification.service";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +46,9 @@ const Login = () => {
           setError('This account has been deleted. Please sign up for a new account.');
           return;
         }
+
+        // --- UPDATE STREAK ON SIGN IN ---
+        await updateUserStreak(data.user.id);
 
         navigate('/');
       } else {

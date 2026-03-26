@@ -27,10 +27,23 @@ import ChallengeDetail from "./pages/ChallengeDetail";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
+import { supabase } from "@/lib/supabase";
+import { updateUserStreak } from "@/services/gamification.service";
+import { useEffect } from "react";
 const queryClient = new QueryClient();
 
 const AnimatedRoutes = () => {
   const location = useLocation();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user?.id) {
+        updateUserStreak(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <AnimatePresence mode="wait">
