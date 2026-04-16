@@ -23,6 +23,7 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageLayout from "@/components/PageLayout";
+import SEO from "@/components/SEO";
 import SectionDivider from "@/components/SectionDivider";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { 
@@ -466,6 +467,10 @@ const Competition = () => {
   return (
     <PageLayout>
       <Navbar />
+      <SEO 
+        title={`${competition.title} | DevHustlers Challenge`}
+        description={competition.description}
+      />
       <div className="min-h-[80vh] pt-20">
       <AnimatePresence mode="wait">
         {phase === "lobby" && (

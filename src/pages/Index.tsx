@@ -7,6 +7,7 @@ import TeamSection from "@/components/TeamSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 import PageLayout from "@/components/PageLayout";
+import SEO from "@/components/SEO";
 import SectionDivider from "@/components/SectionDivider";
 import ScrollReveal from "@/components/ScrollReveal";
 import LiveSection from "@/components/LiveSection";
@@ -38,6 +39,7 @@ const Index = () => {
   return (
     <PageLayout>
       <Navbar />
+      <SEO />
 
       {/* Hero */}
       <section className="pt-28 sm:pt-40 relative overflow-hidden">

@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TeamSection from "@/components/TeamSection";
 import PageLayout from "@/components/PageLayout";
+import SEO from "@/components/SEO";
 import SectionDivider from "@/components/SectionDivider";
 import ScrollReveal from "@/components/ScrollReveal";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -50,6 +51,7 @@ const About = () => {
   return (
     <PageLayout>
       <Navbar />
+      <SEO title={`About DevHustlers | Community for Developers`} />
 
       {/* Hero */}
       <section className="pt-28 sm:pt-40 pb-16 sm:pb-20">

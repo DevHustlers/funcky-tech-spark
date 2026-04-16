@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import PageLayout from "@/components/PageLayout";
+import SEO from "@/components/SEO";
 import SectionDivider from "@/components/SectionDivider";
 import { useLanguage } from "@/i18n/LanguageContext";
 
@@ -36,6 +37,7 @@ const Blog = () => {
   return (
     <PageLayout>
       <Navbar />
+      <SEO title={`DevHustlers Blog | Tech Stories & Insights`} />
       <section className="pt-28 sm:pt-36 pb-8 sm:pb-12">
         <div className="max-w-5xl mx-auto px-4 sm:px-8 lg:px-6">
           <p className="text-[12px] sm:text-[13px] font-medium text-muted-foreground mb-3 uppercase tracking-widest">{t("blog.label")}</p>

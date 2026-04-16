@@ -99,6 +99,11 @@ export const translations: Record<Locale, Record<string, string>> = {
     "cta.btn.1": "Get Started ",
     "cta.btn.2": "View Projects",
     "cta.note": "Welcome to DevHustlers",
+    
+    // SEO
+    "seo.title": "DevHustlers — The Ultimate Community for Developers",
+    "seo.description": "Join DevHustlers, the premier community for developers. Collaborate on open-source projects, participate in weekly hackathons, and grow your tech skills in Arabic and English.",
+    "seo.keywords": "developer community, open source, hackathons, coding community, learn programming, DevHustlers, developers in middle east, arabic developer community",
 
     // Footer
     "footer.desc": "A modern community for developers who want to collaborate, learn, and ship.",
@@ -784,5 +789,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dash.first_100": "أول 100 رائد",
     "dash.all_users": "جميع المستخدمين",
     "dash.pioneer_desc": "أول 100 مطور انضموا إلى المهمة.",
+
+    // SEO
+    "seo.title": "ديف هاسلرز — المجتمع الأمثل للمطورين",
+    "seo.description": "انضم إلى ديف هاسلرز، المجتمع الرائد للمطورين. تعاون في المشاريع مفتوحة المصدر، وشارك في الهاكاثون الأسبوعية، وطوّر مهاراتك التقنية باللغتين العربية والإنجليزية.",
+    "seo.keywords": "مجتمع المطورين, برمجيات مفتوحة المصدر, هاكاثون, مجتمع البرمجة, تعلم البرمجة, ديف هاسلرز, مطورين في الشرق الأوسط, مجتمع مطورين عربي",
   },
 };
