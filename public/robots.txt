@@ -3,4 +3,4 @@ Allow: /
 Disallow: /dashboard/
 Disallow: /admin/
 
-Sitemap: https://devhustlers.com/sitemap.xml
+Sitemap: https://dev-hustlers-website.vercel.app/sitemap.xml

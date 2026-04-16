@@ -16,7 +16,7 @@ const SEO: React.FC<SEOProps> = ({
   description,
   keywords,
   image = '/og-image.png',
-  url = 'https://devhustlers.com',
+  url = 'https://dev-hustlers-website.vercel.app',
   type = 'website',
 }) => {
   const { t, locale } = useLanguage();
