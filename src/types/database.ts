@@ -304,6 +304,7 @@ export type Database = {
           is_deleted: boolean | null
           streak_count: number | null
           last_active_at: string | null
+          level: string | null
         }
         Insert: {
           bio?: string | null
@@ -321,6 +322,7 @@ export type Database = {
           is_deleted?: boolean | null
           streak_count?: number | null
           last_active_at?: string | null
+          level?: string | null
         }
         Update: {
           bio?: string | null
@@ -338,6 +340,7 @@ export type Database = {
           is_deleted?: boolean | null
           streak_count?: number | null
           last_active_at?: string | null
+          level?: string | null
         }
         Relationships: []
       }

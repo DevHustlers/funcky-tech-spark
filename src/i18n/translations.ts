@@ -237,6 +237,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     "signup.or": "or",
     "signup.has_account": "Already have an account?",
     "signup.signin_link": "Sign in",
+    "signup.choose_level": "Choose your level",
+    "signup.level_desc": "Select the level that best describes your current expertise",
+    "level.beginner": "Beginner",
+    "level.intermediate": "Intermediate",
+    "level.advanced": "Advanced",
+    "level.expert": "Expert / Senior",
+    "signup.step3": "step 3 — expertise",
+    "signup.step4": "step 4 — verification",
 
     // Forgot Password
     "forgot.label": "recovery",
@@ -656,6 +664,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     "signup.or": "أو",
     "signup.has_account": "لديك حساب بالفعل؟",
     "signup.signin_link": "سجّل الدخول",
+    "signup.choose_level": "اختر مستواك",
+    "signup.level_desc": "اختر المستوى الذي يصف خبرتك الحالية بشكل أفضل",
+    "level.beginner": "مبتدئ",
+    "level.intermediate": "متوسط",
+    "level.advanced": "متقدم",
+    "level.expert": "خبير / سينيور",
+    "signup.step3": "الخطوة 3 — الخبرة",
+    "signup.step4": "الخطوة 4 — التحقق",
 
     // Forgot Password
     "forgot.label": "استعادة الحساب",

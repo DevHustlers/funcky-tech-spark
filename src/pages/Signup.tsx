@@ -20,7 +20,8 @@ const TRACKS = [
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [selectedLevel, setSelectedLevel] = useState<string>("");
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [otpCode, setOtpCode] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -32,6 +33,13 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [usernameAvailability, setUsernameAvailability] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const [usernameError, setUsernameMsg] = useState<string | null>(null);
+
+  const levels = [
+    { id: "beginner", key: "level.beginner" },
+    { id: "intermediate", key: "level.intermediate" },
+    { id: "advanced", key: "level.advanced" },
+    { id: "expert", key: "level.expert" },
+  ];
   
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -85,9 +93,9 @@ const Signup = () => {
   };
 
   useEffect(() => {
-    if (location.state?.email && location.state?.step === 3) {
+    if (location.state?.email && location.state?.step === 4) {
       setEmail(location.state.email);
-      setStep(3);
+      setStep(4);
     }
   }, [location.state]);
 
@@ -108,17 +116,32 @@ const Signup = () => {
     if (loading) return;
     if (!email || !password || !confirmPassword || !firstName || !lastName || !username) {
       setError("Please fill in all fields before continuing.");
+      setStep(1);
+      return;
+    }
+
+    if (selectedTracks.length === 0) {
+      setError("Please select at least one track.");
+      setStep(2);
+      return;
+    }
+
+    if (!selectedLevel) {
+      setError("Please select your expertise level.");
+      setStep(3);
       return;
     }
 
     const usernameError = validateUsername(username);
     if (usernameError) {
       setError(usernameError);
+      setStep(1);
       return;
     }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      setStep(1);
       return;
     }
     setError(null);
@@ -135,6 +158,7 @@ const Signup = () => {
       if (existingUser) {
         setLoading(false);
         setError("This username is already taken. Please choose another one.");
+        setStep(1);
         return;
       }
       const { data, error: signupError } = await supabase.auth.signUp({
@@ -145,6 +169,7 @@ const Signup = () => {
             full_name: `${firstName} ${lastName}`,
             username,
             tracks: selectedTracks,
+            level: selectedLevel,
             role: "user"
           }
         }
@@ -155,7 +180,7 @@ const Signup = () => {
       if (data?.user) {
         if (!data.session) {
           // Email confirmation is required
-          setStep(3);
+          setStep(4);
           toast.success("Verification code sent to your email!");
         } else {
           // Already signed in (confirmation off)
@@ -248,6 +273,7 @@ const Signup = () => {
               <div className={`h-1 flex-1 ${step >= 1 ? "bg-foreground" : "bg-border"} transition-colors`} />
               <div className={`h-1 flex-1 ${step >= 2 ? "bg-foreground" : "bg-border"} transition-colors`} />
               <div className={`h-1 flex-1 ${step >= 3 ? "bg-foreground" : "bg-border"} transition-colors`} />
+              <div className={`h-1 flex-1 ${step >= 4 ? "bg-foreground" : "bg-border"} transition-colors`} />
             </div>
 
             {step === 1 && (
@@ -443,6 +469,64 @@ const Signup = () => {
                     {t("signup.back")}
                   </button>
                   <button 
+                    onClick={() => setStep(3)} 
+                    className="flex-1 h-12 flex items-center justify-center gap-2 bg-foreground text-background font-medium text-[15px] hover:bg-foreground/90 transition-colors"
+                  >
+                    {t("signup.continue")}
+                    <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                  </button>
+                </div>
+              </>
+            )}
+
+            {step === 3 && (
+              <>
+                <div className="mb-8">
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-[0.3em] font-mono mb-3">
+                    {t("signup.step3")}
+                  </p>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-2">
+                    {t("signup.choose_level")}
+                  </h1>
+                  <p className="text-muted-foreground text-[15px]">
+                    {t("signup.level_desc")}
+                  </p>
+                </div>
+
+                {error && step === 3 && (
+                  <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 text-red-500 text-sm rounded">
+                    {error}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 gap-3 mb-8">
+                  {levels.map((level) => {
+                    const selected = selectedLevel === level.id;
+                    return (
+                      <button
+                        key={level.id}
+                        onClick={() => setSelectedLevel(level.id)}
+                        className={`relative h-16 px-6 flex items-center justify-between border text-[15px] font-bold transition-all ${
+                          selected
+                            ? "border-foreground bg-foreground text-background ring-4 ring-foreground/20"
+                            : "border-border text-foreground hover:bg-accent"
+                        }`}
+                      >
+                        <span className="uppercase tracking-widest">{t(level.key)}</span>
+                        {selected && <Check className="w-5 h-5" />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setStep(2)}
+                    className="h-12 px-6 flex items-center justify-center border border-border text-foreground font-medium text-[15px] hover:bg-accent transition-colors"
+                  >
+                    {t("signup.back")}
+                  </button>
+                  <button 
                     disabled={loading}
                     onClick={handleSignup} 
                     className="flex-1 h-12 flex items-center justify-center gap-2 bg-foreground text-background font-medium text-[15px] hover:bg-foreground/90 transition-colors disabled:opacity-50"
@@ -454,11 +538,11 @@ const Signup = () => {
               </>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
               <>
                 <div className="mb-8">
                   <p className="text-[11px] text-muted-foreground uppercase tracking-[0.3em] font-mono mb-3">
-                    Step 3 — Verification
+                    {t("signup.step4")}
                   </p>
                   <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-2">
                     Verify Your Email
@@ -468,7 +552,7 @@ const Signup = () => {
                   </p>
                 </div>
 
-                {error && step === 3 && (
+                {error && step === 4 && (
                   <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 text-red-500 text-sm rounded">
                     {error}
                   </div>
@@ -511,7 +595,7 @@ const Signup = () => {
               </>
             )}
 
-            {(step === 1 || step === 2) && (
+            {(step === 1 || step === 2 || step === 3) && (
               <>
                 <div className="flex items-center gap-4 my-8">
                   <div className="flex-1 h-px bg-border" />

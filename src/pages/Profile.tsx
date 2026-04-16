@@ -5,14 +5,21 @@ import PageLayout from "@/components/PageLayout";
 import SectionDivider from "@/components/SectionDivider";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
-import { Calendar, Mail, Zap, Trophy, LogOut, Flame } from "lucide-react";
+import { Calendar, Mail, Zap, Trophy, LogOut, Flame, ChevronDown, Check, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/types/database";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { toast } from "sonner";
 
 const Profile = () => {
+  const { t } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Tables<'profiles'> | null>(null);
+  const [isEditingLevel, setIsEditingLevel] = useState(false);
+  const [updatingLevel, setUpdatingLevel] = useState(false);
   const navigate = useNavigate();
+
+  const LEVELS = ["beginner", "intermediate", "advanced", "expert"];
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -33,6 +40,25 @@ const Profile = () => {
   const fetchProfile = async (id: string) => {
     const { data } = await supabase.from('profiles').select('*').eq('id', id).single();
     if (data) setProfile(data);
+  };
+
+  const updateLevel = async (newLevel: string) => {
+    if (!user || updatingLevel) return;
+    
+    setUpdatingLevel(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ level: newLevel })
+      .eq('id', user.id);
+
+    if (error) {
+      toast.error("Failed to update level.");
+    } else {
+      setProfile(prev => prev ? { ...prev, level: newLevel } : null);
+      setIsEditingLevel(false);
+      toast.success(`Level updated to ${t(`level.${newLevel}`)}!`);
+    }
+    setUpdatingLevel(false);
   };
 
   const handleSignOut = async () => {
@@ -97,6 +123,47 @@ const Profile = () => {
                   <div className="flex items-center gap-1.5 border border-border px-3 py-1.5 bg-accent/20">
                     <Calendar className="w-4 h-4" />
                     <span>Joined {new Date(profile?.created_at || user.created_at || Date.now()).toLocaleDateString()}</span>
+                  </div>
+                  <div className="relative">
+                    <button 
+                      onClick={() => setIsEditingLevel(!isEditingLevel)}
+                      className="flex items-center gap-2 border border-foreground px-3 py-1.5 bg-foreground text-background font-bold uppercase tracking-widest text-[11px] hover:bg-foreground/90 transition-all active:scale-95"
+                    >
+                      <Zap className={`w-3.5 h-3.5 ${updatingLevel ? "animate-pulse" : "fill-current"}`} />
+                      <span>{t(`level.${profile?.level || "beginner"}`)}</span>
+                      <ChevronDown className={`w-3 h-3 transition-transform ${isEditingLevel ? "rotate-180" : ""}`} />
+                    </button>
+
+                    {isEditingLevel && (
+                      <div className="absolute top-full left-0 mt-2 w-48 bg-background border border-border shadow-2xl z-50 overflow-hidden">
+                        <div className="p-2 border-b border-border bg-accent/50 group">
+                          <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{t("signup.choose_level")}</p>
+                        </div>
+                        {LEVELS.map((lvl) => (
+                          <button
+                            key={lvl}
+                            disabled={updatingLevel}
+                            onClick={() => updateLevel(lvl)}
+                            className={`w-full flex items-center justify-between px-4 py-3 text-left hover:bg-accent transition-colors border-b border-border/50 last:border-0 ${
+                              profile?.level === lvl ? "bg-accent/30 text-foreground" : "text-muted-foreground"
+                            }`}
+                          >
+                            <span className="text-[11px] font-bold uppercase tracking-widest">
+                              {t(`level.${lvl}`)}
+                            </span>
+                            {profile?.level === lvl && <Check className="w-3.5 h-3.5 text-foreground" />}
+                            {updatingLevel && profile?.level !== lvl && <Loader2 className="w-3 h-3 animate-spin opacity-20" />}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {isEditingLevel && (
+                      <div 
+                        className="fixed inset-0 z-40" 
+                        onClick={() => setIsEditingLevel(false)}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
